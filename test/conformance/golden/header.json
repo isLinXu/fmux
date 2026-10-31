@@ -1,0 +1,14 @@
+{
+  "model": "cap-model",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    }
+  ],
+  "tools": [],
+  "stream_options": {
+    "include_usage": true
+  },
+  "stream": true
+}

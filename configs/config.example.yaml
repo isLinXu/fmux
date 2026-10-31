@@ -1,0 +1,82 @@
+# fmux example configuration.
+#
+# Copy to ~/.fmux/config.yaml (or point --config at it).
+# Every backend except `mock` speaks the OpenAI HTTP protocol; `type` selects
+# the capability matrix and, from M2 onward, the process supervisor.
+
+listen: 127.0.0.1:1976
+log_level: info
+
+# Alias used when a client asks for a model that is not declared below.
+# Empty means unknown names are a hard error (recommended).
+default: ""
+
+backends:
+  - name: ollama
+    type: ollama
+    url: http://127.0.0.1:11434/v1
+    # Pinning models lets /v1/models answer without a round trip.
+    models: ["qwen3.8:27b"]
+
+  # llama.cpp: one process per model, so each model gets its own backend entry.
+  # - name: llamacpp-8b
+  #   type: llamacpp
+  #   url: http://127.0.0.1:8080/v1
+  #   command: ["llama-server", "-m", "/models/Qwen3-8B-Q4_K_M.gguf",
+  #             "--port", "8080", "-c", "32768"]
+
+  # MLX-LM server.
+  # - name: mlx
+  #   type: mlx
+  #   url: http://127.0.0.1:8081/v1
+
+  # LM Studio (Developer -> Local Server).
+  # - name: lmstudio
+  #   type: lmstudio
+  #   url: http://127.0.0.1:1234/v1
+
+  # Remote backends: HTTP only, no process management.
+  # - name: vllm-lab
+  #   type: vllm
+  #   url: http://10.0.0.20:8000/v1
+  #   api_key: sk-...
+  #   headers:
+  #     X-Team: research
+
+  # - name: sglang-lab
+  #   type: sglang
+  #   url: http://10.0.0.21:30000/v1
+
+aliases:
+  qwen3.8:27b:
+    backend: ollama
+    model: "qwen3.8:27b"
+
+  qwen-fast:
+    backend: ollama
+    model: "qwen3.8:27b"
+    profile: fast
+
+  # Fallback chains: first reachable target wins.
+  # auto:
+  #   fallback: ["qwen3.8:27b", "qwen-remote"]
+
+  # qwen-remote:
+  #   backend: vllm-lab
+  #   model: "Qwen3-32B"
+
+profiles:
+  fast:
+    temperature: 0.2
+    max_tokens: 512
+  quality:
+    temperature: 0.7
+  strict:
+    temperature: 0
+    system_prefix: "Answer with a single JSON object and no prose."
+
+timeouts:
+  dial: 5s
+  health: 2s
+  non_stream: 10m
+  stream_idle: 5m

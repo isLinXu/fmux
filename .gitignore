@@ -1,0 +1,16 @@
+# Binaries
+bin/
+fmux
+
+# Go
+*.test
+*.out
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local config and captures
+configs/config.local.yaml
+*.log

@@ -1,0 +1,42 @@
+{
+  "response_format": {
+    "json_schema": {
+      "strict": true,
+      "name": "Person",
+      "schema": {
+        "x-order": [
+          "name",
+          "age"
+        ],
+        "type": "object",
+        "title": "Person",
+        "required": [
+          "name",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "type": "json_schema"
+  },
+  "stream_options": {
+    "include_usage": true
+  },
+  "tools": [],
+  "model": "cap-model",
+  "messages": [
+    {
+      "content": "zhang 30",
+      "role": "user"
+    }
+  ],
+  "stream": true
+}

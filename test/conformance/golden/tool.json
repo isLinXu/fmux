@@ -1,0 +1,17 @@
+{
+  "stream_options": {
+    "include_usage": true
+  },
+  "stream": true,
+  "model": "cap-model",
+  "messages": [
+    {
+      "role": "system"
+    },
+    {
+      "content": "hi",
+      "role": "user"
+    }
+  ],
+  "tools": []
+}
