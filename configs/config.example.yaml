@@ -2,7 +2,7 @@
 #
 # Copy to ~/.fmux/config.yaml (or point --config at it).
 # Every backend except `mock` speaks the OpenAI HTTP protocol; `type` selects
-# the capability matrix and, from M2 onward, the process supervisor.
+# the capability matrix and the process-supervision defaults.
 
 listen: 127.0.0.1:1976
 log_level: info
@@ -11,31 +11,58 @@ log_level: info
 # Empty means unknown names are a hard error (recommended).
 default: ""
 
+# Unified memory the resident models may occupy, in MB. A new model that would
+# exceed the budget evicts the least recently used one first. 0 disables
+# eviction and only records usage. On a 128 GB Mac, ~98304 is a sane ceiling.
+budget_mb: 0
+
+# How often idle supervised processes are checked.
+reap_interval: 30s
+
+# Where child process logs go. Empty means ~/.fmux/logs.
+log_dir: ""
+
 backends:
   - name: ollama
     type: ollama
     url: http://127.0.0.1:11434/v1
     # Pinning models lets /v1/models answer without a round trip.
     models: ["qwen3.8:27b"]
+    # Feeds the budget. 27B at 4-bit is ~18 GB resident.
+    memory_mb: 18432
 
   # llama.cpp: one process per model, so each model gets its own backend entry.
+  # A backend with a command is started on demand, health-probed, and stopped
+  # after idle_timeout, so there is no need to launch llama-server by hand.
   # - name: llamacpp-8b
   #   type: llamacpp
   #   url: http://127.0.0.1:8080/v1
   #   command: ["llama-server", "-m", "/models/Qwen3-8B-Q4_K_M.gguf",
   #             "--port", "8080", "-c", "32768"]
+  #   health_path: /health        # default for type llamacpp
+  #   memory_mb: 6144
+  #   idle_timeout: 15m
+  #   startup_timeout: 120s
+  #   stop_timeout: 10s
 
-  # MLX-LM server.
+  # MLX-LM server. It ignores response_format and tools, so the gateway
+  # degrades JSON schema to a prompt constraint instead of failing.
   # - name: mlx
   #   type: mlx
   #   url: http://127.0.0.1:8081/v1
+  #   command: ["mlx_lm.server", "--model", "mlx-community/Qwen3-8B-4bit",
+  #             "--port", "8081"]
+  #   memory_mb: 5120
+  #   idle_timeout: 15m
 
-  # LM Studio (Developer -> Local Server).
+  # LM Studio (Developer -> Local Server). It loads models on demand, so no
+  # command is needed; it just has to be running.
   # - name: lmstudio
   #   type: lmstudio
   #   url: http://127.0.0.1:1234/v1
 
-  # Remote backends: HTTP only, no process management.
+  # Remote backends: HTTP only, no process management, no budget accounting.
+  # vLLM and SGLang do not run on macOS ARM; they belong on a Linux box.
   # - name: vllm-lab
   #   type: vllm
   #   url: http://10.0.0.20:8000/v1

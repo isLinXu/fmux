@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
+	"github.com/linxu/fmux/internal/adapter"
 	"github.com/linxu/fmux/internal/compat"
 	"github.com/linxu/fmux/internal/ir"
 	"github.com/linxu/fmux/internal/router"
@@ -68,6 +70,18 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 			s.log.Warn("degraded", "backend", d.Backend, "reason", d.Reason)
 		}
 
+		// Local backends may need to start a process or free memory first.
+		if p, ok := target.Adapter.(adapter.Preparer); ok {
+			if err := p.Prepare(r.Context(), target.Model); err != nil {
+				if i == 0 {
+					writeError(w, http.StatusServiceUnavailable, "backend_unavailable", err.Error())
+					return
+				}
+				lastErr = err
+				continue
+			}
+		}
+
 		if cp.Stream {
 			wrote, err := s.streamChat(r.Context(), w, cp, target, plan.Alias)
 			if err == nil {
@@ -100,24 +114,38 @@ func (s *Server) chatOnce(ctx context.Context, w http.ResponseWriter, req *ir.Ch
 	ctx, cancel := context.WithTimeout(ctx, s.cfg.Timeouts.NonStream)
 	defer cancel()
 
+	start := time.Now()
 	resp, err := t.Adapter.Chat(ctx, req)
 	if err != nil {
+		s.observe(t, http.StatusBadGateway, nil, time.Since(start))
 		return err
 	}
 	resp.Model = alias
 	if resp.Usage == nil {
 		resp.Usage = estimateUsage(req, collectedText(resp))
 	}
+	s.observe(t, http.StatusOK, resp.Usage, time.Since(start))
 	writeJSON(w, http.StatusOK, resp)
 	return nil
+}
+
+// observe records a completed request for /metrics.
+func (s *Server) observe(t router.Target, status int, u *ir.Usage, d time.Duration) {
+	var prompt, completion int
+	if u != nil {
+		prompt, completion = u.PromptTokens, u.CompletionTokens
+	}
+	s.metrics.Observe(t.Backend, t.Model, status, prompt, completion, d)
 }
 
 // streamChat proxies a streaming completion, guaranteeing the tail that fm and
 // other OpenAI clients expect: a finish chunk, an optional usage chunk, and
 // the [DONE] sentinel.
 func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias string) (bool, error) {
+	start := time.Now()
 	st, err := t.Adapter.ChatStream(ctx, req)
 	if err != nil {
+		s.observe(t, http.StatusBadGateway, nil, time.Since(start))
 		return false, err
 	}
 	defer st.Close()
@@ -201,6 +229,7 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 	if err := sw.done(); err != nil {
 		return true, err
 	}
+	s.observe(t, http.StatusOK, usage, time.Since(start))
 	return true, nil
 }
 

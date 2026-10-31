@@ -139,7 +139,7 @@ func newHarness(t *testing.T) *harness {
 		t.Fatalf("registry: %v", err)
 	}
 	log := slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelError}))
-	gw := httptest.NewServer(api.New(cfg, reg, log).Handler())
+	gw := httptest.NewServer(api.New(api.Options{Config: cfg, Registry: reg, Log: log}).Handler())
 	t.Cleanup(gw.Close)
 
 	return &harness{gw: gw, rec: rec, t: t}

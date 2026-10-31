@@ -22,11 +22,11 @@ A second reason, and the one that shapes the code: `fm`'s wire format has quirks
 |---|---|---|
 | M0 | Wire fidelity, HTTP layer, SSE, golden tests | **done** |
 | M1 | Ollama adapter, alias routing, capability matrix | **done** |
-| M2 | llama.cpp + process supervisor | not started |
-| M3 | MLX / LM Studio, memory budget, LRU unload | not started |
-| M4 | vLLM / SGLang remote, fallback chains | partial (adapter works, no fallback tests) |
-| M5 | Metrics, structured logs, bench | not started |
-| M6 | Homebrew, LaunchAgent, docs | partial (LaunchAgent script included) |
+| M2 | llama.cpp + process supervisor | **done** |
+| M3 | MLX / LM Studio, memory budget, LRU unload | **done** |
+| M4 | vLLM / SGLang remote, fallback chains | **done** |
+| M5 | Metrics, structured logs, bench | **done** |
+| M6 | Homebrew, LaunchAgent, docs | partial (LaunchAgent script included, no formula) |
 
 Verified on macOS 27.2 / M3 Max against a real `fm` binary and a real Ollama instance. See [Verification](#verification).
 
@@ -77,7 +77,61 @@ profiles:
   fast: { temperature: 0.2, max_tokens: 512 }
 ```
 
-`type` decides the capability matrix and whether the backend is treated as local (process-managed, later) or remote (HTTP only).
+`type` decides the capability matrix and whether the backend is treated as local (process-managed, budget-accounted) or remote (HTTP only).
+
+## Process supervision
+
+A local model on macOS is not just an endpoint. llama.cpp and MLX serve exactly one model per process, loading an 18 GB checkpoint takes tens of seconds, and leaving it resident after the last request is how a 128 GB machine starts swapping. None of that exists in a pure HTTP router, so the gateway manages it:
+
+```yaml
+- name: llamacpp-8b
+  type: llamacpp
+  url: http://127.0.0.1:8080/v1
+  command: ["llama-server", "-m", "/models/Qwen3-8B-Q4_K_M.gguf", "--port", "8080"]
+  memory_mb: 6144        # feeds the budget
+  idle_timeout: 15m      # unload after this long with no requests
+  startup_timeout: 120s  # wait this long for /health before giving up
+```
+
+The first request to that alias starts the process and waits for its health probe; later requests reuse it; after `idle_timeout` it is stopped and its memory released. A backend with no `command` (Ollama, LM Studio) is left to its own manager.
+
+### Memory budget
+
+```yaml
+budget_mb: 98304   # 96 GB on a 128 GB machine
+```
+
+Every request records its model's `memory_mb`. When a new model would exceed the budget, the least recently used one is unloaded first — for Ollama that is a `keep_alive: 0` call, for a supervised backend it is a process stop. The budget is advisory: an oversized model is still served, with a warning, because refusing to answer is worse than a brief spike.
+
+### Observability
+
+```bash
+fmux ps                     # live process state + resident models
+curl -s localhost:1976/admin/processes | jq
+curl -s localhost:1976/metrics          # Prometheus text
+```
+
+`fmux ps` reads a running gateway, because process state only exists inside the serving process:
+
+```
+BACKEND       STATE    PID    RESTARTS  LAST USED  NOTE
+llamacpp-8b   running  91386  0         00:11:57
+RESIDENT MODEL   BACKEND      SIZE
+Qwen3-8B-Q4_K_M  llamacpp-8b  6144 MB
+budget: 6144 / 98304 MB
+```
+
+## Endpoints
+
+| Path | Purpose |
+|---|---|
+| `POST /v1/chat/completions` | The only endpoint a client needs |
+| `GET /v1/models` | Aliases, plus backend-reported models |
+| `GET /healthz` | Liveness |
+| `GET /metrics` | Prometheus text: requests, tokens, duration, evictions |
+| `GET /admin/backends` | Capability matrix and health per backend |
+| `GET /admin/processes` | Supervised processes and memory residency |
+| `GET /admin/config` | Effective configuration |
 
 ## The `fm` quirks this handles
 
@@ -107,27 +161,36 @@ Measured on the machine above, real `fm` binary, real Ollama:
 | Alias routing (`qwen-fast` → `qwen3.8:27b`) | pass |
 | Unknown model | `404 model_not_found` |
 | Vision request to a non-vision backend | `400 unsupported_capability` |
+| Supervised backend (fake llama.cpp) cold start | process started, request served in 0.30 s |
+| Same backend, second request | process reused, same PID |
+| Idle reap | process stopped, port released, budget back to 0 MB |
 
 ## Layout
 
 ```
-cmd/fmux/          CLI: serve, config, version
+cmd/fmux/          CLI: serve, config, backends, models, ps, doctor, version
 internal/ir/       internal representation (polymorphic content, chunk, usage)
 internal/compat/   fm quirk normalization
 internal/router/   alias resolution + capability gate
 internal/adapter/  adapter interface, OpenAI base, mock
-internal/api/      HTTP layer, SSE writer
+internal/adapter/local/  OpenAI adapter + process/memory pre-flight
+internal/supervisor/     child process lifecycle, health probe, idle reap
+internal/budget/         unified memory accounting + LRU eviction
+internal/metrics/        Prometheus counters
+internal/api/      HTTP layer, SSE writer, admin + metrics endpoints
 internal/config/   YAML config
-internal/build/    config -> adapters
+internal/build/    config -> adapters, supervisor, budget
 test/conformance/  golden captures + real-fm end-to-end tests
+test/fixtures/     fake OpenAI server used by the supervision tests
 scripts/           capture_fm.py, install-launchagent.sh, bench.sh
 ```
 
 ## Development
 
 ```bash
-make test        # unit + conformance (skips fm tests if fm is absent)
+make test        # unit + conformance + e2e (skips fm/python tests if absent)
 make conformance # only the real-fm tests
+make e2e         # only the process-supervision tests
 make capture     # re-record golden samples from the installed fm binary
 ```
 
@@ -139,6 +202,7 @@ make capture     # re-record golden samples from the installed fm binary
 - Downloading or quantizing models — that is Ollama's / llama.cpp's / HF's job.
 - Multi-tenant auth — this binds to loopback for a single user.
 - Managing local backends on Linux/Windows — remote HTTP only there.
+- Running vLLM or SGLang on macOS — both are CUDA-first with no official Apple Silicon support, so they are remote-only here.
 
 ## License
 

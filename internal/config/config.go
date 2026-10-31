@@ -16,14 +16,23 @@ const DefaultListen = "127.0.0.1:1976"
 
 // Config is the whole gateway configuration.
 type Config struct {
-	Listen     string             `yaml:"listen"`
-	LogLevel   string             `yaml:"log_level"`
-	Default    string             `yaml:"default"` // alias used when a request names an unknown model
-	Backends   []Backend          `yaml:"backends"`
-	Aliases    map[string]Alias   `yaml:"aliases"`
-	Profiles   map[string]Profile `yaml:"profiles"`
-	Timeouts   Timeouts           `yaml:"timeouts"`
-	SourcePath string             `yaml:"-"`
+	Listen   string             `yaml:"listen"`
+	LogLevel string             `yaml:"log_level"`
+	Default  string             `yaml:"default"` // alias used when a request names an unknown model
+	Backends []Backend          `yaml:"backends"`
+	Aliases  map[string]Alias   `yaml:"aliases"`
+	Profiles map[string]Profile `yaml:"profiles"`
+	Timeouts Timeouts           `yaml:"timeouts"`
+
+	// BudgetMB caps the unified memory the gateway will let resident models
+	// occupy. 0 disables eviction and only records usage.
+	BudgetMB int `yaml:"budget_mb"`
+	// LogDir receives child process logs. Empty means ~/.fmux/logs.
+	LogDir string `yaml:"log_dir"`
+	// ReapInterval is how often idle supervised processes are checked.
+	ReapInterval time.Duration `yaml:"reap_interval"`
+
+	SourcePath string `yaml:"-"`
 }
 
 // Backend is one inference server the gateway can talk to.
@@ -36,10 +45,18 @@ type Backend struct {
 	APIKey  string            `yaml:"api_key"`
 	Headers map[string]string `yaml:"headers"`
 
-	// Local process management, used from M2 onward.
-	Command    []string          `yaml:"command"`
-	Env        map[string]string `yaml:"env"`
-	HealthPath string            `yaml:"health_path"`
+	// Local process management. A backend with a command is started on demand
+	// and stopped when idle, so llama.cpp and MLX do not need a manual launch.
+	Command        []string          `yaml:"command"`
+	Env            map[string]string `yaml:"env"`
+	HealthPath     string            `yaml:"health_path"`
+	StartupTimeout time.Duration     `yaml:"startup_timeout"`
+	StopTimeout    time.Duration     `yaml:"stop_timeout"`
+	IdleTimeout    time.Duration     `yaml:"idle_timeout"`
+
+	// MemoryMB is the estimated resident size of one model on this backend. It
+	// feeds the budget and LRU eviction.
+	MemoryMB int `yaml:"memory_mb"`
 
 	// ModelList pins the models this backend serves, so /v1/models works
 	// without a round trip.
@@ -142,6 +159,20 @@ func (c *Config) Validate() error {
 	if c.LogLevel == "" {
 		c.LogLevel = "info"
 	}
+	// A config built in code (tests, embedders) has no Default() behind it, and
+	// a zero timeout would make every request fail instantly.
+	if c.Timeouts.Dial <= 0 {
+		c.Timeouts.Dial = 5 * time.Second
+	}
+	if c.Timeouts.Health <= 0 {
+		c.Timeouts.Health = 2 * time.Second
+	}
+	if c.Timeouts.NonStream <= 0 {
+		c.Timeouts.NonStream = 10 * time.Minute
+	}
+	if c.Timeouts.StreamIdle <= 0 {
+		c.Timeouts.StreamIdle = 5 * time.Minute
+	}
 	seen := map[string]bool{}
 	for i := range c.Backends {
 		b := &c.Backends[i]
@@ -162,6 +193,15 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("backend %q: url is required", b.Name)
 		}
 		b.URL = strings.TrimRight(b.URL, "/")
+		if len(b.Command) > 0 {
+			b.Kind = "local"
+		}
+		if b.StartupTimeout <= 0 {
+			b.StartupTimeout = 90 * time.Second
+		}
+		if b.StopTimeout <= 0 {
+			b.StopTimeout = 10 * time.Second
+		}
 	}
 	for name, a := range c.Aliases {
 		if a.Backend == "" && len(a.Fallback) == 0 {
@@ -202,4 +242,16 @@ func KindOf(typ string) string {
 	default:
 		return "remote"
 	}
+}
+
+// ResolvedLogDir returns the directory that holds child process logs.
+func (c *Config) ResolvedLogDir() string {
+	if c.LogDir != "" {
+		return c.LogDir
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".fmux", "logs")
 }

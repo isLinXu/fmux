@@ -45,7 +45,7 @@ func newServer(t *testing.T) (*Server, *mock.Adapter) {
 	if err := cfg.Validate(); err != nil {
 		t.Fatalf("config: %v", err)
 	}
-	return New(cfg, reg, testLogger()), m
+	return New(Options{Config: cfg, Registry: reg, Log: testLogger()}), m
 }
 
 func intp(v int) *int { return &v }
@@ -213,7 +213,7 @@ func TestCapabilityReject(t *testing.T) {
 	if err := cfg.Validate(); err != nil {
 		t.Fatalf("config: %v", err)
 	}
-	s := New(cfg, reg, testLogger())
+	s := New(Options{Config: cfg, Registry: reg, Log: testLogger()})
 
 	rec := doChat(t, s, `{"model":"v","messages":[{"role":"user","content":[
 		{"type":"text","text":"what"},
@@ -258,7 +258,7 @@ func TestJSONSchemaDegrade(t *testing.T) {
 			},
 		},
 	}
-	_ = New(cfg, reg, testLogger())
+	_ = New(Options{Config: cfg, Registry: reg, Log: testLogger()})
 	plan, err := router.New(cfg, reg).Resolve("p")
 	if err != nil {
 		t.Fatalf("resolve: %v", err)

@@ -6,10 +6,12 @@
 client      fm CLI / fm serve / curl / SDK / editor plugin
               │  OpenAI HTTP (SSE)
 gateway     ┌──────────────────────────────────────────────┐
-            │ api      routing, SSE writer, error shape    │
-            │ compat   fm quirk normalization              │
-            │ router   alias -> targets, capability gate   │
-            │ adapter  per-backend translation             │
+            │ api        routing, SSE writer, metrics      │
+            │ compat     fm quirk normalization            │
+            │ router     alias -> targets, capability gate │
+            │ supervisor child process lifecycle           │
+            │ budget     unified memory + LRU eviction     │
+            │ adapter    per-backend translation           │
             └──────────────────────────────────────────────┘
               │  OpenAI HTTP
 backends    ollama · llama.cpp · MLX · LM Studio · vLLM · SGLang
@@ -34,10 +36,34 @@ POST /v1/chat/completions
        │    ├─ images  & !vision   -> 400, stop
        │    ├─ tools   & !tools    -> 400, stop
        │    └─ schema  & !jsonschema -> rewrite to prompt, log degraded
+       ├─ adapter.Preparer.Prepare     (start process, acquire memory)
        ├─ rewrite req.Model = target.Model
        ├─ stream ? ChatStream : Chat
        └─ success -> return; failure -> next target
 ```
+
+## Process and memory model
+
+This is the part that does not exist in a pure HTTP router, and the reason the
+project is macOS-specific rather than another LiteLLM.
+
+**Processes are demand-started.** A backend with a `command` is not started at
+boot. The first request to one of its aliases calls `supervisor.Ensure`, which
+spawns the process and polls its health endpoint until it answers or
+`startup_timeout` expires. Later requests reuse the process. A background
+watcher stops it once `idle_timeout` passes with no requests, which also releases
+its budget entry through the supervisor's `onStop` hook.
+
+**Memory is a single pool.** On Apple Silicon the GPU shares RAM with the CPU,
+so "VRAM" is not a separate budget. `budget_mb` caps the sum of `memory_mb` over
+resident models; acquiring a new one evicts the least recently used first —
+`keep_alive: 0` for Ollama, a process stop for supervised backends. Eviction is
+advisory: an oversized model is still admitted with a warning, because a wrong
+estimate should not turn into a failed request.
+
+**Cold starts are inside the request.** The alternative is a 503 plus
+client-side retry logic, which every OpenAI client implements differently. The
+cost is a slow first request and a `startup_timeout` to bound it.
 
 ## Design decisions
 

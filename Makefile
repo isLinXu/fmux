@@ -3,7 +3,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.
 LDFLAGS := -X github.com/linxu/fmux/internal/api.Version=$(VERSION)
 GOBIN   := bin/fmux
 
-.PHONY: all build test conformance capture vet fmt run mock clean install launchagent bench
+.PHONY: all build test conformance e2e capture vet fmt run mock clean install launchagent bench
 
 all: build
 
@@ -17,6 +17,10 @@ test:
 
 conformance:
 	go test ./test/conformance/ -v
+
+# Process supervision against a real child process (needs python3).
+e2e:
+	go test ./test/e2e/ -v
 
 # Re-record golden request bodies from the installed fm binary.
 capture:

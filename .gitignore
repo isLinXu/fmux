@@ -1,6 +1,6 @@
 # Binaries
 bin/
-fmux
+/fmux
 
 # Go
 *.test

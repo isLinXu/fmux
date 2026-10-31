@@ -12,8 +12,11 @@ import (
 
 	"github.com/linxu/fmux/internal/adapter"
 	"github.com/linxu/fmux/internal/adapter/openai"
+	"github.com/linxu/fmux/internal/budget"
 	"github.com/linxu/fmux/internal/config"
+	"github.com/linxu/fmux/internal/metrics"
 	"github.com/linxu/fmux/internal/router"
+	"github.com/linxu/fmux/internal/supervisor"
 )
 
 // Version is stamped at build time.
@@ -24,19 +27,41 @@ type Server struct {
 	cfg     *config.Config
 	reg     *adapter.Registry
 	rt      *router.Router
+	sup     *supervisor.Supervisor
+	bud     *budget.Manager
+	metrics *metrics.Registry
 	log     *slog.Logger
 	started time.Time
 }
 
+// Options carries everything a server needs. Every field except Config and
+// Registry is optional, which keeps the zero-config test path simple.
+type Options struct {
+	Config     *config.Config
+	Registry   *adapter.Registry
+	Supervisor *supervisor.Supervisor
+	Budget     *budget.Manager
+	Metrics    *metrics.Registry
+	Log        *slog.Logger
+}
+
 // New builds a server.
-func New(cfg *config.Config, reg *adapter.Registry, log *slog.Logger) *Server {
+func New(o Options) *Server {
+	log := o.Log
 	if log == nil {
 		log = slog.Default()
 	}
+	met := o.Metrics
+	if met == nil {
+		met = metrics.New()
+	}
 	return &Server{
-		cfg:     cfg,
-		reg:     reg,
-		rt:      router.New(cfg, reg),
+		cfg:     o.Config,
+		reg:     o.Registry,
+		rt:      router.New(o.Config, o.Registry),
+		sup:     o.Supervisor,
+		bud:     o.Budget,
+		metrics: met,
 		log:     log,
 		started: time.Now(),
 	}
@@ -49,8 +74,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /healthz", s.handleHealth)
 	mux.HandleFunc("GET /v1/models", s.handleModels)
 	mux.HandleFunc("POST /v1/chat/completions", s.handleChat)
+	mux.HandleFunc("GET /metrics", s.handleMetrics)
 
 	mux.HandleFunc("GET /admin/backends", s.handleBackends)
+	mux.HandleFunc("GET /admin/processes", s.handleProcesses)
 	mux.HandleFunc("GET /admin/config", s.handleConfig)
 	mux.HandleFunc("GET /admin/version", s.handleVersion)
 

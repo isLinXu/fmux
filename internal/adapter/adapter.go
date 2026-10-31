@@ -41,6 +41,13 @@ type Adapter interface {
 	Health(ctx context.Context) error
 }
 
+// Preparer is implemented by adapters that must do work before a request can
+// succeed: starting a child process, waiting for a model to load, or evicting
+// another model to make room.
+type Preparer interface {
+	Prepare(ctx context.Context, model string) error
+}
+
 // Registry holds the live adapters by backend name.
 type Registry struct {
 	mu     sync.RWMutex

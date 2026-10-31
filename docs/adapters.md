@@ -18,10 +18,10 @@ type Adapter interface {
 
 | Backend | Wire protocol | Endpoint | Vision | json_schema | tools | usage in stream | Process model |
 |---|---|---|---|---|---|---|---|
-| Ollama | OpenAI-compatible | `:11434/v1` | yes | yes | yes | yes | always-on daemon |
-| llama.cpp | OpenAI-compatible | `:8080/v1` | with `--mmproj` | grammar-constrained | yes | no | one process per model |
-| MLX-LM | OpenAI-compatible | `:8081/v1` | no | no | no | no | one process per model, slow cold start |
-| LM Studio | OpenAI-compatible | `:1234/v1` | yes | yes | yes | yes | JIT model loading |
+| Ollama | OpenAI-compatible | `:11434/v1` | yes | yes | yes | yes | always-on daemon, `keep_alive` unload |
+| llama.cpp | OpenAI-compatible | `:8080/v1` | with `--mmproj` | grammar-constrained | yes | no | one process per model, supervised |
+| MLX-LM | OpenAI-compatible | `:8081/v1` | no | no | no | no | one process per model, slow cold start, supervised |
+| LM Studio | OpenAI-compatible | `:1234/v1` | yes | yes | yes | yes | JIT model loading, external |
 | vLLM | OpenAI-compatible | `:8000/v1` | yes | yes | yes | yes | remote, CUDA host |
 | SGLang | OpenAI-compatible | `:30000/v1` | yes | yes | yes | yes | remote, CUDA host |
 | mock | in-process | — | yes | yes | yes | yes | none |
@@ -47,7 +47,31 @@ The HTTP layer is identical everywhere; only these diverge:
 | Native structured output | 400 on `response_format` | Prompt-rewrite degradation |
 | Vision availability | 400 or garbage | Capability gate |
 | Context window | Silent truncation | `max_context` check |
-| Process lifetime | Model not loaded on first call | Supervisor (M2+) |
+| Process lifetime | Model not loaded on first call | `internal/supervisor` |
+| Resident memory | Two 18 GB models swap the machine | `internal/budget` (LRU unload) |
+
+## The supervised adapter
+
+`internal/adapter/local` wraps `openai.Adapter` and adds one method:
+
+```go
+func (a *Adapter) Prepare(ctx context.Context, model string) error
+```
+
+The HTTP layer calls it before every request. It starts the child process if
+needed (`supervisor.Ensure`) and records the model's memory footprint
+(`budget.Acquire`), which may unload a different model first. A backend with no
+`command` skips the process step; a remote backend does not use this adapter at
+all.
+
+Two consequences worth knowing:
+
+- **Cold start is inside the request.** The first call to a supervised backend
+  blocks for the whole model load. That is deliberate — the alternative is
+  returning 503 and making every client retry. `startup_timeout` bounds it.
+- **Alias model names must match what the process serves.** llama.cpp and MLX
+  ignore the model field but some builds validate it; point the alias at the
+  exact name in `command`.
 
 ## Adding a backend
 
