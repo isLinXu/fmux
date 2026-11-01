@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/linxu/fmux/internal/budget"
+	"github.com/isLinXu/fmux/internal/budget"
 )
 
 // handleProcesses reports supervised child processes and memory residency.

@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/mock"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/mock"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/config"
 )
 
 // deadBackend is an HTTP server that always answers 503 and counts how many

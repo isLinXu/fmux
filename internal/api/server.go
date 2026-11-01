@@ -11,15 +11,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/breaker"
-	"github.com/linxu/fmux/internal/budget"
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/gate"
-	"github.com/linxu/fmux/internal/metrics"
-	"github.com/linxu/fmux/internal/router"
-	"github.com/linxu/fmux/internal/supervisor"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/breaker"
+	"github.com/isLinXu/fmux/internal/budget"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/gate"
+	"github.com/isLinXu/fmux/internal/metrics"
+	"github.com/isLinXu/fmux/internal/router"
+	"github.com/isLinXu/fmux/internal/supervisor"
 )
 
 // Version is stamped at build time.

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // Quirk names recorded when a request is adjusted.

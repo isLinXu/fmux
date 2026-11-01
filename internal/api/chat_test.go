@@ -13,12 +13,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/mock"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/ir"
-	"github.com/linxu/fmux/internal/router"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/mock"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/router"
 )
 
 func testLogger() *slog.Logger {

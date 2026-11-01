@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/config"
 )
 
 // Target is one concrete backend/model pair a request can be sent to.

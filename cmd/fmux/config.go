@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/linxu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

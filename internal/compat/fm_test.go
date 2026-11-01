@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 func loadGolden(t *testing.T, name string) *ir.ChatRequest {

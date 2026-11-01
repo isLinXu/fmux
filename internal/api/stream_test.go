@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/config"
 )
 
 // stallingBackend is a backend that opens a stream, sends one token, and then

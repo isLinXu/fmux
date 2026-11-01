@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/linxu/fmux/internal/supervisor"
+	"github.com/isLinXu/fmux/internal/supervisor"
 )
 
 // DrainAndStop shuts the gateway down in the only order that does not corrupt

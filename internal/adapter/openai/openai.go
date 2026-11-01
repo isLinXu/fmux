@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // Options configures the adapter.

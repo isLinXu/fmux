@@ -17,9 +17,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/linxu/fmux/internal/api"
-	"github.com/linxu/fmux/internal/build"
-	"github.com/linxu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/api"
+	"github.com/isLinXu/fmux/internal/build"
+	"github.com/isLinXu/fmux/internal/config"
 )
 
 func quietLogger() *slog.Logger {

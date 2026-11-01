@@ -1,21 +1,21 @@
 class Fmux < Formula
   desc "OpenAI-compatible gateway in front of every local inference server"
-  homepage "https://github.com/linxu/fmux"
+  homepage "https://github.com/isLinXu/fmux"
 
   # Builds from the git tree rather than a release tarball, so the formula is
   # usable before the first tag. Once `v0.1.0` is released, replace these two
   # lines with the tarball stanza below and fill in the checksum from
   # `shasum -a 256 fmux_0.1.0_darwin_arm64.tar.gz`:
   #
-  #   url "https://github.com/linxu/fmux/archive/refs/tags/v0.1.0.tar.gz"
+  #   url "https://github.com/isLinXu/fmux/archive/refs/tags/v0.1.0.tar.gz"
   #   sha256 "..."
   #
   # `.goreleaser.yaml` does this rewrite automatically for the tap.
-  url "https://github.com/linxu/fmux.git", branch: "main"
+  url "https://github.com/isLinXu/fmux.git", branch: "main"
   version "0.1.0"
   license "MIT"
 
-  head "https://github.com/linxu/fmux.git", branch: "main"
+  head "https://github.com/isLinXu/fmux.git", branch: "main"
 
   depends_on "go" => :build
   depends_on :macos
@@ -23,7 +23,7 @@ class Fmux < Formula
   def install
     ldflags = %W[
       -s -w
-      -X github.com/linxu/fmux/internal/api.Version=#{version}
+      -X github.com/isLinXu/fmux/internal/api.Version=#{version}
     ]
     system "go", "build", *std_go_args(ldflags: ldflags), "./cmd/fmux"
   end

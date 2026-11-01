@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/linxu/fmux/internal/api"
+	"github.com/isLinXu/fmux/internal/api"
 	"github.com/spf13/cobra"
 )
 

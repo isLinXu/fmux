@@ -6,7 +6,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // ErrNotSupported is returned when a backend cannot serve a request shape.

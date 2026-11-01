@@ -13,15 +13,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/local"
-	"github.com/linxu/fmux/internal/adapter/mock"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/budget"
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/gate"
-	"github.com/linxu/fmux/internal/metrics"
-	"github.com/linxu/fmux/internal/supervisor"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/local"
+	"github.com/isLinXu/fmux/internal/adapter/mock"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/budget"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/gate"
+	"github.com/isLinXu/fmux/internal/metrics"
+	"github.com/isLinXu/fmux/internal/supervisor"
 )
 
 // Bundle is everything the HTTP layer needs to serve requests.

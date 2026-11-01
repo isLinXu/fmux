@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/launchd"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/launchd"
 	"github.com/spf13/cobra"
 )
 

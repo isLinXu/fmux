@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/compat"
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/compat"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // Degradation records a request shape that had to be softened for a backend.

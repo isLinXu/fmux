@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/mock"
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/gate"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/mock"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/gate"
 )
 
 // gatedServer builds a two-backend gateway where b1 admits one request and b2

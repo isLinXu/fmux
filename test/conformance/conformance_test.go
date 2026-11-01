@@ -17,10 +17,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/linxu/fmux/internal/api"
-	"github.com/linxu/fmux/internal/build"
-	"github.com/linxu/fmux/internal/config"
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/api"
+	"github.com/isLinXu/fmux/internal/build"
+	"github.com/isLinXu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // recorder is a fake OpenAI backend that remembers what it was asked.

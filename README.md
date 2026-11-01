@@ -35,14 +35,14 @@ Verified on macOS 27.2 / M3 Max against a real `fm` binary and a real Ollama ins
 ## Install
 
 ```bash
-git clone https://github.com/linxu/fmux && cd fmux
+git clone https://github.com/isLinXu/fmux && cd fmux
 make install                # -> ~/.local/bin/fmux
 fmux config init            # -> ~/.fmux/config.yaml
 fmux service install        # run at login, restart on crash
 fmux doctor                 # config, backends, aliases, port, fm wiring
 ```
 
-`brew install linxu/tap/fmux` once a release is tagged. The full operational
+`brew install isLinXu/tap/fmux` once a release is tagged. The full operational
 guide — plist layout, the `launchctl` EIO trap, upgrades, removal — is in
 [docs/deployment.md](docs/deployment.md).
 

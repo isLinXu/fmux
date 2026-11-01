@@ -20,7 +20,7 @@ builds:
     goarch: [arm64, amd64]
     ldflags:
       - -s -w
-      - -X github.com/linxu/fmux/internal/api.Version={{ .Version }}
+      - -X github.com/isLinXu/fmux/internal/api.Version={{ .Version }}
 
 archives:
   - formats: [tar.gz]
@@ -53,11 +53,11 @@ changelog:
 brews:
   - name: fmux
     repository:
-      owner: linxu
+      owner: isLinXu
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
-    homepage: https://github.com/linxu/fmux
+    homepage: https://github.com/isLinXu/fmux
     description: OpenAI-compatible gateway in front of every local inference server
     license: MIT
     install: |

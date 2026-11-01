@@ -9,10 +9,10 @@ package local
 import (
 	"context"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/budget"
-	"github.com/linxu/fmux/internal/supervisor"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/budget"
+	"github.com/isLinXu/fmux/internal/supervisor"
 )
 
 // Options configures a supervised local adapter.

@@ -6,9 +6,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/linxu/fmux/internal/breaker"
-	"github.com/linxu/fmux/internal/gate"
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/breaker"
+	"github.com/isLinXu/fmux/internal/gate"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // handleModels serves /v1/models.

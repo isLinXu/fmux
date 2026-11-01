@@ -3,7 +3,7 @@ package build
 import (
 	"testing"
 
-	"github.com/linxu/fmux/internal/config"
+	"github.com/isLinXu/fmux/internal/config"
 )
 
 func TestHealthURL(t *testing.T) {

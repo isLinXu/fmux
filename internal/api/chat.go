@@ -10,13 +10,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/adapter/openai"
-	"github.com/linxu/fmux/internal/budget"
-	"github.com/linxu/fmux/internal/compat"
-	"github.com/linxu/fmux/internal/gate"
-	"github.com/linxu/fmux/internal/ir"
-	"github.com/linxu/fmux/internal/router"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/budget"
+	"github.com/isLinXu/fmux/internal/compat"
+	"github.com/isLinXu/fmux/internal/gate"
+	"github.com/isLinXu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/router"
 )
 
 const maxBodyBytes = 64 << 20

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 type ctxKey int

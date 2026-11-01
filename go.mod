@@ -1,4 +1,4 @@
-module github.com/linxu/fmux
+module github.com/isLinXu/fmux
 
 go 1.24
 

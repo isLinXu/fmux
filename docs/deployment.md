@@ -8,7 +8,7 @@ user; there is no service account, no TLS and no auth to configure.
 **From source** (works today, no release needed):
 
 ```bash
-git clone https://github.com/linxu/fmux && cd fmux
+git clone https://github.com/isLinXu/fmux && cd fmux
 make install          # -> ~/.local/bin/fmux
 ```
 
@@ -22,7 +22,7 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 **Homebrew** (after the tap exists):
 
 ```bash
-brew install linxu/tap/fmux
+brew install isLinXu/tap/fmux
 # or, before the first tagged release:
 brew install --HEAD ./Formula/fmux.rb
 ```

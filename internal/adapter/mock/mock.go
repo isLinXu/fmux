@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/linxu/fmux/internal/adapter"
-	"github.com/linxu/fmux/internal/ir"
+	"github.com/isLinXu/fmux/internal/adapter"
+	"github.com/isLinXu/fmux/internal/ir"
 )
 
 // Adapter is a fake backend that echoes the prompt.
