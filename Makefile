@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.0-dev)
-LDFLAGS := -X github.com/linxu/fmux/internal/api.Version=$(VERSION)
+LDFLAGS := -X github.com/isLinXu/fmux/internal/api.Version=$(VERSION)
 GOBIN   := bin/fmux
 
 .PHONY: all build test conformance e2e capture vet fmt run mock clean install launchagent service bench release-check
