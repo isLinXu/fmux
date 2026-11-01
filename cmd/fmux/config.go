@@ -87,6 +87,11 @@ backends:
     url: http://127.0.0.1:11434/v1
     models: ["qwen3.8:27b"]
     memory_mb: 18432
+    # Admission control. Ollama batches requests itself, so the default is
+    # unlimited; set a number when one model must not be asked twice at once.
+    # max_concurrency: 1
+    # queue_depth: 4
+    # queue_timeout: 3m
 
   # A backend with a command is started on demand and stopped when idle, so
   # llama.cpp and MLX need no manual launch. One process serves one model.

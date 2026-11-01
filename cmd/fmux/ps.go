@@ -26,6 +26,7 @@ type processesResponse struct {
 		Backend string `json:"backend"`
 		Model   string `json:"model"`
 		SizeMB  int    `json:"size_mb"`
+		Pins    int    `json:"pins"`
 	} `json:"resident"`
 	Budget struct {
 		LimitMB int `json:"limit_mb"`
@@ -87,13 +88,19 @@ func newPsCmd() *cobra.Command {
 			}
 			if len(out.Resident) > 0 {
 				fmt.Fprintln(w, "\t\t\t\t\t")
-				fmt.Fprintln(w, "RESIDENT MODEL\tBACKEND\tSIZE\t\t\t")
+				fmt.Fprintln(w, "RESIDENT MODEL\tBACKEND\tSIZE\tIN USE\t\t")
 				for _, r := range out.Resident {
 					size := "unknown"
 					if r.SizeMB > 0 {
 						size = fmt.Sprintf("%d MB", r.SizeMB)
 					}
-					fmt.Fprintf(w, "%s\t%s\t%s\t\t\t\n", r.Model, r.Backend, size)
+					// A pinned model cannot be evicted, so it is worth
+					// showing: it explains why the budget cannot be reclaimed.
+					inUse := "-"
+					if r.Pins > 0 {
+						inUse = fmt.Sprintf("%d req", r.Pins)
+					}
+					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t\t\n", r.Model, r.Backend, size, inUse)
 				}
 			}
 			if out.Budget.LimitMB > 0 {

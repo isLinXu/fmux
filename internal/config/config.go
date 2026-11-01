@@ -32,6 +32,11 @@ type Config struct {
 	// ReapInterval is how often idle supervised processes are checked.
 	ReapInterval time.Duration `yaml:"reap_interval"`
 
+	// AllowedHosts extends the Host-header allowlist. The loopback names and
+	// the listen host are always allowed; add entries only when the gateway is
+	// deliberately bound to something else.
+	AllowedHosts []string `yaml:"allowed_hosts"`
+
 	SourcePath string `yaml:"-"`
 }
 
@@ -61,6 +66,19 @@ type Backend struct {
 	// ModelList pins the models this backend serves, so /v1/models works
 	// without a round trip.
 	ModelList []string `yaml:"models"`
+
+	// Admission control. A local model answers one request at a time; letting
+	// ten requests in does not add throughput, it adds swap.
+	//
+	// MaxConcurrency 0 means "decide for me": 1 for a supervised backend (one
+	// that has a command), unlimited for everything else. A negative value
+	// means unlimited explicitly.
+	MaxConcurrency int `yaml:"max_concurrency"`
+	// QueueDepth is how many requests may wait for a slot before the gateway
+	// answers 429. 0 means "never wait" — a saturated backend rejects at once.
+	QueueDepth int `yaml:"queue_depth"`
+	// QueueTimeout bounds how long a request may wait for a slot.
+	QueueTimeout time.Duration `yaml:"queue_timeout"`
 }
 
 // Alias maps a client-facing model name onto a concrete backend/model pair.
@@ -201,6 +219,19 @@ func (c *Config) Validate() error {
 		}
 		if b.StopTimeout <= 0 {
 			b.StopTimeout = 10 * time.Second
+		}
+		// A backend the gateway starts itself serves exactly one model from
+		// one process, so a second concurrent request can only hurt. A backend
+		// with its own manager (Ollama, LM Studio, a remote vLLM) already has
+		// a concurrency policy, and overriding it silently would be rude.
+		if b.MaxConcurrency == 0 && len(b.Command) > 0 {
+			b.MaxConcurrency = 1
+		}
+		if b.MaxConcurrency > 0 && b.QueueDepth == 0 {
+			b.QueueDepth = 8
+		}
+		if b.QueueTimeout <= 0 {
+			b.QueueTimeout = 2 * time.Minute
 		}
 	}
 	for name, a := range c.Aliases {

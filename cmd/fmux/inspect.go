@@ -47,7 +47,7 @@ func newBackendsCmd() *cobra.Command {
 			defer cancel()
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
-			fmt.Fprintln(w, "NAME\tTYPE\tKIND\tHEALTH\tCAPS\tURL")
+			fmt.Fprintln(w, "NAME\tTYPE\tKIND\tHEALTH\tLIMIT\tCAPS\tURL")
 			for _, ad := range reg.All() {
 				health := "ok"
 				if err := ad.Health(ctx); err != nil {
@@ -67,13 +67,16 @@ func newBackendsCmd() *cobra.Command {
 				if caps.Tools {
 					flags = append(flags, "tools")
 				}
-				url := ""
+				url, limit := "", "unlimited"
 				if b, ok := cfg.BackendByName(ad.Name()); ok {
 					url = b.URL
+					if b.MaxConcurrency > 0 {
+						limit = fmt.Sprintf("%d conc / %d queue", b.MaxConcurrency, b.QueueDepth)
+					}
 				}
 				kind := config.KindOf(ad.Type())
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-					ad.Name(), ad.Type(), kind, health, strings.Join(flags, ","), url)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+					ad.Name(), ad.Type(), kind, health, limit, strings.Join(flags, ","), url)
 			}
 			return w.Flush()
 		},
@@ -233,7 +236,31 @@ func runDoctor(ctx context.Context, cfg *config.Config) []doctorCheck {
 		add("listen", "ok", cfg.Listen+" is free")
 	}
 
-	// 5. fm integration
+	// 5. admission and memory
+	limited, unlimitedLocal := 0, 0
+	for _, b := range cfg.Backends {
+		if b.MaxConcurrency > 0 {
+			limited++
+		} else if config.KindOf(b.Type) == "local" || len(b.Command) > 0 {
+			unlimitedLocal++
+		}
+	}
+	if cfg.BudgetMB <= 0 {
+		add("budget", "warn", "budget_mb is 0: residency is recorded but nothing is ever evicted")
+	} else {
+		add("budget", "ok", fmt.Sprintf("%d MB, reap every %s", cfg.BudgetMB, cfg.ReapInterval))
+	}
+	if unlimitedLocal > 0 {
+		add("admission", "warn", fmt.Sprintf(
+			"%d local backend(s) accept unlimited concurrency; a local model answers one request at a time",
+			unlimitedLocal))
+	} else if limited > 0 {
+		add("admission", "ok", fmt.Sprintf("%d backend(s) gated", limited))
+	} else {
+		add("admission", "ok", "all backends unlimited (remote-only setup)")
+	}
+
+	// 6. fm integration
 	fmPath, err := exec.LookPath("fm")
 	if err != nil {
 		add("fm", "warn", "fm CLI not found; the gateway still serves curl and SDKs")

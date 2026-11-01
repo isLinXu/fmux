@@ -14,6 +14,7 @@ import (
 	"github.com/linxu/fmux/internal/adapter/openai"
 	"github.com/linxu/fmux/internal/budget"
 	"github.com/linxu/fmux/internal/config"
+	"github.com/linxu/fmux/internal/gate"
 	"github.com/linxu/fmux/internal/metrics"
 	"github.com/linxu/fmux/internal/router"
 	"github.com/linxu/fmux/internal/supervisor"
@@ -29,6 +30,7 @@ type Server struct {
 	rt      *router.Router
 	sup     *supervisor.Supervisor
 	bud     *budget.Manager
+	gate    *gate.Gate
 	metrics *metrics.Registry
 	log     *slog.Logger
 	started time.Time
@@ -41,6 +43,7 @@ type Options struct {
 	Registry   *adapter.Registry
 	Supervisor *supervisor.Supervisor
 	Budget     *budget.Manager
+	Gate       *gate.Gate
 	Metrics    *metrics.Registry
 	Log        *slog.Logger
 }
@@ -55,12 +58,19 @@ func New(o Options) *Server {
 	if met == nil {
 		met = metrics.New()
 	}
+	g := o.Gate
+	if g == nil {
+		// No gate configured means every backend is unlimited, which is the
+		// right default for tests and for remote-only setups.
+		g = gate.New(gate.Limits{}, gate.Hooks{}, log)
+	}
 	return &Server{
 		cfg:     o.Config,
 		reg:     o.Registry,
 		rt:      router.New(o.Config, o.Registry),
 		sup:     o.Supervisor,
 		bud:     o.Budget,
+		gate:    g,
 		metrics: met,
 		log:     log,
 		started: time.Now(),
@@ -68,6 +78,10 @@ func New(o Options) *Server {
 }
 
 // Handler returns the routed http.Handler.
+//
+// Order matters: the panic recoverer is outermost so a crash inside the
+// request-id or guard middleware is still caught, and the guard runs before
+// anything that touches a backend.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 
@@ -81,7 +95,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /admin/config", s.handleConfig)
 	mux.HandleFunc("GET /admin/version", s.handleVersion)
 
-	return s.recoverer(s.accessLog(mux))
+	return s.recoverer(requestID(s.guard(s.accessLog(mux))))
 }
 
 // accessLog records method, path, status and duration.
@@ -91,6 +105,7 @@ func (s *Server) accessLog(next http.Handler) http.Handler {
 		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(rec, r)
 		s.log.Info("http",
+			"req_id", RequestID(r.Context()),
 			"method", r.Method,
 			"path", r.URL.Path,
 			"status", rec.status,
@@ -178,6 +193,10 @@ func writeError(w http.ResponseWriter, status int, code, msg string) {
 	switch {
 	case status >= 500:
 		typ = "api_error"
+	case status == http.StatusTooManyRequests:
+		// 429 is the one 4xx that is not the client's fault: the request was
+		// well formed and the backend is simply occupied.
+		typ = "rate_limit_error"
 	case status == http.StatusUnauthorized || status == http.StatusForbidden:
 		typ = "permission_error"
 	}
@@ -197,6 +216,13 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 // StatusOf extracts an HTTP status from an adapter error when possible.
 func StatusOf(err error) int {
+	switch {
+	case errors.Is(err, gate.ErrBusy), errors.Is(err, gate.ErrQueueFull):
+		// The backend is healthy and busy; the request should be retried.
+		return http.StatusTooManyRequests
+	case errors.Is(err, errStreamIdle):
+		return http.StatusGatewayTimeout
+	}
 	var he *openai.HTTPError
 	if errors.As(err, &he) && he.StatusCode > 0 {
 		return he.StatusCode

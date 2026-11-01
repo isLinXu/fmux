@@ -63,6 +63,7 @@ func newServeCmd() *cobra.Command {
 				Registry:   bundle.Registry,
 				Supervisor: bundle.Supervisor,
 				Budget:     bundle.Budget,
+				Gate:       bundle.Gate,
 				Metrics:    bundle.Metrics,
 				Log:        log,
 			})

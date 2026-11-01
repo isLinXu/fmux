@@ -9,16 +9,26 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
 
 // Registry accumulates request statistics per backend and model.
 type Registry struct {
-	mu    sync.Mutex
-	start time.Time
-	reqs  map[key]*counter
-	evict int
+	mu       sync.Mutex
+	start    time.Time
+	reqs     map[key]*counter
+	evict    int
+	inflight map[string]int
+	waits    map[string]*waitStat
+	rejects  map[string]int64
+}
+
+// waitStat is the admission-control history of one backend.
+type waitStat struct {
+	count   int64
+	totalMS int64
 }
 
 type key struct {
@@ -36,7 +46,13 @@ type counter struct {
 
 // New returns an empty registry.
 func New() *Registry {
-	return &Registry{start: time.Now(), reqs: map[key]*counter{}}
+	return &Registry{
+		start:    time.Now(),
+		reqs:     map[key]*counter{},
+		inflight: map[string]int{},
+		waits:    map[string]*waitStat{},
+		rejects:  map[string]int64{},
+	}
 }
 
 // Observe records one completed request.
@@ -65,6 +81,42 @@ func (r *Registry) Evicted() {
 	}
 	r.mu.Lock()
 	r.evict++
+	r.mu.Unlock()
+}
+
+// SetInflight records how many requests a backend is currently serving.
+func (r *Registry) SetInflight(backend string, n int) {
+	if r == nil {
+		return
+	}
+	r.mu.Lock()
+	r.inflight[backend] = n
+	r.mu.Unlock()
+}
+
+// QueueWait records one request that had to wait for an admission slot.
+func (r *Registry) QueueWait(backend string, d time.Duration) {
+	if r == nil {
+		return
+	}
+	r.mu.Lock()
+	w := r.waits[backend]
+	if w == nil {
+		w = &waitStat{}
+		r.waits[backend] = w
+	}
+	w.count++
+	w.totalMS += d.Milliseconds()
+	r.mu.Unlock()
+}
+
+// Rejected records a request the gate refused, with the reason it was refused.
+func (r *Registry) Rejected(backend, reason string) {
+	if r == nil {
+		return
+	}
+	r.mu.Lock()
+	r.rejects[backend+"|"+reason]++
 	r.mu.Unlock()
 }
 
@@ -99,6 +151,19 @@ func (r *Registry) Render(w io.Writer) error {
 	}
 	evicted := r.evict
 	uptime := time.Since(r.start)
+
+	inflight := make(map[string]int, len(r.inflight))
+	for b, n := range r.inflight {
+		inflight[b] = n
+	}
+	waits := make(map[string]waitStat, len(r.waits))
+	for b, w := range r.waits {
+		waits[b] = *w
+	}
+	rejects := make(map[string]int64, len(r.rejects))
+	for k, v := range r.rejects {
+		rejects[k] = v
+	}
 	r.mu.Unlock()
 
 	fmt.Fprintln(w, "# HELP fmux_requests_total Completed chat completion requests.")
@@ -130,8 +195,44 @@ func (r *Registry) Render(w io.Writer) error {
 	fmt.Fprintln(w, "# TYPE fmux_evictions_total counter")
 	fmt.Fprintf(w, "fmux_evictions_total %d\n", evicted)
 
+	fmt.Fprintln(w, "# HELP fmux_inflight_requests Requests currently being served per backend.")
+	fmt.Fprintln(w, "# TYPE fmux_inflight_requests gauge")
+	for _, b := range sortedKeys(inflight) {
+		fmt.Fprintf(w, "fmux_inflight_requests{backend=%q} %d\n", b, inflight[b])
+	}
+
+	fmt.Fprintln(w, "# HELP fmux_queue_waits_total Requests that had to wait for an admission slot.")
+	fmt.Fprintln(w, "# TYPE fmux_queue_waits_total counter")
+	for _, b := range sortedKeys(waits) {
+		fmt.Fprintf(w, "fmux_queue_waits_total{backend=%q} %d\n", b, waits[b].count)
+	}
+
+	fmt.Fprintln(w, "# HELP fmux_queue_wait_milliseconds_sum Time spent waiting for an admission slot.")
+	fmt.Fprintln(w, "# TYPE fmux_queue_wait_milliseconds_sum counter")
+	for _, b := range sortedKeys(waits) {
+		fmt.Fprintf(w, "fmux_queue_wait_milliseconds_sum{backend=%q} %d\n", b, waits[b].totalMS)
+	}
+
+	fmt.Fprintln(w, "# HELP fmux_rejected_total Requests refused by admission control.")
+	fmt.Fprintln(w, "# TYPE fmux_rejected_total counter")
+	for _, k := range sortedKeys(rejects) {
+		backend, reason, _ := strings.Cut(k, "|")
+		fmt.Fprintf(w, "fmux_rejected_total{backend=%q,reason=%q} %d\n", backend, reason, rejects[k])
+	}
+
 	fmt.Fprintln(w, "# HELP fmux_uptime_seconds Seconds since the gateway started.")
 	fmt.Fprintln(w, "# TYPE fmux_uptime_seconds gauge")
 	fmt.Fprintf(w, "fmux_uptime_seconds %.0f\n", uptime.Seconds())
 	return nil
+}
+
+// sortedKeys returns map keys in a stable order, so the exposition text does
+// not churn between scrapes.
+func sortedKeys[V any](m map[string]V) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }

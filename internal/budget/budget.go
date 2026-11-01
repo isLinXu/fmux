@@ -27,6 +27,11 @@ type Resident struct {
 	Model    string    `json:"model"`
 	SizeMB   int       `json:"size_mb"`
 	LastUsed time.Time `json:"last_used"`
+	// Pins counts the requests currently using this model. A pinned model is
+	// never evicted: unloading it would kill a generation that is halfway
+	// through, which is a much worse outcome than briefly exceeding an
+	// estimate.
+	Pins int `json:"pins"`
 }
 
 // EvictFunc unloads a model. It is called with the manager lock released, so it
@@ -38,6 +43,7 @@ type Manager struct {
 	mu      sync.Mutex
 	limitMB int
 	items   map[Key]*item
+	pins    map[Key]int
 	evict   EvictFunc
 	log     *slog.Logger
 }
@@ -53,7 +59,13 @@ func New(limitMB int, evict EvictFunc, log *slog.Logger) *Manager {
 	if log == nil {
 		log = slog.Default()
 	}
-	return &Manager{limitMB: limitMB, items: map[Key]*item{}, evict: evict, log: log}
+	return &Manager{
+		limitMB: limitMB,
+		items:   map[Key]*item{},
+		pins:    map[Key]int{},
+		evict:   evict,
+		log:     log,
+	}
 }
 
 // Acquire records that a model is about to be used, evicting LRU residents if
@@ -76,9 +88,11 @@ func (m *Manager) Acquire(ctx context.Context, k Key, sizeMB int) error {
 	}
 
 	var victims []Key
+	blockedByPins := false
 	for m.usedLocked()+sizeMB > m.limitMB {
 		v := m.lruLocked(k)
 		if v == nil {
+			blockedByPins = m.anyPinnedLocked(k)
 			break
 		}
 		delete(m.items, *v)
@@ -97,7 +111,12 @@ func (m *Manager) Acquire(ctx context.Context, k Key, sizeMB int) error {
 		}
 	}
 	if used > m.limitMB {
-		m.log.Warn("memory budget exceeded after eviction", "used_mb", used, "limit_mb", m.limitMB, "model", k.Model)
+		if blockedByPins {
+			m.log.Warn("memory budget exceeded: every evictable resident is in use",
+				"used_mb", used, "limit_mb", m.limitMB, "model", k.Model)
+		} else {
+			m.log.Warn("memory budget exceeded after eviction", "used_mb", used, "limit_mb", m.limitMB, "model", k.Model)
+		}
 	}
 	return nil
 }
@@ -111,10 +130,34 @@ func (m *Manager) Touch(k Key) {
 	m.mu.Unlock()
 }
 
+// Pin marks a resident model as in use. Pinned models are skipped by eviction
+// until the matching Unpin, so a second model cannot unload a model that is
+// mid-generation on another backend.
+//
+// Pinning a model that was never acquired is harmless and still protects it if
+// it becomes resident later.
+func (m *Manager) Pin(k Key) {
+	m.mu.Lock()
+	m.pins[k]++
+	m.mu.Unlock()
+}
+
+// Unpin releases one Pin.
+func (m *Manager) Unpin(k Key) {
+	m.mu.Lock()
+	if n := m.pins[k]; n > 1 {
+		m.pins[k] = n - 1
+	} else {
+		delete(m.pins, k)
+	}
+	m.mu.Unlock()
+}
+
 // Release forgets a resident model.
 func (m *Manager) Release(k Key) {
 	m.mu.Lock()
 	delete(m.items, k)
+	delete(m.pins, k)
 	m.mu.Unlock()
 }
 
@@ -125,6 +168,11 @@ func (m *Manager) ReleaseBackend(backend string) {
 	for k := range m.items {
 		if k.Backend == backend {
 			delete(m.items, k)
+		}
+	}
+	for k := range m.pins {
+		if k.Backend == backend {
+			delete(m.pins, k)
 		}
 	}
 	m.mu.Unlock()
@@ -146,7 +194,13 @@ func (m *Manager) Snapshot() []Resident {
 	defer m.mu.Unlock()
 	out := make([]Resident, 0, len(m.items))
 	for k, it := range m.items {
-		out = append(out, Resident{Backend: k.Backend, Model: k.Model, SizeMB: it.sizeMB, LastUsed: it.lastUsed})
+		out = append(out, Resident{
+			Backend:  k.Backend,
+			Model:    k.Model,
+			SizeMB:   it.sizeMB,
+			LastUsed: it.lastUsed,
+			Pins:     m.pins[k],
+		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].LastUsed.After(out[j].LastUsed) })
 	return out
@@ -164,7 +218,7 @@ func (m *Manager) lruLocked(except Key) *Key {
 	var victim *Key
 	var oldest time.Time
 	for k, it := range m.items {
-		if k == except {
+		if k == except || m.pins[k] > 0 {
 			continue
 		}
 		if victim == nil || it.lastUsed.Before(oldest) {
@@ -174,4 +228,14 @@ func (m *Manager) lruLocked(except Key) *Key {
 		}
 	}
 	return victim
+}
+
+// anyPinnedLocked reports whether any resident other than except is in use.
+func (m *Manager) anyPinnedLocked(except Key) bool {
+	for k := range m.items {
+		if k != except && m.pins[k] > 0 {
+			return true
+		}
+	}
+	return false
 }

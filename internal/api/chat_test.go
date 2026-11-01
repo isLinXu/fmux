@@ -50,10 +50,29 @@ func newServer(t *testing.T) (*Server, *mock.Adapter) {
 
 func intp(v int) *int { return &v }
 
+// doChat sends a completion request the way a local client would: httptest
+// defaults Host to example.com, which the guard rejects by design.
 func doChat(t *testing.T, s *Server, body string) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body))
+	req.Host = "127.0.0.1:1976"
 	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	s.Handler().ServeHTTP(rec, req)
+	return rec
+}
+
+// doLocal issues any request with a loopback Host.
+func doLocal(s *Server, method, path, body string) *httptest.ResponseRecorder {
+	var rdr io.Reader
+	if body != "" {
+		rdr = strings.NewReader(body)
+	}
+	req := httptest.NewRequest(method, path, rdr)
+	req.Host = "127.0.0.1:1976"
+	if body != "" {
+		req.Header.Set("Content-Type", "application/json")
+	}
 	rec := httptest.NewRecorder()
 	s.Handler().ServeHTTP(rec, req)
 	return rec
@@ -283,9 +302,7 @@ func TestJSONSchemaDegrade(t *testing.T) {
 
 func TestModelsEndpoint(t *testing.T) {
 	s, _ := newServer(t)
-	req := httptest.NewRequest(http.MethodGet, "/v1/models", nil)
-	rec := httptest.NewRecorder()
-	s.Handler().ServeHTTP(rec, req)
+	rec := doLocal(s, http.MethodGet, "/v1/models", "")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d", rec.Code)
 	}
@@ -304,8 +321,7 @@ func TestModelsEndpoint(t *testing.T) {
 
 func TestHealth(t *testing.T) {
 	s, _ := newServer(t)
-	rec := httptest.NewRecorder()
-	s.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	rec := doLocal(s, http.MethodGet, "/healthz", "")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d", rec.Code)
 	}

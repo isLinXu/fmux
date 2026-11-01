@@ -72,6 +72,8 @@ backends:
     type: ollama                      # ollama|llamacpp|mlx|lmstudio|vllm|sglang|openai|mock
     url: http://127.0.0.1:11434/v1
     models: ["qwen3.8:27b"]
+    max_concurrency: 1                # one GPU, one request at a time
+    queue_depth: 4                    # then 429 + Retry-After
 
   - name: vllm-lab
     type: vllm
@@ -113,6 +115,33 @@ budget_mb: 98304   # 96 GB on a 128 GB machine
 
 Every request records its model's `memory_mb`. When a new model would exceed the budget, the least recently used one is unloaded first — for Ollama that is a `keep_alive: 0` call, for a supervised backend it is a process stop. The budget is advisory: an oversized model is still served, with a warning, because refusing to answer is worse than a brief spike.
 
+A model that is currently generating is **pinned** and never chosen as a victim. Without that, a request for a second model could unload the model another request is halfway through answering on — the eviction would look successful and the victim request would fail mid-stream.
+
+### Admission control
+
+A local model is not a web service. A 27B checkpoint on a Mac answers one request at a time: the second concurrent request does not halve the latency, it doubles the KV cache and pushes a shared-memory machine toward swap. A router that forwards everything immediately is therefore not neutral — it amplifies exactly the failure mode a local model has.
+
+```yaml
+- name: ollama
+  max_concurrency: 1   # requests served at once
+  queue_depth: 4       # requests allowed to wait; 0 rejects immediately
+  queue_timeout: 3m    # how long a waiter may wait before 429
+```
+
+Admission runs **before** process start and memory eviction, so a request that is only going to queue never triggers an 18 GB load, and ten simultaneous cold requests cannot all try to start the same backend. A backend the gateway starts itself defaults to `max_concurrency: 1`; everything else defaults to unlimited.
+
+Saturation is a `429` with `Retry-After` and `type: rate_limit_error` — the request was fine, the timing was not. If the alias has a fallback chain, a busy primary hands the request to the next target instead of failing it.
+
+### Loopback only
+
+The gateway binds to `127.0.0.1`, but that alone does not make it private: any web page can POST to loopback, and `text/plain` skips the CORS preflight. A `Host`/`Origin` check therefore runs before anything touches a backend, and DNS rebinding cannot turn a visited site into a client of the local model.
+
+```yaml
+allowed_hosts: ["127.0.0.1", "localhost", "::1"]   # extras only; loopback is implicit
+```
+
+Every response carries `X-Request-Id`, echoed from the client when present, so one log line maps to one complaint.
+
 ### Observability
 
 ```bash
@@ -126,10 +155,12 @@ curl -s localhost:1976/metrics          # Prometheus text
 ```
 BACKEND       STATE    PID    RESTARTS  LAST USED  NOTE
 llamacpp-8b   running  91386  0         00:11:57
-RESIDENT MODEL   BACKEND      SIZE
-Qwen3-8B-Q4_K_M  llamacpp-8b  6144 MB
+RESIDENT MODEL   BACKEND      SIZE      IN USE
+Qwen3-8B-Q4_K_M  llamacpp-8b  6144 MB   1 req
 budget: 6144 / 98304 MB
 ```
+
+`IN USE` is the pin count: a resident model with a live request cannot be evicted, which is the answer to "why is the budget not shrinking".
 
 ## Running as a service
 
@@ -162,7 +193,7 @@ Details in [docs/deployment.md](docs/deployment.md#the-launchctl-eio-trap).
 | `POST /v1/chat/completions` | The only endpoint a client needs |
 | `GET /v1/models` | Aliases, plus backend-reported models |
 | `GET /healthz` | Liveness |
-| `GET /metrics` | Prometheus text: requests, tokens, duration, evictions |
+| `GET /metrics` | Prometheus text: requests, tokens, duration, evictions, inflight, queue waits, rejections |
 | `GET /admin/backends` | Capability matrix and health per backend |
 | `GET /admin/processes` | Supervised processes and memory residency |
 | `GET /admin/config` | Effective configuration |
@@ -201,6 +232,11 @@ Measured on the machine above, real `fm` binary, real Ollama:
 | Supervised backend (fake llama.cpp) cold start | process started, request served in 0.30 s |
 | Same backend, second request | process reused, same PID |
 | Idle reap | process stopped, port released, budget back to 0 MB |
+| 8 concurrent requests, `max_concurrency: 1`, `queue_depth: 4` | 5 served, 3 rejected `429` + `Retry-After: 5` |
+| Cross-origin POST / foreign `Host` | `403 origin_not_allowed` / `403 host_not_allowed` |
+| Backend that stalls mid-stream | `stream_idle` event, no `[DONE]`, slot released |
+| Backend that never sends headers | `504 stream_idle` |
+| Second model loaded while the first is generating | first model pinned, not evicted |
 
 ## Layout
 
@@ -212,10 +248,11 @@ internal/router/   alias resolution + capability gate
 internal/adapter/  adapter interface, OpenAI base, mock
 internal/adapter/local/  OpenAI adapter + process/memory pre-flight
 internal/supervisor/     child process lifecycle, health probe, idle reap
-internal/budget/         unified memory accounting + LRU eviction
-internal/metrics/        Prometheus counters
+internal/budget/         unified memory accounting + LRU eviction + in-use pins
+internal/gate/           per-backend admission control (semaphore + bounded queue)
+internal/metrics/        Prometheus counters, inflight and rejection gauges
 internal/launchd/        LaunchAgent plist + launchctl state
-internal/api/      HTTP layer, SSE writer, admin + metrics endpoints
+internal/api/      HTTP layer, SSE writer, loopback guard, admin + metrics endpoints
 internal/config/   YAML config
 internal/build/    config -> adapters, supervisor, budget
 test/conformance/  golden captures + real-fm end-to-end tests

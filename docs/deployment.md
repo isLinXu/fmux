@@ -155,6 +155,24 @@ Check `fmux backends` for `HEALTH=down`, then the backend's own port.
 the gateway. `OLLAMA_KEEP_ALIVE=30m` on the Ollama service is the fix; the
 gateway's `idle_timeout` only applies to backends it supervises itself.
 
+**`429 backend_busy`.** Admission control did its job: the backend is at
+`max_concurrency` and `queue_depth` requests are already waiting. The response
+carries `Retry-After`. If this is a common outcome the limit is wrong for the
+workload — raise `queue_depth`, or accept that one GPU serves one request.
+`curl -s localhost:1976/metrics | grep fmux_rejected` shows whether it is
+happening.
+
+**`403 host_not_allowed` / `403 origin_not_allowed`.** The request came from
+something that is not a local client — a browser page, a DNS-rebound hostname,
+or a proxy that rewrote `Host`. Add the name to `allowed_hosts` only if the
+gateway is deliberately bound somewhere else.
+
+**`504 stream_idle` or a truncated stream ending in an error event.** The
+backend accepted the request and then stopped producing tokens for
+`timeouts.stream_idle`. A local model that is swapping looks exactly like this.
+Check memory pressure first; raise the timeout only if the model is genuinely
+slow.
+
 **Config edits do nothing.** `serve` reads the file once at startup. Use
 `fmux service restart` (or `brew services restart fmux`).
 

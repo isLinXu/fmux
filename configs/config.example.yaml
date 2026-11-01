@@ -30,10 +30,19 @@ backends:
     models: ["qwen3.8:27b"]
     # Feeds the budget. 27B at 4-bit is ~18 GB resident.
     memory_mb: 18432
+    # Admission control. Ollama manages its own batching, so the default is
+    # unlimited; set a number when one model must not be asked twice at once.
+    # max_concurrency: 1
+    # queue_depth: 4        # requests allowed to wait; 0 rejects immediately
+    # queue_timeout: 3m     # how long a waiter may wait before a 429
 
   # llama.cpp: one process per model, so each model gets its own backend entry.
   # A backend with a command is started on demand, health-probed, and stopped
   # after idle_timeout, so there is no need to launch llama-server by hand.
+  #
+  # max_concurrency defaults to 1 for any backend the gateway starts itself:
+  # one process serves one model, and a second concurrent request only doubles
+  # the KV cache. queue_depth defaults to 8.
   # - name: llamacpp-8b
   #   type: llamacpp
   #   url: http://127.0.0.1:8080/v1

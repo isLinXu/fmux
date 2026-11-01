@@ -6,9 +6,10 @@
 client      fm CLI / fm serve / curl / SDK / editor plugin
               │  OpenAI HTTP (SSE)
 gateway     ┌──────────────────────────────────────────────┐
-            │ api        routing, SSE writer, metrics      │
+            │ api        routing, SSE writer, guard, metrics│
             │ compat     fm quirk normalization            │
             │ router     alias -> targets, capability gate │
+            │ gate       per-backend admission control      │
             │ supervisor child process lifecycle           │
             │ budget     unified memory + LRU eviction     │
             │ adapter    per-backend translation           │
@@ -26,6 +27,7 @@ accepts only a base URL as configuration.
 ```
 POST /v1/chat/completions
   │
+  ├─ guard                             (Host / Origin must be loopback)
   ├─ decode into ir.ChatRequest        (polymorphic content, absent fields)
   ├─ Validate                          (model + at least one message)
   ├─ compat.Normalize                  (drop empty system msgs, nil out tools:[])
@@ -36,11 +38,19 @@ POST /v1/chat/completions
        │    ├─ images  & !vision   -> 400, stop
        │    ├─ tools   & !tools    -> 400, stop
        │    └─ schema  & !jsonschema -> rewrite to prompt, log degraded
+       ├─ gate.Acquire                  (slot or bounded wait; 429 on overflow)
+       ├─ budget.Pin                    (this model must not be evicted now)
        ├─ adapter.Preparer.Prepare     (start process, acquire memory)
        ├─ rewrite req.Model = target.Model
-       ├─ stream ? ChatStream : Chat
+       ├─ stream ? ChatStream : Chat   (stream_idle bounds a silent backend)
        └─ success -> return; failure -> next target
 ```
+
+The order of `gate` before `Prepare` is load-bearing. Admission first, because
+starting an 18 GB process or evicting a resident model for a request that will
+only queue is wasted work, and because N concurrent cold requests would
+otherwise all try to start the same backend. Prepare second, because once a slot
+is held the caller owns the backend and may safely block on a cold start.
 
 ## Process and memory model
 
@@ -60,6 +70,13 @@ resident models; acquiring a new one evicts the least recently used first —
 `keep_alive: 0` for Ollama, a process stop for supervised backends. Eviction is
 advisory: an oversized model is still admitted with a warning, because a wrong
 estimate should not turn into a failed request.
+
+**In-use models are pinned.** LRU alone is not safe: the least recently used
+model may be the one currently generating on another backend, and unloading it
+would kill a request that is halfway through an answer. Every request pins its
+model for its lifetime, and eviction skips pinned residents. If every candidate
+is pinned the load proceeds over budget and logs why — the same
+advisory-not-authoritative trade-off as above, but now with an accurate reason.
 
 **Cold starts are inside the request.** The alternative is a 503 plus
 client-side retry logic, which every OpenAI client implements differently. The
@@ -109,14 +126,49 @@ straight to the client with a flush per event; nothing is buffered beyond a
 single chunk. `http.Server.WriteTimeout` is deliberately unset because a slow
 27B model can legitimately take minutes to finish.
 
+**Concurrency is bounded per backend, not globally.** `gate` holds one
+semaphore per backend with a bounded wait queue:
+
+| Setting | Meaning |
+|---|---|
+| `max_concurrency: 1` | one request served at a time (the default for a backend the gateway starts) |
+| `queue_depth: 4` | four requests may wait; the fifth gets `429` |
+| `queue_timeout: 3m` | a waiter gives up with `429` after this long |
+
+The bound belongs to the backend, not the gateway, because the resource being
+protected is one GPU and one KV cache. A remote vLLM with continuous batching
+genuinely serves dozens at once; a single llama.cpp process does not. A global
+limit would have to be wrong for one of them.
+
+**Two clocks bound a stream.** `stream_idle` (default 5m) is reset on every
+chunk. When it fires the outbound request is cancelled, which unblocks the body
+read — no goroutine is left watching a dead stream. If the first token had
+already gone out the client gets an `error` event with `code: stream_idle` and
+no `[DONE]`; if nothing had been written it gets a proper `504`. A silent
+backend and a slow backend look identical on the socket, so the timeout is the
+only thing that distinguishes them.
+
 Client disconnect cancels `r.Context()`, which cancels the outbound request and
 closes the backend stream — verified in the logs as
 `Post .../chat/completions: context canceled`.
 
+## Trust boundary
+
+The gateway is loopback-only, and that is enforced rather than assumed. A page
+in any browser can POST to `127.0.0.1`, and a `text/plain` body skips the CORS
+preflight entirely; without a `Host` check, DNS rebinding makes every visited
+site a client of the local model. `guard` compares the `Host` header and any
+`Origin` against the loopback names (plus `allowed_hosts`) before routing, and
+answers `403` otherwise. The cost is one map lookup per request.
+
+Every request carries `X-Request-Id` — echoed when the client supplies one,
+generated otherwise — and that id appears in every log line for the request, so
+a client-side complaint maps to exactly one trace.
+
 ## What is deliberately absent
 
-- No request queue. Local backends serialize internally; queuing twice adds
-  latency without adding throughput.
+- No global request queue. The queue is per backend and bounded, because the
+  contention being managed is one model on one GPU, not a fleet.
 - No response cache. Sampling makes identical prompts diverge, and a cache that
   ignores `temperature` is a correctness bug.
 - No model download. Ollama and llama.cpp already own that.

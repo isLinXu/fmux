@@ -19,6 +19,7 @@ import (
 	"github.com/linxu/fmux/internal/adapter/openai"
 	"github.com/linxu/fmux/internal/budget"
 	"github.com/linxu/fmux/internal/config"
+	"github.com/linxu/fmux/internal/gate"
 	"github.com/linxu/fmux/internal/metrics"
 	"github.com/linxu/fmux/internal/supervisor"
 )
@@ -28,6 +29,7 @@ type Bundle struct {
 	Registry   *adapter.Registry
 	Supervisor *supervisor.Supervisor
 	Budget     *budget.Manager
+	Gate       *gate.Gate
 	Metrics    *metrics.Registry
 }
 
@@ -97,8 +99,21 @@ func Build(cfg *config.Config, log *slog.Logger) (*Bundle, error) {
 	// A stopped process holds no memory, so its residency records must go too.
 	sup.SetOnStop(func(name string) { bud.ReleaseBackend(name) })
 
+	// Admission control. The hooks feed /metrics without the gate package
+	// having to know what a metric is.
+	gt := gate.New(gate.Limits{}, gate.Hooks{
+		Wait:     func(backend string, d time.Duration) { met.QueueWait(backend, d) },
+		Rejected: func(backend, reason string) { met.Rejected(backend, reason) },
+		Inflight: func(backend string, n int) { met.SetInflight(backend, n) },
+	}, log)
+
 	client := &http.Client{Timeout: 0}
 	for _, b := range cfg.Backends {
+		gt.Configure(b.Name, gate.Limits{
+			Max:     b.MaxConcurrency,
+			Queue:   b.QueueDepth,
+			Timeout: b.QueueTimeout,
+		})
 		if b.Type == "mock" {
 			reg.Add(mock.New(b.Name))
 			continue
@@ -144,7 +159,7 @@ func Build(cfg *config.Config, log *slog.Logger) (*Bundle, error) {
 	if len(reg.Names()) == 0 {
 		return nil, fmt.Errorf("no backends configured")
 	}
-	return &Bundle{Registry: reg, Supervisor: sup, Budget: bud, Metrics: met}, nil
+	return &Bundle{Registry: reg, Supervisor: sup, Budget: bud, Gate: gt, Metrics: met}, nil
 }
 
 // Registry builds just the adapter registry. Commands that only inspect

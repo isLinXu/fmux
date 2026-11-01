@@ -6,6 +6,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/linxu/fmux/internal/gate"
 	"github.com/linxu/fmux/internal/ir"
 )
 
@@ -49,10 +50,18 @@ func (s *Server) handleModels(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, ir.ModelList{Object: "list", Data: out})
 }
 
-// handleBackends reports the capability matrix and live health.
+// handleBackends reports the capability matrix, live health and the admission
+// policy per backend.
 func (s *Server) handleBackends(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
+
+	gates := map[string]gate.Stat{}
+	if s.gate != nil {
+		for _, g := range s.gate.Stats() {
+			gates[g.Backend] = g
+		}
+	}
 
 	reports := make([]map[string]any, 0, len(s.reg.Names()))
 	for _, ad := range s.reg.All() {
@@ -67,6 +76,7 @@ func (s *Server) handleBackends(w http.ResponseWriter, r *http.Request) {
 			"caps":    ad.Caps(),
 			"healthy": healthy,
 			"error":   errMsg,
+			"gate":    gates[ad.Name()],
 		})
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"backends": reports})
@@ -77,18 +87,24 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	backends := make([]map[string]any, 0, len(s.cfg.Backends))
 	for _, b := range s.cfg.Backends {
 		backends = append(backends, map[string]any{
-			"name": b.Name,
-			"type": b.Type,
-			"kind": b.Kind,
-			"url":  b.URL,
+			"name":            b.Name,
+			"type":            b.Type,
+			"kind":            b.Kind,
+			"url":             b.URL,
+			"max_concurrency": b.MaxConcurrency,
+			"queue_depth":     b.QueueDepth,
+			"queue_timeout":   b.QueueTimeout.String(),
 		})
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"listen":   s.cfg.Listen,
-		"default":  s.cfg.Default,
-		"source":   s.cfg.SourcePath,
-		"backends": backends,
-		"aliases":  s.cfg.Aliases,
-		"profiles": s.cfg.Profiles,
+		"listen":    s.cfg.Listen,
+		"default":   s.cfg.Default,
+		"source":    s.cfg.SourcePath,
+		"budget_mb": s.cfg.BudgetMB,
+		"backends":  backends,
+		"aliases":   s.cfg.Aliases,
+		"profiles":  s.cfg.Profiles,
+		"timeouts":  s.cfg.Timeouts,
+		"guard":     sortedSet(s.allowedHosts()),
 	})
 }

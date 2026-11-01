@@ -7,17 +7,54 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/linxu/fmux/internal/adapter"
+	"github.com/linxu/fmux/internal/budget"
 	"github.com/linxu/fmux/internal/compat"
+	"github.com/linxu/fmux/internal/gate"
 	"github.com/linxu/fmux/internal/ir"
 	"github.com/linxu/fmux/internal/router"
 )
 
 const maxBodyBytes = 64 << 20
 
+// errStreamIdle marks a stream the gateway gave up on because the backend
+// stopped producing tokens.
+var errStreamIdle = errors.New("stream idle timeout")
+
+// errorCodeOf names the failure in the OpenAI error envelope.
+func errorCodeOf(err error) string {
+	switch {
+	case errors.Is(err, gate.ErrBusy), errors.Is(err, gate.ErrQueueFull):
+		return "backend_busy"
+	case errors.Is(err, errStreamIdle):
+		return "stream_idle"
+	}
+	return "backend_error"
+}
+
+// streamErrorCode names a failure that happened after the SSE headers were
+// already on the wire, where the only remaining option is an error event.
+func streamErrorCode(err error) string {
+	if errors.Is(err, errStreamIdle) {
+		return "stream_idle"
+	}
+	return "stream_error"
+}
+
 // handleChat is the single entry point for completions.
+//
+// The per-target order is deliberate and load-bearing:
+//
+//	gate -> prepare -> chat
+//
+// Admission first, because starting a 18 GB process or evicting a resident
+// model for a request that will only queue is wasted work, and because N
+// concurrent cold requests would otherwise all try to start the same backend.
+// Prepare second, because once a slot is held the caller owns the backend and
+// may safely block on a cold start or an eviction.
 func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(io.LimitReader(r.Body, maxBodyBytes))
 	if err != nil {
@@ -41,8 +78,9 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_request", err.Error())
 		return
 	}
+	reqID := RequestID(r.Context())
 	if len(quirks) > 0 {
-		s.log.Debug("compat", "client_is_fm", req.ClientIsFm, "quirks", quirks, "model", req.Model)
+		s.log.Debug("compat", "req_id", reqID, "client_is_fm", req.ClientIsFm, "quirks", quirks, "model", req.Model)
 	}
 
 	plan, err := s.rt.Resolve(req.Model)
@@ -67,46 +105,68 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		for _, d := range degradations {
-			s.log.Warn("degraded", "backend", d.Backend, "reason", d.Reason)
+			s.log.Warn("degraded", "backend", d.Backend, "reason", d.Reason, "req_id", reqID)
 		}
 
-		// Local backends may need to start a process or free memory first.
-		if p, ok := target.Adapter.(adapter.Preparer); ok {
-			if err := p.Prepare(r.Context(), target.Model); err != nil {
-				if i == 0 {
-					writeError(w, http.StatusServiceUnavailable, "backend_unavailable", err.Error())
-					return
-				}
-				lastErr = err
-				continue
-			}
+		wrote, err := s.serveTarget(r.Context(), w, cp, target, plan.Alias, reqID)
+		if err == nil {
+			return
 		}
-
-		if cp.Stream {
-			wrote, err := s.streamChat(r.Context(), w, cp, target, plan.Alias)
-			if err == nil {
-				return
-			}
-			lastErr = err
-			if wrote {
-				// Headers are already on the wire; nothing sane left to send.
-				s.log.Error("stream aborted", "backend", target.Backend, "err", err)
-				return
-			}
-		} else {
-			if err := s.chatOnce(r.Context(), w, cp, target, plan.Alias); err != nil {
-				lastErr = err
-			} else {
-				return
-			}
+		lastErr = err
+		if wrote {
+			// Headers are already on the wire; nothing sane left to send.
+			s.log.Error("stream aborted", "backend", target.Backend, "err", err, "req_id", reqID)
+			return
 		}
-		s.log.Warn("target failed", "backend", target.Backend, "model", target.Model, "err", lastErr)
+		// A dead client cannot be helped by a second backend.
+		if r.Context().Err() != nil {
+			return
+		}
+		s.log.Warn("target failed", "backend", target.Backend, "model", target.Model, "err", err, "req_id", reqID)
 	}
 
 	if lastErr == nil {
 		lastErr = errors.New("no backend available")
 	}
-	writeError(w, StatusOf(lastErr), "backend_error", lastErr.Error())
+	status := StatusOf(lastErr)
+	if status == http.StatusTooManyRequests {
+		// Every target was busy rather than broken. Tell the client how long
+		// the wait is expected to be instead of inviting an immediate retry.
+		w.Header().Set("Retry-After", "5")
+	}
+	writeError(w, status, errorCodeOf(lastErr), lastErr.Error())
+}
+
+// serveTarget admits one request to one backend, prepares it, and serves it.
+// It releases the admission slot before returning, whatever happened.
+func (s *Server) serveTarget(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias, reqID string) (bool, error) {
+	release, err := s.gate.Acquire(ctx, t.Backend)
+	if err != nil {
+		return false, err
+	}
+	defer release()
+
+	// Pin before preparing: once the model is resident it must not be evicted
+	// to make room for someone else's model while this request is still
+	// generating. The pin is taken first so a concurrent load cannot slip in
+	// between the budget accounting and the first token.
+	if s.bud != nil {
+		key := budget.Key{Backend: t.Backend, Model: t.Model}
+		s.bud.Pin(key)
+		defer s.bud.Unpin(key)
+	}
+
+	// Local backends may need to start a process or free memory first.
+	if p, ok := t.Adapter.(adapter.Preparer); ok {
+		if err := p.Prepare(ctx, t.Model); err != nil {
+			return false, err
+		}
+	}
+
+	if req.Stream {
+		return s.streamChat(ctx, w, req, t, alias)
+	}
+	return false, s.chatOnce(ctx, w, req, t, alias)
 }
 
 // chatOnce performs a non-streaming completion.
@@ -143,8 +203,39 @@ func (s *Server) observe(t router.Target, status int, u *ir.Usage, d time.Durati
 // the [DONE] sentinel.
 func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias string) (bool, error) {
 	start := time.Now()
+
+	// A backend that stops producing tokens is not slow, it is stuck: the
+	// process is alive, the socket is open, and nothing will ever arrive.
+	// `stream_idle` is the only bound on that, and it is enforced by
+	// cancelling the upstream request — the HTTP client then unblocks the
+	// body read, so no goroutine is left behind watching a dead stream.
+	idle := s.cfg.Timeouts.StreamIdle
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	var (
+		idleTimer *time.Timer
+		idleFired atomic.Bool
+	)
+	if idle > 0 {
+		idleTimer = time.AfterFunc(idle, func() {
+			idleFired.Store(true)
+			cancel()
+		})
+		defer idleTimer.Stop()
+	}
+
 	st, err := t.Adapter.ChatStream(ctx, req)
 	if err != nil {
+		// Nothing has been written yet, so this can still be an honest 504
+		// instead of a half-open 200. A backend that accepts the connection
+		// and then says nothing is the same failure as one that goes quiet
+		// mid-stream; the client should see the same code either way.
+		if idleFired.Load() {
+			err = fmt.Errorf("%w: %s sent no response within %s", errStreamIdle, t.Backend, idle)
+			s.observe(t, http.StatusGatewayTimeout, nil, time.Since(start))
+			return false, err
+		}
 		s.observe(t, http.StatusBadGateway, nil, time.Since(start))
 		return false, err
 	}
@@ -159,14 +250,28 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 
 	for {
 		ch, err := st.Recv()
+		if idleTimer != nil && err == nil {
+			idleTimer.Reset(idle)
+		}
 		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
+			if idleFired.Load() {
+				// The client is still connected and waiting; it deserves an
+				// explanation rather than a silent truncation.
+				err = fmt.Errorf("%w: no token from %s for %s", errStreamIdle, t.Backend, idle)
+				s.observe(t, http.StatusGatewayTimeout, nil, time.Since(start))
+				if !sw.started {
+					return false, err
+				}
+				sw.errorEvent(streamErrorCode(err), err.Error())
+				return true, err
+			}
 			if !sw.started {
 				return false, err
 			}
-			sw.errorEvent(err.Error())
+			sw.errorEvent(streamErrorCode(err), err.Error())
 			return true, err
 		}
 
@@ -273,9 +378,9 @@ func (s *sseWriter) event(v any) error {
 	return nil
 }
 
-func (s *sseWriter) errorEvent(msg string) {
+func (s *sseWriter) errorEvent(code, msg string) {
 	s.start()
-	payload, _ := json.Marshal(errorEnvelope{Error: errorBody{Message: msg, Type: "api_error", Code: "stream_error"}})
+	payload, _ := json.Marshal(errorEnvelope{Error: errorBody{Message: msg, Type: "api_error", Code: code}})
 	_, _ = fmt.Fprintf(s.w, "data: %s\n\n", payload)
 	if s.f != nil {
 		s.f.Flush()
