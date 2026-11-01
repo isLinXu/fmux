@@ -27,6 +27,8 @@ A second reason, and the one that shapes the code: `fm`'s wire format has quirks
 | M4 | vLLM / SGLang remote, fallback chains | **done** |
 | M5 | Metrics, structured logs, bench | **done** |
 | M6 | Homebrew formula, LaunchAgent, release pipeline, docs | **done** |
+| M7 | Admission control, stream idle, loopback guard | **done** |
+| M8 | Drain on shutdown, busy-aware reaping, circuit breaker, latency histograms | **done** |
 
 Verified on macOS 27.2 / M3 Max against a real `fm` binary and a real Ollama instance. See [Verification](#verification).
 
@@ -107,6 +109,8 @@ A local model on macOS is not just an endpoint. llama.cpp and MLX serve exactly 
 
 The first request to that alias starts the process and waits for its health probe; later requests reuse it; after `idle_timeout` it is stopped and its memory released. A backend with no `command` (Ollama, LM Studio) is left to its own manager.
 
+Idle is measured from the end of the last request, not its start. A request that outlives `idle_timeout` — a long generation on a small machine — holds an in-flight claim on the process, so the reaper skips it and the clock restarts when it finishes. Otherwise a model that is busy working would be killed for being idle.
+
 ### Memory budget
 
 ```yaml
@@ -132,6 +136,19 @@ Admission runs **before** process start and memory eviction, so a request that i
 
 Saturation is a `429` with `Retry-After` and `type: rate_limit_error` — the request was fine, the timing was not. If the alias has a fallback chain, a busy primary hands the request to the next target instead of failing it.
 
+### Failure handling
+
+A fallback chain only helps if the gateway remembers that a target just failed. Otherwise every request pays the dead backend's connect timeout first, forever, and the fallback only ever saves the request — not the latency.
+
+```yaml
+# built in, no configuration needed
+# 3 consecutive backend failures -> skip that target for 30s
+```
+
+Only failures that mean "the backend is not there" count: refused connections, resets, `502`, `503`, `504`. A `400` means the backend is alive and disliked the request; counting it would take a healthy backend out of service for everyone. `429` means busy, not dead. After the cooldown one request is let through as a probe; if it succeeds the circuit closes, if it fails it reopens immediately. If every target is open the gateway tries anyway rather than refusing to answer.
+
+State is visible per backend in `GET /admin/backends` (`circuit.open`, `circuit.consecutive_failures`, `circuit.trips`).
+
 ### Loopback only
 
 The gateway binds to `127.0.0.1`, but that alone does not make it private: any web page can POST to loopback, and `text/plain` skips the CORS preflight. A `Host`/`Origin` check therefore runs before anything touches a backend, and DNS rebinding cannot turn a visited site into a client of the local model.
@@ -153,14 +170,23 @@ curl -s localhost:1976/metrics          # Prometheus text
 `fmux ps` reads a running gateway, because process state only exists inside the serving process:
 
 ```
-BACKEND       STATE    PID    RESTARTS  LAST USED  NOTE
-llamacpp-8b   running  91386  0         00:11:57
+BACKEND       STATE    PID    BUSY   RESTARTS  LAST USED  NOTE
+llamacpp-8b   running  91386  1 req  0         00:11:57
 RESIDENT MODEL   BACKEND      SIZE      IN USE
 Qwen3-8B-Q4_K_M  llamacpp-8b  6144 MB   1 req
 budget: 6144 / 98304 MB
 ```
 
-`IN USE` is the pin count: a resident model with a live request cannot be evicted, which is the answer to "why is the budget not shrinking".
+`BUSY` is the process's in-flight request count and `IN USE` is the model's pin count. A process that is serving a request is never reaped for being idle, and a pinned model is never evicted to make room — the two columns are the answer to "why is this still running" and "why is the budget not shrinking".
+
+`/metrics` carries two histograms rather than a single average, because on a local model the average hides the thing worth knowing:
+
+| Metric | Why it is separate |
+|---|---|
+| `fmux_time_to_first_token_milliseconds` | A cold 20 GB load shows up here and nowhere else |
+| `fmux_request_duration_milliseconds` | Total wall time, bucketed from 50 ms to 5 min |
+
+A 30-second answer that produced its first token in 200 ms is a healthy model on a long generation. The same 30 seconds with a 25-second first token is a model that had to be loaded from disk. One number cannot tell those apart; two can.
 
 ## Running as a service
 
@@ -171,13 +197,30 @@ manages its own LaunchAgent:
 fmux service install     # write the plist and hand it to launchd
 fmux service status      # job state, pid, last exit code, /healthz
 fmux service logs -f     # follow ~/Library/Logs/fmux.log
-fmux service restart     # reload the config
+fmux service restart     # reload the config without cutting answers
 fmux service uninstall
 ```
 
 The plist runs `serve --config ~/.fmux/config.yaml`, restarts on crash (not on
 clean exit), and pins `NO_PROXY` for loopback so a login-session proxy cannot
 break the gateway's own calls to Ollama.
+
+### Restarting without cutting answers
+
+`SIGTERM` drains before it kills. The order is the whole point:
+
+```
+SIGTERM -> stop accepting -> wait for in-flight generations -> stop the backends -> exit
+```
+
+Killing the child processes first is the tempting version and the wrong one: they are what the in-flight requests are reading from, so every generation halfway done becomes a truncated stream with no error event, and a supervised backend that was killed mid-request has to be loaded from disk again on the retry.
+
+Two details make the drain real rather than decorative:
+
+- `timeouts.drain` (default `2m`) has to cover the longest legitimate answer, not the typical one. When it expires the connection is closed and the log says so at `WARN` — `drain deadline hit, cutting in-flight requests`.
+- The plist sets `ExitTimeOut` to `drain + 15s`. launchd's default is 20 seconds, so without it launchd would SIGKILL the process in the middle of the drain it was told to perform.
+
+`fmux service restart` sends `SIGTERM` and waits for the job to actually exit before starting it again, instead of `kickstart -k`, which would skip the drain entirely. A second `SIGTERM` (or Ctrl-C) skips the wait and exits immediately.
 
 `launchctl bootstrap` reports `Input/output error` for a job that is already
 loaded, for a malformed plist, and for a shell that is not allowed to spawn
@@ -193,8 +236,8 @@ Details in [docs/deployment.md](docs/deployment.md#the-launchctl-eio-trap).
 | `POST /v1/chat/completions` | The only endpoint a client needs |
 | `GET /v1/models` | Aliases, plus backend-reported models |
 | `GET /healthz` | Liveness |
-| `GET /metrics` | Prometheus text: requests, tokens, duration, evictions, inflight, queue waits, rejections |
-| `GET /admin/backends` | Capability matrix and health per backend |
+| `GET /metrics` | Prometheus text: requests, tokens, latency and TTFT histograms, evictions, inflight, queue waits, rejections |
+| `GET /admin/backends` | Capability matrix, health, admission policy and circuit state per backend |
 | `GET /admin/processes` | Supervised processes and memory residency |
 | `GET /admin/config` | Effective configuration |
 
@@ -237,6 +280,11 @@ Measured on the machine above, real `fm` binary, real Ollama:
 | Backend that stalls mid-stream | `stream_idle` event, no `[DONE]`, slot released |
 | Backend that never sends headers | `504 stream_idle` |
 | Second model loaded while the first is generating | first model pinned, not evicted |
+| `SIGTERM` with a stream in flight | request completes with `[DONE]`, child stopped after `http drained` |
+| Drain deadline exceeded | connection closed, `WARN drain deadline hit, cutting in-flight requests` |
+| Request outliving `idle_timeout` | reaper skips the busy process, clock restarts on release |
+| Dead primary in a fallback chain, 8 requests | first 3 hit it, the rest go straight to the fallback |
+| Backend answering `400` repeatedly | circuit stays closed, every request still attempted |
 
 ## Layout
 
@@ -250,7 +298,8 @@ internal/adapter/local/  OpenAI adapter + process/memory pre-flight
 internal/supervisor/     child process lifecycle, health probe, idle reap
 internal/budget/         unified memory accounting + LRU eviction + in-use pins
 internal/gate/           per-backend admission control (semaphore + bounded queue)
-internal/metrics/        Prometheus counters, inflight and rejection gauges
+internal/breaker/        consecutive-failure circuit per backend
+internal/metrics/        Prometheus counters, histograms, inflight and rejection gauges
 internal/launchd/        LaunchAgent plist + launchctl state
 internal/api/      HTTP layer, SSE writer, loopback guard, admin + metrics endpoints
 internal/config/   YAML config

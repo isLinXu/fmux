@@ -97,3 +97,28 @@ func TestRenderNoKeepAlive(t *testing.T) {
 		t.Fatal("label missing")
 	}
 }
+
+// TestRenderExitTimeout: launchd SIGKILLs a job 20 seconds after SIGTERM by
+// default. The gateway drains in-flight generations on SIGTERM, so without
+// this key the drain is cut short by the very mechanism meant to restart it.
+func TestRenderExitTimeout(t *testing.T) {
+	body, err := Render(Options{Bin: "/tmp/fmux", Label: "x", Log: "/tmp/l", ExitTimeout: 135})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(body, "<key>ExitTimeOut</key>") {
+		t.Fatal("ExitTimeOut missing")
+	}
+	if !strings.Contains(body, "<integer>135</integer>") {
+		t.Fatalf("ExitTimeOut value missing:\n%s", body)
+	}
+
+	// Zero means "leave launchd's default alone" rather than "wait forever".
+	plain, err := Render(Options{Bin: "/tmp/fmux", Label: "x", Log: "/tmp/l"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(plain, "ExitTimeOut") {
+		t.Fatal("ExitTimeOut should be omitted when unset")
+	}
+}

@@ -8,12 +8,19 @@ reuse, idle reap), not the inference.
 Usage: fake_openai.py <port> [model-name]
 """
 import json
+import os
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 MODEL = "fake-model"
+
+# FAKE_STREAM_DELAY holds a streaming response open for N seconds before the
+# first token. The shutdown test needs a request that is genuinely in flight
+# when the gateway starts draining; without the pause the fake answers in a
+# microsecond and there is nothing to drain.
+STREAM_DELAY = float(os.environ.get("FAKE_STREAM_DELAY", "0"))
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -61,6 +68,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
+            self.wfile.flush()
+            if STREAM_DELAY > 0:
+                time.sleep(STREAM_DELAY)
             self.wfile.write(body)
             return
         body = json.dumps({

@@ -44,8 +44,15 @@ type Adapter interface {
 // Preparer is implemented by adapters that must do work before a request can
 // succeed: starting a child process, waiting for a model to load, or evicting
 // another model to make room.
+//
+// Prepare returns a release function that the caller must invoke when the
+// request is finished. It is never nil, so callers can defer it
+// unconditionally. Its job is to drop the in-flight claim on the backend, which
+// is what keeps an idle reaper from stopping a process that is still
+// generating: without it a request longer than `idle_timeout` would be killed
+// halfway through.
 type Preparer interface {
-	Prepare(ctx context.Context, model string) error
+	Prepare(ctx context.Context, model string) (release func(), err error)
 }
 
 // Registry holds the live adapters by backend name.

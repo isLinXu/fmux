@@ -59,7 +59,8 @@ func newServiceCmd() *cobra.Command {
 			}
 			// Validate before installing: a job that crash-loops on a bad
 			// config is much harder to debug than an error right here.
-			if _, err := config.Load(cfg); err != nil {
+			loaded, err := config.Load(cfg)
+			if err != nil {
 				return fmt.Errorf("config does not load, refusing to install: %w", err)
 			}
 
@@ -69,6 +70,10 @@ func newServiceCmd() *cobra.Command {
 				Args:   []string{"serve", "--config", cfg},
 				Log:    logp,
 				KeepOn: keep,
+				// launchd's default is 20s. The gateway drains in-flight
+				// generations on SIGTERM, so the job has to be allowed to
+				// live past that or the drain is cut short by SIGKILL.
+				ExitTimeout: int(loaded.Timeouts.Drain.Seconds()) + 15,
 				// fm reads ~/.fm/config.json and talks to loopback; a proxy
 				// inherited from the login session would break both.
 				Env: map[string]string{
@@ -160,9 +165,14 @@ func newServiceCmd() *cobra.Command {
 
 	restart := &cobra.Command{
 		Use:   "restart",
-		Short: "Kick the job so it reloads the config",
+		Short: "Reload the config without truncating in-flight requests",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := launchd.Kickstart(label); err != nil {
+			loaded, err := config.Load(cfg)
+			if err != nil {
+				return err
+			}
+			// Wait out the gateway's own drain window before giving up.
+			if err := launchd.Restart(label, loaded.Timeouts.Drain+15*time.Second); err != nil {
 				return err
 			}
 			if waitHealthy(cfg, 10*time.Second) {

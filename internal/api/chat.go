@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/linxu/fmux/internal/adapter"
+	"github.com/linxu/fmux/internal/adapter/openai"
 	"github.com/linxu/fmux/internal/budget"
 	"github.com/linxu/fmux/internal/compat"
 	"github.com/linxu/fmux/internal/gate"
@@ -44,6 +45,41 @@ func streamErrorCode(err error) string {
 	return "stream_error"
 }
 
+// backendDown reports whether err is evidence that the backend itself is gone,
+// as opposed to the request being wrong or the backend being merely busy.
+//
+// The distinction matters because the answer is remembered for a cooldown: a
+// 400 that opens the circuit would take a working backend out of service for
+// every client, while a refused connection that does not open it makes every
+// request pay the same timeout.
+func backendDown(err error) bool {
+	switch {
+	case err == nil:
+		return false
+	case errors.Is(err, gate.ErrBusy), errors.Is(err, gate.ErrQueueFull):
+		// Saturated, not dead. Backing off here would be wrong: the next
+		// request may well get a slot.
+		return false
+	case errors.Is(err, errStreamIdle):
+		// The backend accepted the connection and then went quiet. Suspicious,
+		// but a cold restart costs a minute; one stall is not a pattern.
+		return false
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		// The caller left, or a legitimately long generation hit its bound.
+		return false
+	}
+	var he *openai.HTTPError
+	if errors.As(err, &he) {
+		switch he.StatusCode {
+		case http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+			return true
+		}
+		return false
+	}
+	// Whatever is left is a transport failure: refused, reset, no route.
+	return true
+}
+
 // handleChat is the single entry point for completions.
 //
 // The per-target order is deliberate and load-bearing:
@@ -56,6 +92,9 @@ func streamErrorCode(err error) string {
 // Prepare second, because once a slot is held the caller owns the backend and
 // may safely block on a cold start or an eviction.
 func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
+	s.inflight.Add(1)
+	defer s.inflight.Add(-1)
+
 	body, err := io.ReadAll(io.LimitReader(r.Body, maxBodyBytes))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid_body", "could not read request body: "+err.Error())
@@ -89,8 +128,24 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Skip targets whose circuit is open, but only when something else can
+	// take the request. A gateway that refuses everything because one backend
+	// is down is worse than one that retries a dead backend.
+	targets := plan.Targets
+	if len(targets) > 1 {
+		live := make([]router.Target, 0, len(targets))
+		for _, t := range targets {
+			if s.brk.Allow(t.Backend) {
+				live = append(live, t)
+			}
+		}
+		if len(live) > 0 {
+			targets = live
+		}
+	}
+
 	var lastErr error
-	for i, target := range plan.Targets {
+	for i, target := range targets {
 		cp := req.Clone()
 		cp.ResolvedAlias = plan.Alias
 
@@ -110,7 +165,17 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 
 		wrote, err := s.serveTarget(r.Context(), w, cp, target, plan.Alias, reqID)
 		if err == nil {
+			s.brk.Succeed(target.Backend)
 			return
+		}
+		if backendDown(err) {
+			// Remember it, so the next request does not pay this timeout too.
+			s.brk.Fail(target.Backend, err.Error())
+			s.log.Warn("backend marked down", "backend", target.Backend,
+				"err", err, "req_id", reqID)
+		} else {
+			// The backend answered, it just did not like the request.
+			s.brk.Succeed(target.Backend)
 		}
 		lastErr = err
 		if wrote {
@@ -156,11 +221,15 @@ func (s *Server) serveTarget(ctx context.Context, w http.ResponseWriter, req *ir
 		defer s.bud.Unpin(key)
 	}
 
-	// Local backends may need to start a process or free memory first.
+	// Local backends may need to start a process or free memory first. The
+	// release drops the in-flight claim, so the idle reaper cannot stop this
+	// process while the request is still generating.
 	if p, ok := t.Adapter.(adapter.Preparer); ok {
-		if err := p.Prepare(ctx, t.Model); err != nil {
+		release, err := p.Prepare(ctx, t.Model)
+		if err != nil {
 			return false, err
 		}
+		defer release()
 	}
 
 	if req.Stream {
@@ -245,6 +314,7 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 	firstPending := true
 	finishSeen := false
 	usageEmitted := false
+	ttftSeen := false
 	var usage *ir.Usage
 	var text []byte
 
@@ -298,6 +368,13 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 		}
 		if err := sw.event(ch); err != nil {
 			return true, err
+		}
+		if !ttftSeen {
+			// The first byte the client actually receives. On a local model
+			// this is where a cold load shows up, and it is invisible in the
+			// total duration once the generation itself is long.
+			ttftSeen = true
+			s.metrics.ObserveTTFT(t.Backend, time.Since(start))
 		}
 	}
 

@@ -23,6 +23,40 @@ type Registry struct {
 	inflight map[string]int
 	waits    map[string]*waitStat
 	rejects  map[string]int64
+	duration map[string]*hist
+	ttft     map[string]*hist
+}
+
+// BucketsMS are the latency buckets, in milliseconds.
+//
+// The range is chosen for local inference, not for a web service: a first
+// token under 100 ms means the model was already warm, a few seconds means it
+// had to load, and anything past a minute is a machine that is swapping. The
+// upper buckets exist so a slow 27B is visible rather than collapsed into
+// +Inf.
+var BucketsMS = []float64{50, 100, 250, 500, 1000, 2500, 5000, 10000, 20000, 30000, 60000, 120000, 300000}
+
+// hist is a fixed-bucket histogram. Counts are stored per bucket and made
+// cumulative only when rendered, which is what Prometheus expects to read.
+type hist struct {
+	counts []int64
+	sumMS  int64
+	count  int64
+}
+
+func newHist() *hist { return &hist{counts: make([]int64, len(BucketsMS))} }
+
+func (h *hist) add(d time.Duration) {
+	ms := d.Milliseconds()
+	h.count++
+	h.sumMS += ms
+	for i, b := range BucketsMS {
+		if float64(ms) <= b {
+			h.counts[i]++
+			return
+		}
+	}
+	// Above the last bucket: counted only in +Inf.
 }
 
 // waitStat is the admission-control history of one backend.
@@ -38,10 +72,9 @@ type key struct {
 }
 
 type counter struct {
-	count      int64
-	promptTok  int64
-	complTok   int64
-	durationMS int64
+	count     int64
+	promptTok int64
+	complTok  int64
 }
 
 // New returns an empty registry.
@@ -52,6 +85,8 @@ func New() *Registry {
 		inflight: map[string]int{},
 		waits:    map[string]*waitStat{},
 		rejects:  map[string]int64{},
+		duration: map[string]*hist{},
+		ttft:     map[string]*hist{},
 	}
 }
 
@@ -70,8 +105,32 @@ func (r *Registry) Observe(backend, model string, status int, promptTok, complTo
 	c.count++
 	c.promptTok += int64(promptTok)
 	c.complTok += int64(complTok)
-	c.durationMS += d.Milliseconds()
+	r.histLocked(r.duration, backend).add(d)
 	r.mu.Unlock()
+}
+
+// ObserveTTFT records the time to the first streamed token.
+//
+// Total duration says a request was slow; TTFT says why. A 30-second answer
+// that produced its first token in 200 ms is a healthy model on a long
+// generation, while the same 30 seconds with a 25-second first token is a cold
+// load. Without this split the two are indistinguishable.
+func (r *Registry) ObserveTTFT(backend string, d time.Duration) {
+	if r == nil {
+		return
+	}
+	r.mu.Lock()
+	r.histLocked(r.ttft, backend).add(d)
+	r.mu.Unlock()
+}
+
+func (r *Registry) histLocked(m map[string]*hist, backend string) *hist {
+	h := m[backend]
+	if h == nil {
+		h = newHist()
+		m[backend] = h
+	}
+	return h
 }
 
 // Evicted increments the eviction counter.
@@ -164,6 +223,8 @@ func (r *Registry) Render(w io.Writer) error {
 	for k, v := range r.rejects {
 		rejects[k] = v
 	}
+	durations := copyHists(r.duration)
+	ttfts := copyHists(r.ttft)
 	r.mu.Unlock()
 
 	fmt.Fprintln(w, "# HELP fmux_requests_total Completed chat completion requests.")
@@ -185,11 +246,13 @@ func (r *Registry) Render(w io.Writer) error {
 		fmt.Fprintf(w, "fmux_completion_tokens_total{backend=%q,model=%q} %d\n", s.k.backend, s.k.model, s.c.complTok)
 	}
 
-	fmt.Fprintln(w, "# HELP fmux_request_duration_milliseconds_sum Total wall time spent per backend and model.")
-	fmt.Fprintln(w, "# TYPE fmux_request_duration_milliseconds_sum counter")
-	for _, s := range snapshot {
-		fmt.Fprintf(w, "fmux_request_duration_milliseconds_sum{backend=%q,model=%q} %d\n", s.k.backend, s.k.model, s.c.durationMS)
-	}
+	fmt.Fprintln(w, "# HELP fmux_request_duration_milliseconds Wall time per request, bucketed.")
+	fmt.Fprintln(w, "# TYPE fmux_request_duration_milliseconds histogram")
+	renderHist(w, "fmux_request_duration_milliseconds", durations)
+
+	fmt.Fprintln(w, "# HELP fmux_time_to_first_token_milliseconds Time from request start to the first streamed token.")
+	fmt.Fprintln(w, "# TYPE fmux_time_to_first_token_milliseconds histogram")
+	renderHist(w, "fmux_time_to_first_token_milliseconds", ttfts)
 
 	fmt.Fprintln(w, "# HELP fmux_evictions_total Models unloaded to stay inside the memory budget.")
 	fmt.Fprintln(w, "# TYPE fmux_evictions_total counter")
@@ -235,4 +298,33 @@ func sortedKeys[V any](m map[string]V) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// copyHists deep-copies the histogram map so rendering never reads a slice the
+// request path is still writing to.
+func copyHists(m map[string]*hist) map[string]hist {
+	out := make(map[string]hist, len(m))
+	for k, h := range m {
+		c := make([]int64, len(h.counts))
+		copy(c, h.counts)
+		out[k] = hist{counts: c, sumMS: h.sumMS, count: h.count}
+	}
+	return out
+}
+
+// renderHist writes one histogram family in the Prometheus text format.
+// Bucket counts must be cumulative, which is why the running total is
+// accumulated here rather than stored.
+func renderHist(w io.Writer, name string, hists map[string]hist) {
+	for _, backend := range sortedKeys(hists) {
+		h := hists[backend]
+		var cum int64
+		for i, le := range BucketsMS {
+			cum += h.counts[i]
+			fmt.Fprintf(w, "%s_bucket{backend=%q,le=\"%g\"} %d\n", name, backend, le, cum)
+		}
+		fmt.Fprintf(w, "%s_bucket{backend=%q,le=\"+Inf\"} %d\n", name, backend, h.count)
+		fmt.Fprintf(w, "%s_sum{backend=%q} %d\n", name, backend, h.sumMS)
+		fmt.Fprintf(w, "%s_count{backend=%q} %d\n", name, backend, h.count)
+	}
 }

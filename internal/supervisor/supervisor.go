@@ -67,6 +67,7 @@ type Status struct {
 	Command   []string  `json:"command,omitempty"`
 	StartedAt time.Time `json:"started_at,omitempty"`
 	LastUsed  time.Time `json:"last_used,omitempty"`
+	Inflight  int       `json:"inflight"`
 	Restarts  int       `json:"restarts"`
 	LastError string    `json:"last_error,omitempty"`
 }
@@ -182,6 +183,51 @@ func (s *Supervisor) Touch(name string) {
 	p.mu.Unlock()
 }
 
+// Enter claims the process for one in-flight request and returns the function
+// that releases it.
+//
+// The idle reaper is driven by wall-clock time, so without this a request that
+// outlives IdleTimeout would be killed while it is still generating: the model
+// is working, not idle, and the clock says otherwise. The release also
+// refreshes the idle clock, because a long request should leave the process
+// warm for IdleTimeout after it *finishes*, not after it started.
+func (s *Supervisor) Enter(name string) func() {
+	s.mu.RLock()
+	p := s.procs[name]
+	s.mu.RUnlock()
+	if p == nil {
+		return func() {}
+	}
+	p.mu.Lock()
+	p.inflight++
+	p.mu.Unlock()
+
+	var once sync.Once
+	return func() {
+		once.Do(func() {
+			p.mu.Lock()
+			if p.inflight > 0 {
+				p.inflight--
+			}
+			p.lastUsed = time.Now()
+			p.mu.Unlock()
+		})
+	}
+}
+
+// Inflight reports how many requests a process is currently serving.
+func (s *Supervisor) Inflight(name string) int {
+	s.mu.RLock()
+	p := s.procs[name]
+	s.mu.RUnlock()
+	if p == nil {
+		return 0
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.inflight
+}
+
 // Status returns every process state, sorted by name.
 func (s *Supervisor) Status() []Status {
 	s.mu.RLock()
@@ -242,10 +288,17 @@ func (s *Supervisor) reapIdle() {
 		idle := p.spec.IdleTimeout
 		running := p.state == StateRunning
 		last := p.lastUsed
+		busy := p.inflight
 		name := p.spec.Name
 		p.mu.Unlock()
 
 		if !running || idle <= 0 || last.IsZero() || now.Sub(last) < idle {
+			continue
+		}
+		if busy > 0 {
+			// Serving a request is the opposite of idle. The release path
+			// refreshes lastUsed, so this process gets a full IdleTimeout
+			// once it drains.
 			continue
 		}
 		s.log.Info("reaping idle backend", "backend", name, "idle", now.Sub(last).Round(time.Second))
@@ -287,6 +340,7 @@ type proc struct {
 	lastUsed  time.Time
 	restarts  int
 	lastErr   string
+	inflight  int
 
 	exited atomic.Bool
 	done   chan struct{}
@@ -302,6 +356,7 @@ func (p *proc) status() Status {
 		Command:   append([]string(nil), p.spec.Command...),
 		StartedAt: p.startedAt,
 		LastUsed:  p.lastUsed,
+		Inflight:  p.inflight,
 		Restarts:  p.restarts,
 		LastError: p.lastErr,
 	}

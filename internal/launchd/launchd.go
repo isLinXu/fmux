@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 )
 
 // DefaultLabel is the job identifier used unless the user overrides it.
@@ -32,6 +33,13 @@ type Options struct {
 	Log    string   // combined stdout/stderr path
 	Env    map[string]string
 	KeepOn bool // restart after a crash
+
+	// ExitTimeout is how long launchd waits after SIGTERM before SIGKILL.
+	//
+	// It has to cover the gateway's own drain window, or the drain is
+	// theatre: launchd's default is 20 seconds, which would SIGKILL a process
+	// that is deliberately still serving a long generation.
+	ExitTimeout int // seconds; 0 leaves launchd's default
 }
 
 // PlistPath returns ~/Library/LaunchAgents/<label>.plist.
@@ -83,6 +91,10 @@ var plistTmpl = template.Must(template.New("plist").Funcs(template.FuncMap{
 {{- end}}
 	<key>ProcessType</key>
 	<string>Interactive</string>
+{{- if .ExitTimeout}}
+	<key>ExitTimeOut</key>
+	<integer>{{.ExitTimeout}}</integer>
+{{- end}}
 	<key>StandardOutPath</key>
 	<string>{{xml .Log}}</string>
 	<key>StandardErrorPath</key>
@@ -183,6 +195,45 @@ func Kickstart(label string) error {
 		return fmt.Errorf("launchctl kickstart: %s", strings.TrimSpace(out))
 	}
 	return nil
+}
+
+// Signal delivers a signal to the job's process.
+func Signal(label, sig string) error {
+	out, err := run("kill", sig, Domain()+"/"+label)
+	if err != nil {
+		return fmt.Errorf("launchctl kill %s: %s", sig, strings.TrimSpace(out))
+	}
+	return nil
+}
+
+// Restart stops the job with SIGTERM and starts it again.
+//
+// `kickstart -k` would be one line, but it kills the process outright: the
+// gateway never gets to drain, so every generation in flight is truncated.
+// Asking politely and waiting for the job to actually go away is what makes a
+// restart look like a restart rather than a crash.
+func Restart(label string, wait time.Duration) error {
+	st, err := Status(label)
+	if err != nil {
+		return err
+	}
+	if st.Running() {
+		if err := Signal(label, "SIGTERM"); err != nil {
+			return err
+		}
+		deadline := time.Now().Add(wait)
+		for time.Now().Before(deadline) {
+			cur, err := Status(label)
+			if err != nil || !cur.Running() {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+		if cur, err := Status(label); err == nil && cur.Running() {
+			return fmt.Errorf("launchd: job %s still running after %s; in-flight requests are draining, try again or raise timeouts.drain", label, wait)
+		}
+	}
+	return Kickstart(label)
 }
 
 // State is what `launchctl print` says about a job.

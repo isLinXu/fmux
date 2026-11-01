@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"runtime"
 	"runtime/debug"
+	"sync/atomic"
 	"time"
 
 	"github.com/linxu/fmux/internal/adapter"
 	"github.com/linxu/fmux/internal/adapter/openai"
+	"github.com/linxu/fmux/internal/breaker"
 	"github.com/linxu/fmux/internal/budget"
 	"github.com/linxu/fmux/internal/config"
 	"github.com/linxu/fmux/internal/gate"
@@ -31,10 +33,19 @@ type Server struct {
 	sup     *supervisor.Supervisor
 	bud     *budget.Manager
 	gate    *gate.Gate
+	brk     *breaker.Breaker
 	metrics *metrics.Registry
 	log     *slog.Logger
 	started time.Time
+
+	// inflight counts chat requests that have not finished. Shutdown uses it
+	// to tell "drained cleanly" from "we just cut off N generations".
+	inflight atomic.Int64
 }
+
+// Inflight reports how many chat requests are still being served. It is the
+// number that decides whether a shutdown is safe to finish.
+func (s *Server) Inflight() int64 { return s.inflight.Load() }
 
 // Options carries everything a server needs. Every field except Config and
 // Registry is optional, which keeps the zero-config test path simple.
@@ -44,6 +55,7 @@ type Options struct {
 	Supervisor *supervisor.Supervisor
 	Budget     *budget.Manager
 	Gate       *gate.Gate
+	Breaker    *breaker.Breaker
 	Metrics    *metrics.Registry
 	Log        *slog.Logger
 }
@@ -64,6 +76,10 @@ func New(o Options) *Server {
 		// right default for tests and for remote-only setups.
 		g = gate.New(gate.Limits{}, gate.Hooks{}, log)
 	}
+	brk := o.Breaker
+	if brk == nil {
+		brk = breaker.New(breaker.Options{})
+	}
 	return &Server{
 		cfg:     o.Config,
 		reg:     o.Registry,
@@ -71,6 +87,7 @@ func New(o Options) *Server {
 		sup:     o.Supervisor,
 		bud:     o.Budget,
 		gate:    g,
+		brk:     brk,
 		metrics: met,
 		log:     log,
 		started: time.Now(),
@@ -166,6 +183,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 		"version":        Version,
 		"uptime_seconds": int(time.Since(s.started).Seconds()),
 		"backends":       len(s.reg.Names()),
+		"inflight":       s.Inflight(),
 	})
 }
 

@@ -110,3 +110,68 @@ func TestEnsureUnknownName(t *testing.T) {
 		t.Fatal("expected an error for an unregistered name")
 	}
 }
+
+// TestReapSkipsBusyProcess is the reason Enter exists. The reaper is driven by
+// wall-clock time, and a request can easily outlive IdleTimeout — a 27B model
+// generating 2000 tokens takes longer than the default idle window on a small
+// machine. Stopping the process then would kill a request that is working
+// fine, and the client would see a truncated stream with no explanation.
+func TestReapSkipsBusyProcess(t *testing.T) {
+	requirePython(t)
+	port := freePort(t)
+	s := New(nil)
+	s.Register(Spec{
+		Name:           "busy",
+		Command:        []string{"python3", "-m", "http.server", fmt.Sprint(port), "--bind", "127.0.0.1"},
+		HealthURL:      fmt.Sprintf("http://127.0.0.1:%d/", port),
+		StartupTimeout: 15 * time.Second,
+		StopTimeout:    5 * time.Second,
+		IdleTimeout:    time.Minute,
+		LogPath:        t.TempDir() + "/busy.log",
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	if err := s.Ensure(ctx, "busy"); err != nil {
+		t.Fatalf("ensure: %v", err)
+	}
+
+	release := s.Enter("busy")
+	if n := s.Inflight("busy"); n != 1 {
+		t.Fatalf("inflight = %d, want 1", n)
+	}
+	// Backdate the idle clock to simulate a request that has outlived it.
+	s.procs["busy"].mu.Lock()
+	s.procs["busy"].lastUsed = time.Now().Add(-time.Hour)
+	s.procs["busy"].mu.Unlock()
+
+	s.reapIdle()
+	if st := s.Status()[0]; st.State != StateRunning {
+		t.Fatalf("busy process was reaped: %+v", st)
+	}
+
+	// Releasing must refresh the idle clock, so a long request leaves the
+	// process warm for IdleTimeout after it ends, not after it began.
+	release()
+	if n := s.Inflight("busy"); n != 0 {
+		t.Fatalf("inflight after release = %d, want 0", n)
+	}
+	if st := s.Status()[0]; time.Since(st.LastUsed) > time.Second {
+		t.Fatalf("release did not refresh lastUsed: %s ago", time.Since(st.LastUsed))
+	}
+
+	// Idempotent: a second call must not drive the count negative.
+	release()
+	if n := s.Inflight("busy"); n != 0 {
+		t.Fatalf("inflight after double release = %d", n)
+	}
+
+	// Now that nothing is in flight, the same clock stops it.
+	s.procs["busy"].mu.Lock()
+	s.procs["busy"].lastUsed = time.Now().Add(-time.Hour)
+	s.procs["busy"].mu.Unlock()
+	s.reapIdle()
+	if st := s.Status()[0]; st.State != StateStopped {
+		t.Fatalf("idle process was not reaped: %+v", st)
+	}
+}

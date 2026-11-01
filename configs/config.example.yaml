@@ -116,3 +116,6 @@ timeouts:
   health: 2s
   non_stream: 10m
   stream_idle: 5m
+  # How long SIGTERM waits for in-flight generations before cutting them.
+  # Must cover the longest legitimate answer, not the typical one.
+  drain: 2m

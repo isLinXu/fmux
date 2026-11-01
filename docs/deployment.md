@@ -76,17 +76,29 @@ Route A writes:
 | Program | the binary you ran `service install` from |
 | Arguments | `serve --config ~/.fmux/config.yaml` |
 | KeepAlive | `SuccessfulExit: false` — restarts on crash, not on clean exit |
+| ExitTimeOut | `timeouts.drain + 15s` (135 by default) |
 | Log | `~/Library/Logs/fmux.log` |
 | Env | `NO_PROXY=127.0.0.1,localhost` |
+
+`ExitTimeOut` is not decoration. launchd waits **20 seconds** after `SIGTERM`
+before `SIGKILL`, and the gateway spends that window draining in-flight
+generations. Without the key, launchd would kill the process in the middle of
+the drain it was asked to perform, and the answer would be truncated anyway.
 
 Then:
 
 ```bash
 fmux service status      # job state, pid, last exit code, /healthz
 fmux service logs -f     # follow the log
-fmux service restart     # after editing the config
+fmux service restart     # drains, then reloads the config
 fmux service uninstall   # bootout + delete the plist
 ```
+
+`restart` sends `SIGTERM` and waits for the job to leave the domain before
+starting it again — deliberately not `kickstart -k`, which kills the process
+outright and would make the drain pointless. If a long generation is still
+running after `drain + 15s`, the command says so and you can retry; a second
+`SIGTERM` skips the wait.
 
 ### The `launchctl` EIO trap
 
@@ -175,6 +187,23 @@ slow.
 
 **Config edits do nothing.** `serve` reads the file once at startup. Use
 `fmux service restart` (or `brew services restart fmux`).
+
+**A backend stopped being tried.** `curl -s localhost:1976/admin/backends`
+shows `circuit.open: true` with `consecutive_failures` and `last_error`. Three
+consecutive connection failures or `502/503/504` open it for 30 seconds. It
+closes by itself after one successful probe; if it stays open, the backend
+really is down. Restart the backend rather than the gateway.
+
+**A restart seems to hang.** It is draining. `fmux service status` shows the
+pid still alive and `curl -s localhost:1976/healthz | jq .inflight` counts the
+requests it is waiting for. After `timeouts.drain` the gateway cuts them and
+logs `drain deadline hit, cutting in-flight requests`. If you would rather not
+wait, send `SIGTERM` again.
+
+**The log says `drain deadline hit` under launchd but the request had barely
+started.** The plist predates the `ExitTimeOut` key — rerun
+`fmux service install`, then `launchctl bootout gui/$(id -u)/com.fmux.gateway`
+and bootstrap it again.
 
 ## 6. Upgrades and removal
 

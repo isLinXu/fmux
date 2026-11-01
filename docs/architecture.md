@@ -10,6 +10,7 @@ gateway     ┌─────────────────────�
             │ compat     fm quirk normalization            │
             │ router     alias -> targets, capability gate │
             │ gate       per-backend admission control      │
+            │ breaker    per-backend failure memory         │
             │ supervisor child process lifecycle           │
             │ budget     unified memory + LRU eviction     │
             │ adapter    per-backend translation           │
@@ -32,6 +33,8 @@ POST /v1/chat/completions
   ├─ Validate                          (model + at least one message)
   ├─ compat.Normalize                  (drop empty system msgs, nil out tools:[])
   ├─ router.Resolve                    (alias -> ordered []Target)
+  ├─ breaker.Allow                     (drop targets whose circuit is open,
+  │                                     unless nothing else is left)
   │
   └─ for each target in order:
        ├─ router.Prepare               (capability gate + profile defaults)
@@ -40,9 +43,10 @@ POST /v1/chat/completions
        │    └─ schema  & !jsonschema -> rewrite to prompt, log degraded
        ├─ gate.Acquire                  (slot or bounded wait; 429 on overflow)
        ├─ budget.Pin                    (this model must not be evicted now)
-       ├─ adapter.Preparer.Prepare     (start process, acquire memory)
+       ├─ adapter.Preparer.Prepare     (start process, acquire memory, claim)
        ├─ rewrite req.Model = target.Model
        ├─ stream ? ChatStream : Chat   (stream_idle bounds a silent backend)
+       ├─ breaker.Succeed / breaker.Fail (only failures that mean "gone")
        └─ success -> return; failure -> next target
 ```
 
@@ -151,6 +155,59 @@ only thing that distinguishes them.
 Client disconnect cancels `r.Context()`, which cancels the outbound request and
 closes the backend stream — verified in the logs as
 `Post .../chat/completions: context canceled`.
+
+## Failure memory
+
+A fallback chain without memory is a latency tax. The request still succeeds,
+because the second target answers, but every request first pays the dead
+backend's connect timeout — five seconds locally, more when the host is
+unreachable and the kernel retries. Nothing in a stateless router learns from
+that.
+
+`breaker` keeps three consecutive failures per backend and then refuses that
+target for thirty seconds. The classification is the delicate part, because the
+wrong answer is worse than no breaker at all:
+
+| Outcome | Counts as failure? | Why |
+|---|---|---|
+| connection refused / reset / no route | yes | the backend is not there |
+| `502`, `503`, `504` | yes | the backend says it cannot serve |
+| `400`, `404` | no | the backend answered; the request was wrong |
+| `429` from `gate` | no | busy is not dead |
+| `stream_idle` | no | one stall is not a pattern, and a restart costs a minute |
+| client cancelled | no | that says nothing about the backend |
+
+When the cooldown expires exactly one request is let through as a probe. If it
+succeeds the circuit closes; if it fails it reopens immediately rather than
+requiring another three failures. A probe that never reports back expires with
+the next cooldown, so the breaker cannot get stuck open.
+
+If every target in a chain is open, the request is attempted anyway. A gateway
+that answers `503` because its only backend is down is strictly worse than one
+that tries and reports the real error.
+
+## Shutdown
+
+```
+SIGTERM
+  ├─ stop accepting new connections
+  ├─ wait for in-flight handlers, up to timeouts.drain
+  ├─ close any that are still running (and say so at WARN)
+  └─ stop the child processes
+```
+
+The order is the design. Stopping the children first — the obvious version —
+turns every generation that is halfway through into a truncated stream with no
+error event, and because the process is gone the client's retry pays a full
+cold load. The backends are the thing in-flight requests are reading from, so
+they go last.
+
+`timeouts.drain` (default `2m`) has to cover the longest legitimate answer
+rather than the typical one. It is bounded by `stream_idle`: a backend that has
+stopped producing tokens is already cancelled by the stream deadline, so the
+drain only waits for work that is actually progressing. Under `launchd` the
+plist sets `ExitTimeOut` to `drain + 15s`, because launchd's own default is 20
+seconds and would SIGKILL the process in the middle of its drain.
 
 ## Trust boundary
 

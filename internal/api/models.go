@@ -6,6 +6,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/linxu/fmux/internal/breaker"
 	"github.com/linxu/fmux/internal/gate"
 	"github.com/linxu/fmux/internal/ir"
 )
@@ -62,6 +63,10 @@ func (s *Server) handleBackends(w http.ResponseWriter, r *http.Request) {
 			gates[g.Backend] = g
 		}
 	}
+	circuits := map[string]breaker.Report{}
+	for _, c := range s.brk.Snapshot() {
+		circuits[c.Backend] = c
+	}
 
 	reports := make([]map[string]any, 0, len(s.reg.Names()))
 	for _, ad := range s.reg.All() {
@@ -70,6 +75,11 @@ func (s *Server) handleBackends(w http.ResponseWriter, r *http.Request) {
 			healthy = false
 			errMsg = err.Error()
 		}
+		// A backend the breaker has never seen is closed, not missing.
+		circuit, ok := circuits[ad.Name()]
+		if !ok {
+			circuit = breaker.Report{Backend: ad.Name()}
+		}
 		reports = append(reports, map[string]any{
 			"backend": ad.Name(),
 			"type":    ad.Type(),
@@ -77,6 +87,7 @@ func (s *Server) handleBackends(w http.ResponseWriter, r *http.Request) {
 			"healthy": healthy,
 			"error":   errMsg,
 			"gate":    gates[ad.Name()],
+			"circuit": circuit,
 		})
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"backends": reports})

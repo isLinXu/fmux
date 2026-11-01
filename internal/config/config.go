@@ -105,6 +105,18 @@ type Timeouts struct {
 	Health     time.Duration `yaml:"health"`
 	NonStream  time.Duration `yaml:"non_stream"`
 	StreamIdle time.Duration `yaml:"stream_idle"`
+
+	// Drain is how long shutdown waits for in-flight requests to finish
+	// before closing their connections.
+	//
+	// It has to be longer than the longest legitimate generation, not just
+	// longer than a typical one: a 27B model writing 400 Chinese characters
+	// takes the better part of a minute, and cutting that off at 30 seconds
+	// reintroduces exactly the truncated stream this ordering exists to
+	// prevent. Two minutes covers a long answer; `stream_idle` bounds the
+	// pathological case where the backend has stopped producing tokens
+	// entirely.
+	Drain time.Duration `yaml:"drain"`
 }
 
 // Default returns a config that works with a stock Ollama install.
@@ -132,6 +144,7 @@ func Default() *Config {
 			Health:     2 * time.Second,
 			NonStream:  10 * time.Minute,
 			StreamIdle: 5 * time.Minute,
+			Drain:      2 * time.Minute,
 		},
 	}
 }
@@ -190,6 +203,9 @@ func (c *Config) Validate() error {
 	}
 	if c.Timeouts.StreamIdle <= 0 {
 		c.Timeouts.StreamIdle = 5 * time.Minute
+	}
+	if c.Timeouts.Drain <= 0 {
+		c.Timeouts.Drain = 2 * time.Minute
 	}
 	seen := map[string]bool{}
 	for i := range c.Backends {

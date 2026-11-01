@@ -148,4 +148,5 @@ timeouts:
   health: 2s
   non_stream: 10m
   stream_idle: 5m
+  drain: 2m
 `

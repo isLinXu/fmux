@@ -110,11 +110,11 @@ func newServeCmd() *cobra.Command {
 			case err := <-errCh:
 				return err
 			case <-ctx.Done():
-				log.Info("shutting down")
-				shutdownCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-				defer cancel()
-				bundle.Supervisor.Shutdown(shutdownCtx)
-				return httpSrv.Shutdown(shutdownCtx)
+				// Restore the default signal action so a second Ctrl-C during
+				// a long drain kills the process instead of being swallowed.
+				stop()
+				api.DrainAndStop(log, httpSrv, srv, bundle.Supervisor, cfg.Timeouts.Drain)
+				return nil
 			}
 		},
 	}

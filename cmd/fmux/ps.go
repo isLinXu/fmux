@@ -18,6 +18,7 @@ type processesResponse struct {
 		Name      string    `json:"name"`
 		State     string    `json:"state"`
 		PID       int       `json:"pid"`
+		Inflight  int       `json:"inflight"`
 		Restarts  int       `json:"restarts"`
 		LastUsed  time.Time `json:"last_used"`
 		LastError string    `json:"last_error"`
@@ -71,9 +72,9 @@ func newPsCmd() *cobra.Command {
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
-			fmt.Fprintln(w, "BACKEND\tSTATE\tPID\tRESTARTS\tLAST USED\tNOTE")
+			fmt.Fprintln(w, "BACKEND\tSTATE\tPID\tBUSY\tRESTARTS\tLAST USED\tNOTE")
 			if len(out.Processes) == 0 {
-				fmt.Fprintln(w, "(none)\t\t\t\t\tall backends are externally managed")
+				fmt.Fprintln(w, "(none)\t\t\t\t\t\tall backends are externally managed")
 			}
 			for _, p := range out.Processes {
 				last := "-"
@@ -84,7 +85,12 @@ func newPsCmd() *cobra.Command {
 				if note == "" && p.State == "stopped" {
 					note = "starts on first request"
 				}
-				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%s\t%s\n", p.Name, p.State, p.PID, p.Restarts, last, note)
+				busy := "-"
+				if p.Inflight > 0 {
+					busy = fmt.Sprintf("%d req", p.Inflight)
+				}
+				fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%d\t%s\t%s\n",
+					p.Name, p.State, p.PID, busy, p.Restarts, last, note)
 			}
 			if len(out.Resident) > 0 {
 				fmt.Fprintln(w, "\t\t\t\t\t")

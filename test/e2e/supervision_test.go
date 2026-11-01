@@ -39,11 +39,17 @@ func freePort(t *testing.T) int {
 
 type harness struct {
 	ts     *httptest.Server
+	srv    *api.Server
 	bundle *build.Bundle
 	url    string
 }
 
 func newHarness(t *testing.T, port int) *harness {
+	t.Helper()
+	return newHarnessEnv(t, port, nil)
+}
+
+func newHarnessEnv(t *testing.T, port int, env map[string]string) *harness {
 	t.Helper()
 	if _, err := exec.LookPath("python3"); err != nil {
 		t.Skip("python3 not available")
@@ -63,6 +69,7 @@ func newHarness(t *testing.T, port int) *harness {
 			Type:           "llamacpp",
 			URL:            fmt.Sprintf("http://127.0.0.1:%d/v1", port),
 			Command:        []string{"python3", fixture, fmt.Sprint(port), "fake-model"},
+			Env:            env,
 			MemoryMB:       1024,
 			StartupTimeout: 15 * time.Second,
 			StopTimeout:    5 * time.Second,
@@ -91,7 +98,7 @@ func newHarness(t *testing.T, port int) *harness {
 		ts.Close()
 		bundle.Supervisor.Shutdown(context.Background())
 	})
-	return &harness{ts: ts, bundle: bundle, url: ts.URL}
+	return &harness{ts: ts, srv: srv, bundle: bundle, url: ts.URL}
 }
 
 func (h *harness) chat(t *testing.T, model string) string {
@@ -209,5 +216,70 @@ func TestMetricsRecordRequests(t *testing.T) {
 		if !strings.Contains(text, want) {
 			t.Errorf("metrics missing %q\n%s", want, text)
 		}
+	}
+}
+
+// TestShutdownDrainsBeforeStoppingChildren is the regression test for the
+// shutdown ordering bug.
+//
+// The gateway used to stop its child backends first and drain HTTP second.
+// That reads as harmless until you notice the children are what in-flight
+// requests are reading from: a generation that was halfway done would be
+// truncated with no error event, and because the process was gone the client's
+// retry paid a full cold start. Here the fake backend holds the stream open
+// for two seconds, shutdown is triggered while it is open, and the request has
+// to come back complete.
+func TestShutdownDrainsBeforeStoppingChildren(t *testing.T) {
+	port := freePort(t)
+	h := newHarnessEnv(t, port, map[string]string{"FAKE_STREAM_DELAY": "2"})
+
+	type result struct {
+		body string
+		err  error
+	}
+	done := make(chan result, 1)
+	go func() {
+		body := `{"model":"tiny","stream":true,"messages":[{"role":"user","content":"hi"}]}`
+		resp, err := http.Post(h.url+"/v1/chat/completions", "application/json", strings.NewReader(body))
+		if err != nil {
+			done <- result{err: err}
+			return
+		}
+		defer resp.Body.Close()
+		raw, err := io.ReadAll(resp.Body)
+		done <- result{body: string(raw), err: err}
+	}()
+
+	// Wait until the request is genuinely inside the gateway before draining.
+	deadline := time.Now().Add(10 * time.Second)
+	for h.srv.Inflight() == 0 {
+		if time.Now().After(deadline) {
+			t.Fatal("request never reached the gateway")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	start := time.Now()
+	api.DrainAndStop(quietLogger(), h.ts.Config, h.srv, h.bundle.Supervisor, 15*time.Second)
+	drained := time.Since(start)
+
+	got := <-done
+	if got.err != nil {
+		t.Fatalf("in-flight request failed during shutdown: %v", got.err)
+	}
+	if !strings.Contains(got.body, "served by the fake backend") {
+		t.Fatalf("response was truncated:\n%s", got.body)
+	}
+	if !strings.Contains(got.body, "[DONE]") {
+		t.Fatalf("stream ended without [DONE]:\n%s", got.body)
+	}
+	if drained < time.Second {
+		t.Fatalf("shutdown returned in %s, before the 2s stream could finish", drained)
+	}
+	if st := h.bundle.Supervisor.Status()[0]; st.State != "stopped" {
+		t.Fatalf("child process state after shutdown = %q, want stopped", st.State)
+	}
+	if n := h.srv.Inflight(); n != 0 {
+		t.Fatalf("inflight after shutdown = %d", n)
 	}
 }
