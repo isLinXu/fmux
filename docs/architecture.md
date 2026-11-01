@@ -65,6 +65,15 @@ estimate should not turn into a failed request.
 client-side retry logic, which every OpenAI client implements differently. The
 cost is a slow first request and a `startup_timeout` to bound it.
 
+**Three levels of process, one owner each.** The gateway itself is a launchd
+job (`com.fmux.gateway`, managed by `fmux service`), because a gateway that
+dies with its terminal is not a gateway. The inference servers it supervises
+are its children, started and stopped by request pressure and `idle_timeout`.
+And Ollama and LM Studio are owned by nobody here — they have their own
+managers, so the gateway only talks to their HTTP API and lets them decide what
+stays resident. The rule is: one owner per process, and the gateway never
+fights another manager for the same server.
+
 ## Design decisions
 
 **Alias first, model second.** Clients name aliases; backends receive their own

@@ -27,6 +27,7 @@ func main() {
 	root.AddCommand(newModelsCmd())
 	root.AddCommand(newPsCmd())
 	root.AddCommand(newDoctorCmd())
+	root.AddCommand(newServiceCmd())
 	root.AddCommand(newVersionCmd())
 
 	if err := root.Execute(); err != nil {

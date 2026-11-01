@@ -3,7 +3,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.
 LDFLAGS := -X github.com/linxu/fmux/internal/api.Version=$(VERSION)
 GOBIN   := bin/fmux
 
-.PHONY: all build test conformance e2e capture vet fmt run mock clean install launchagent bench
+.PHONY: all build test conformance e2e capture vet fmt run mock clean install launchagent service bench release-check
 
 all: build
 
@@ -45,6 +45,14 @@ install: build
 
 launchagent: install
 	./scripts/install-launchagent.sh
+
+service: install
+	$(HOME)/.local/bin/fmux service status
+
+# Validate the release pipeline without publishing anything.
+release-check:
+	goreleaser check
+	goreleaser build --snapshot --clean
 
 bench:
 	./scripts/bench.sh

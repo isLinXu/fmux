@@ -1,0 +1,47 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    # The conformance suite replays request bodies captured from the real `fm`
+    # binary, and the e2e suite starts a child process. Both need a macOS
+    # runner; neither needs a GPU or a model.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: gofmt
+        run: |
+          out=$(gofmt -l .)
+          if [ -n "$out" ]; then
+            echo "not gofmt'd:"
+            echo "$out"
+            exit 1
+          fi
+
+      - name: vet
+        run: go vet ./...
+
+      - name: test
+        run: go test ./... -count=1
+
+      - name: build
+        run: go build -trimpath -o bin/fmux ./cmd/fmux
+
+      - name: smoke
+        run: |
+          ./bin/fmux serve --mock --listen 127.0.0.1:1977 &
+          for i in $(seq 1 40); do
+            curl -sf --noproxy '*' http://127.0.0.1:1977/healthz && break
+            sleep 0.25
+          done
+          curl -sf --noproxy '*' http://127.0.0.1:1977/v1/models | grep -q mock-model

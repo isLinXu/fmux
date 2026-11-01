@@ -1,0 +1,72 @@
+version: 2
+
+project_name: fmux
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: fmux
+    main: ./cmd/fmux
+    binary: fmux
+    env:
+      - CGO_ENABLED=0
+    # fmux is a macOS-only gateway: it supervises local inference servers and
+    # installs a LaunchAgent. Remote-only use from Linux is possible but not
+    # something this project ships binaries for.
+    goos: [darwin]
+    goarch: [arm64, amd64]
+    ldflags:
+      - -s -w
+      - -X github.com/linxu/fmux/internal/api.Version={{ .Version }}
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^feat'
+      order: 0
+    - title: Fixes
+      regexp: '^fix'
+      order: 1
+    - title: Other
+      order: 999
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+
+# Pushing a tag updates the tap, which is what turns a git-only formula into a
+# pinned tarball + checksum. Set HOMEBREW_TAP_GITHUB_TOKEN in the release
+# workflow for this to work.
+brews:
+  - name: fmux
+    repository:
+      owner: linxu
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/linxu/fmux
+    description: OpenAI-compatible gateway in front of every local inference server
+    license: MIT
+    install: |
+      bin.install "fmux"
+    service: |
+      run [opt_bin/"fmux", "serve"]
+      keep_alive crashed: true
+      log_path var/"log/fmux.log"
+      error_log_path var/"log/fmux.log"
+      environment_variables NO_PROXY: "127.0.0.1,localhost", no_proxy: "127.0.0.1,localhost"
+    test: |
+      assert_match "fmux", shell_output("#{bin}/fmux version")

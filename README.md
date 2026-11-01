@@ -26,22 +26,30 @@ A second reason, and the one that shapes the code: `fm`'s wire format has quirks
 | M3 | MLX / LM Studio, memory budget, LRU unload | **done** |
 | M4 | vLLM / SGLang remote, fallback chains | **done** |
 | M5 | Metrics, structured logs, bench | **done** |
-| M6 | Homebrew, LaunchAgent, docs | partial (LaunchAgent script included, no formula) |
+| M6 | Homebrew formula, LaunchAgent, release pipeline, docs | **done** |
 
 Verified on macOS 27.2 / M3 Max against a real `fm` binary and a real Ollama instance. See [Verification](#verification).
 
-## Quick start
+## Install
 
 ```bash
-go build -o bin/fmux ./cmd/fmux
+git clone https://github.com/linxu/fmux && cd fmux
+make install                # -> ~/.local/bin/fmux
+fmux config init            # -> ~/.fmux/config.yaml
+fmux service install        # run at login, restart on crash
+fmux doctor                 # config, backends, aliases, port, fm wiring
+```
 
-# 1. write a config
-./bin/fmux config init        # -> ~/.fmux/config.yaml
+`brew install linxu/tap/fmux` once a release is tagged. The full operational
+guide — plist layout, the `launchctl` EIO trap, upgrades, removal — is in
+[docs/deployment.md](docs/deployment.md).
 
-# 2. start the gateway
-./bin/fmux serve
+## Wire up `fm`
 
-# 3. point fm at it
+`fm` keeps its providers in `~/.fm/config.json`. Point the default one at the
+gateway and every alias becomes a model:
+
+```bash
 fm config add model-provider fmux http://127.0.0.1:1976/v1
 fm config set default-model-provider fmux
 fm config set default-model qwen3.8:27b
@@ -50,7 +58,9 @@ fm models     # ✓ qwen3.8:27b
 fm chat
 ```
 
-No config file? `fmux serve --mock` starts a deterministic fake backend so you can exercise the whole path without any model.
+No backend handy? `fmux serve --mock` starts a deterministic fake backend, so
+the whole path — `fm` → gateway → SSE → terminal — can be exercised without a
+single weight on disk.
 
 ## Configuration
 
@@ -121,6 +131,30 @@ Qwen3-8B-Q4_K_M  llamacpp-8b  6144 MB
 budget: 6144 / 98304 MB
 ```
 
+## Running as a service
+
+A gateway that only lives as long as a terminal is not a gateway. `fmux`
+manages its own LaunchAgent:
+
+```bash
+fmux service install     # write the plist and hand it to launchd
+fmux service status      # job state, pid, last exit code, /healthz
+fmux service logs -f     # follow ~/Library/Logs/fmux.log
+fmux service restart     # reload the config
+fmux service uninstall
+```
+
+The plist runs `serve --config ~/.fmux/config.yaml`, restarts on crash (not on
+clean exit), and pins `NO_PROXY` for loopback so a login-session proxy cannot
+break the gateway's own calls to Ollama.
+
+`launchctl bootstrap` reports `Input/output error` for a job that is already
+loaded, for a malformed plist, and for a shell that is not allowed to spawn
+jobs — identically, with no hint which. `service install` checks the job's real
+state afterwards instead of trusting the exit code, and prints the one-line
+command to run by hand when the plist is valid but the caller is blocked.
+Details in [docs/deployment.md](docs/deployment.md#the-launchctl-eio-trap).
+
 ## Endpoints
 
 | Path | Purpose |
@@ -159,6 +193,9 @@ Measured on the machine above, real `fm` binary, real Ollama:
 | `fm chat` → gateway → Ollama | `turn 1 · ↑65 · ↓33` |
 | `fm models` → gateway | lists both aliases |
 | Alias routing (`qwen-fast` → `qwen3.8:27b`) | pass |
+| `fm respond --model qwen-json --schema` → Ollama | `{"age": 30, "name": "张三"}`, profile applied |
+| Memory budget accounting | `fmux ps` reports `20480 / 98304 MB` resident |
+| `fmux service install` when launchd refuses the job | plist written, real state checked, manual command printed |
 | Unknown model | `404 model_not_found` |
 | Vision request to a non-vision backend | `400 unsupported_capability` |
 | Supervised backend (fake llama.cpp) cold start | process started, request served in 0.30 s |
@@ -168,7 +205,7 @@ Measured on the machine above, real `fm` binary, real Ollama:
 ## Layout
 
 ```
-cmd/fmux/          CLI: serve, config, backends, models, ps, doctor, version
+cmd/fmux/          CLI: serve, config, service, backends, models, ps, doctor, version
 internal/ir/       internal representation (polymorphic content, chunk, usage)
 internal/compat/   fm quirk normalization
 internal/router/   alias resolution + capability gate
@@ -177,12 +214,16 @@ internal/adapter/local/  OpenAI adapter + process/memory pre-flight
 internal/supervisor/     child process lifecycle, health probe, idle reap
 internal/budget/         unified memory accounting + LRU eviction
 internal/metrics/        Prometheus counters
+internal/launchd/        LaunchAgent plist + launchctl state
 internal/api/      HTTP layer, SSE writer, admin + metrics endpoints
 internal/config/   YAML config
 internal/build/    config -> adapters, supervisor, budget
 test/conformance/  golden captures + real-fm end-to-end tests
 test/fixtures/     fake OpenAI server used by the supervision tests
 scripts/           capture_fm.py, install-launchagent.sh, bench.sh
+docs/              fm-compat, architecture, adapters, deployment
+Formula/fmux.rb    Homebrew formula (also generated by goreleaser for the tap)
+.goreleaser.yaml   darwin arm64/amd64 archives + tap update on tag
 ```
 
 ## Development
@@ -192,6 +233,7 @@ make test        # unit + conformance + e2e (skips fm/python tests if absent)
 make conformance # only the real-fm tests
 make e2e         # only the process-supervision tests
 make capture     # re-record golden samples from the installed fm binary
+make release-check  # goreleaser check + snapshot build
 ```
 
 `make capture` is the maintenance lever: after a macOS update, run it and diff. If the wire format moved, the diff says exactly how.
