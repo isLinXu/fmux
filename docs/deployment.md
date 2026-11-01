@@ -167,6 +167,25 @@ Check `fmux backends` for `HEALTH=down`, then the backend's own port.
 the gateway. `OLLAMA_KEEP_ALIVE=30m` on the Ollama service is the fix; the
 gateway's `idle_timeout` only applies to backends it supervises itself.
 
+**Generation is far slower than the model should be.** Check `sysctl
+vm.swapusage` before touching the gateway. A 27B that answers at 2 tok/s
+instead of 20 is usually swapping, not routing, and the usual cause is context
+length: Ollama sizes the KV cache from the context the *model* declares, so a
+checkpoint advertising 262144 tokens sits at 26.7 GB where the same weights at
+32768 sit at 17.2 GB. Derive a capped model rather than fighting the config:
+
+```bash
+printf 'FROM qwen3.8:27b\nPARAMETER num_ctx 32768\n' > Modelfile
+ollama create qwen3.8:27b-32k -f Modelfile     # shares the blobs, no copy
+ollama ps                                      # confirm the smaller size
+```
+
+Then point the alias at `qwen3.8:27b-32k` and restart. `fmux ps` should agree
+with `ollama ps` about the size; if the numbers differ, `memory_mb` is stale
+and the budget is being computed from a guess. Also confirm nothing else is
+holding the GPU: a second workload on port 11434 halves throughput and looks
+exactly like a gateway problem.
+
 **`429 backend_busy`.** Admission control did its job: the backend is at
 `max_concurrency` and `queue_depth` requests are already waiting. The response
 carries `Retry-After`. If this is a common outcome the limit is wrong for the

@@ -13,7 +13,8 @@ default: ""
 
 # Unified memory the resident models may occupy, in MB. A new model that would
 # exceed the budget evicts the least recently used one first. 0 disables
-# eviction and only records usage. On a 128 GB Mac, ~98304 is a sane ceiling.
+# eviction and only records usage. On a 128 GB Mac, 40960 is a better ceiling
+# than 98304: the budget has to be hit before the swap file is.
 budget_mb: 0
 
 # How often idle supervised processes are checked.
@@ -28,13 +29,27 @@ backends:
     url: http://127.0.0.1:11434/v1
     # Pinning models lets /v1/models answer without a round trip.
     models: ["qwen3.8:27b"]
-    # Feeds the budget. 27B at 4-bit is ~18 GB resident.
+    # Feeds the budget. Measure it, do not guess: `ollama ps` reports the
+    # resident size, and for a 27B it ranges from 17 GB to 27 GB depending on
+    # the context length the model declares. See the note below.
     memory_mb: 18432
     # Admission control. Ollama manages its own batching, so the default is
     # unlimited; set a number when one model must not be asked twice at once.
     # max_concurrency: 1
     # queue_depth: 4        # requests allowed to wait; 0 rejects immediately
     # queue_timeout: 3m     # how long a waiter may wait before a 429
+
+  # Context length is the biggest memory lever on a local model, and it is not
+  # obvious from the model name. Ollama sizes the KV cache from the model's
+  # declared context: a checkpoint that advertises 262144 tokens costs ~9.5 GB
+  # more than the same weights at 32768, and on a 128 GB machine that
+  # difference is swap. If `vm.swapusage` is full and generation crawls, derive
+  # a capped model instead of buying RAM:
+  #
+  #   printf 'FROM qwen3.8:27b\nPARAMETER num_ctx 32768\n' > Modelfile
+  #   ollama create qwen3.8:27b-32k -f Modelfile
+  #
+  # then point the alias at it. Client-facing names do not change.
 
   # llama.cpp: one process per model, so each model gets its own backend entry.
   # A backend with a command is started on demand, health-probed, and stopped

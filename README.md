@@ -119,6 +119,8 @@ budget_mb: 98304   # 96 GB on a 128 GB machine
 
 Every request records its model's `memory_mb`. When a new model would exceed the budget, the least recently used one is unloaded first — for Ollama that is a `keep_alive: 0` call, for a supervised backend it is a process stop. The budget is advisory: an oversized model is still served, with a warning, because refusing to answer is worse than a brief spike.
 
+Set the budget so it is reached **before** the swap file is. On a 128 GB Mac, 40 GB is a more useful ceiling than 96: a model that fits but leaves the machine swapping runs at a tenth of its speed, and nothing in the gateway can tell you that from the inside. `memory_mb` should come from `ollama ps` or a process's RSS, not from the parameter count — the same 27B weighs 17 GB or 27 GB depending on the context length its checkpoint declares, because the KV cache is sized from that number.
+
 A model that is currently generating is **pinned** and never chosen as a victim. Without that, a request for a second model could unload the model another request is halfway through answering on — the eviction would look successful and the victim request would fail mid-stream.
 
 ### Admission control
