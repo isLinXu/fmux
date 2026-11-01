@@ -20,12 +20,27 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      # `brews:` renders its token from HOMEBREW_TAP_GITHUB_TOKEN. When that
+      # secret is absent the token renders as an empty string, the tap push
+      # fails with a 401, and the whole release dies with it -- an empty token
+      # is not treated as "not configured". So decide up front and skip the
+      # pipe explicitly, which lets the GitHub release succeed on its own.
+      - name: Decide whether the tap can be updated
+        id: tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "flags=--skip=homebrew" >> "$GITHUB_OUTPUT"
+            echo "::notice::HOMEBREW_TAP_GITHUB_TOKEN is not set; releasing without a tap update"
+          else
+            echo "flags=" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
-          args: release --clean
+          args: release --clean ${{ steps.tap.outputs.flags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Required only for the `brews:` section; drop it and the tap is
-          # skipped, the GitHub release still happens.
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
