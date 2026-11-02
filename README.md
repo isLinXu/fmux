@@ -171,7 +171,7 @@ profiles:
 
 ## How it works
 
-The rest of this section explains the design decisions that make the gateway behave correctly on a machine with one GPU and a shared memory pool. If you only want to run it, the [Quick start](#quick-start) is enough.
+The rest of this section explains the design decisions that make the gateway behave correctly on a machine with one GPU and a shared memory pool. If you only want to run it, the [Quick start](#quick-start) is enough; for the layer-by-layer walkthrough, see [docs/architecture.md](docs/architecture.md).
 
 ### Request lifecycle
 
@@ -348,7 +348,7 @@ The plist runs `serve --config ~/.fmux/config.yaml`, restarts on crash (not on c
 
 ## The `fm` quirks this handles
 
-Captured from the real binary, replayed in every test run:
+Captured from the real binary, replayed in every test run. The capture procedure and the raw samples are in [docs/fm-compat.md](docs/fm-compat.md).
 
 | Quirk | Consequence if unhandled |
 |---|---|
