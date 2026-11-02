@@ -36,6 +36,11 @@ const (
 	StateStopped  State = "stopped"
 	StateStarting State = "starting"
 	StateRunning  State = "running"
+	// StateStopping is claimed by the reaper while it holds the process lock.
+	// It is the difference between "this process is idle, I intend to stop it"
+	// and "this process is already being stopped", which is what keeps a
+	// request from being handed a process that is about to be killed.
+	StateStopping State = "stopping"
 	StateFailed   State = "failed"
 )
 
@@ -290,21 +295,42 @@ func (s *Supervisor) reapIdle() {
 		last := p.lastUsed
 		busy := p.inflight
 		name := p.spec.Name
+
+		if !running || idle <= 0 || last.IsZero() || now.Sub(last) < idle || busy > 0 {
+			p.mu.Unlock()
+			continue
+		}
+
+		// Claim the stop while still holding the lock. Reading inflight here,
+		// unlocking, and killing afterwards leaves a window in which a request
+		// can arrive and be handed a process that is about to die -- the exact
+		// opposite of what the inflight counter is for.
+		p.state = StateStopping
 		p.mu.Unlock()
 
-		if !running || idle <= 0 || last.IsZero() || now.Sub(last) < idle {
-			continue
-		}
-		if busy > 0 {
-			// Serving a request is the opposite of idle. The release path
-			// refreshes lastUsed, so this process gets a full IdleTimeout
-			// once it drains.
-			continue
-		}
 		s.log.Info("reaping idle backend", "backend", name, "idle", now.Sub(last).Round(time.Second))
-		if err := s.Stop(name); err != nil {
-			s.log.Warn("reap failed", "backend", name, "err", err)
+
+		p.mu.Lock()
+		if p.state != StateStopping {
+			// Something restarted it after the claim; leave it alone.
+			p.mu.Unlock()
+			continue
 		}
+		if p.inflight > 0 {
+			// A request arrived between the claim and the kill. Serving work is
+			// the opposite of idle, so hand the state back and let it finish.
+			p.state = StateRunning
+			p.mu.Unlock()
+			continue
+		}
+		err := p.stopLocked(s.log)
+		p.mu.Unlock()
+
+		if err != nil {
+			s.log.Warn("reap failed", "backend", name, "err", err)
+			continue
+		}
+		s.notifyStop(name)
 	}
 }
 
