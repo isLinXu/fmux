@@ -50,9 +50,11 @@
 
 A second reason, and the one that shapes the code: **`fm`'s wire format has quirks that strict backends reject.** Every one of them was captured from the real binary into `test/conformance/golden/` and is replayed by the test suite on every run.
 
+A third reason decides the architecture: **a generic HTTP proxy assumes every backend is an always-on endpoint.** On a Mac that assumption is wrong. llama.cpp and MLX serve one model per process; an 18 GB checkpoint takes tens of seconds to load; leaving it resident after the last request is how a 128 GB machine starts swapping; and on Apple Silicon the GPU shares RAM with the CPU, so there is no separate VRAM to budget. So the gateway also owns process lifecycle and a unified memory pool. Nothing here is vendor-specific — a remote vLLM over HTTP is just another target, and a generic proxy can sit in front of it if you want one.
+
 ## Features
 
-| | |
+| Capability | What it gives you |
 |---|---|
 | **OpenAI-compatible surface** | `POST /v1/chat/completions` with SSE streaming, synthesized `finish_reason` / usage / `[DONE]` so inconsistent backends still satisfy strict clients |
 | **One namespace, many backends** | Ollama, llama.cpp, MLX, LM Studio, vLLM, SGLang behind aliases; clients never learn the backend's model id |
