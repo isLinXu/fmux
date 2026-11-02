@@ -1,36 +1,99 @@
 # fmux
 
-One OpenAI-compatible endpoint in front of every local inference server on macOS, so `fm` — Apple's Foundation Models CLI — can drive all of them.
+**One OpenAI-compatible endpoint in front of every local inference server on macOS — so `fm`, Apple's built-in Foundation Models CLI, can drive all of them.**
 
+[![ci](https://github.com/isLinXu/fmux/actions/workflows/ci.yml/badge.svg)](https://github.com/isLinXu/fmux/actions/workflows/ci.yml)
+[![release](https://github.com/isLinXu/fmux/actions/workflows/release.yml/badge.svg)](https://github.com/isLinXu/fmux/actions/workflows/release.yml)
+[![version](https://img.shields.io/github/v/release/isLinXu/fmux?sort=semver&display_name=tag)](https://github.com/isLinXu/fmux/releases)
+[![go](https://img.shields.io/github/go-mod/go-version/isLinXu/fmux)](go.mod)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![platform](https://img.shields.io/badge/platform-macOS%20arm64%20%7C%20amd64-lightgrey)](#install)
+
+```mermaid
+flowchart LR
+    fm["fm CLI"]
+    sdk["curl · SDKs · editors"]
+    gw["fmux · 127.0.0.1:1976/v1<br/>compat · router · gate · breaker · budget · supervisor"]
+    ollama["Ollama"]
+    llama["llama.cpp"]
+    mlx["MLX · LM Studio"]
+    remote["vLLM · SGLang<br/>remote"]
+
+    fm --> gw
+    sdk --> gw
+    gw --> ollama
+    gw --> llama
+    gw --> mlx
+    gw --> remote
 ```
-fm CLI  ──┐
-curl    ──┼──▶  fmux :1976/v1  ──▶  ollama / llama.cpp / MLX / LM Studio / vLLM / SGLang
-SDKs    ──┘
-```
+
+---
+
+## Contents
+
+- [Why this exists](#why-this-exists)
+- [Features](#features)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [How it works](#how-it-works)
+  - [Request lifecycle](#request-lifecycle)
+  - [Process and memory model](#process-and-memory-model)
+  - [Admission control](#admission-control)
+  - [Failure handling](#failure-handling)
+  - [Shutdown](#shutdown)
+  - [Trust boundary](#trust-boundary)
+  - [Observability](#observability)
+  - [Running as a service](#running-as-a-service)
+- [Endpoints](#endpoints)
+- [The `fm` quirks this handles](#the-fm-quirks-this-handles)
+- [Verification](#verification)
+- [Project layout](#project-layout)
+- [Development](#development)
+- [Non-goals](#non-goals)
+- [License](#license)
+
+---
 
 ## Why this exists
 
-`fm` ships with macOS and speaks a clean OpenAI-compatible dialect, but it can only reach three places: the on-device Apple model, Private Cloud Compute, and a single custom provider. On a machine where Apple Intelligence is unavailable (region-gated, no model assets), the first two are dead ends, and the third is a bare URL — no aliasing, no capability routing, no fallback.
+`fm` ships with macOS and speaks a clean OpenAI-compatible dialect, but it can reach only three places: the on-device Apple model, Private Cloud Compute, and a single custom provider. On a machine where Apple Intelligence is unavailable — region-gated, or without model assets — the first two are dead ends, and the third is a bare URL with no aliasing, no capability routing and no fallback.
 
 `fmux` turns that single URL into a proper gateway. `fm` stays the client; the gateway becomes the abstraction layer.
 
-A second reason, and the one that shapes the code: `fm`'s wire format has quirks that strict backends reject. Every one of them is captured in `test/conformance/golden/` from the real binary and covered by tests.
+A second reason, and the one that shapes the code: **`fm`'s wire format has quirks that strict backends reject.** Every one of them was captured from the real binary into `test/conformance/golden/` and is replayed by the test suite on every run.
 
-## Status
+## Features
 
-| Milestone | Scope | State |
-|---|---|---|
-| M0 | Wire fidelity, HTTP layer, SSE, golden tests | **done** |
-| M1 | Ollama adapter, alias routing, capability matrix | **done** |
-| M2 | llama.cpp + process supervisor | **done** |
-| M3 | MLX / LM Studio, memory budget, LRU unload | **done** |
-| M4 | vLLM / SGLang remote, fallback chains | **done** |
-| M5 | Metrics, structured logs, bench | **done** |
-| M6 | Homebrew formula, LaunchAgent, release pipeline, docs | **done** |
-| M7 | Admission control, stream idle, loopback guard | **done** |
-| M8 | Drain on shutdown, busy-aware reaping, circuit breaker, latency histograms | **done** |
+| | |
+|---|---|
+| **OpenAI-compatible surface** | `POST /v1/chat/completions` with SSE streaming, synthesized `finish_reason` / usage / `[DONE]` so inconsistent backends still satisfy strict clients |
+| **One namespace, many backends** | Ollama, llama.cpp, MLX, LM Studio, vLLM, SGLang behind aliases; clients never learn the backend's model id |
+| **Process supervision** | Backends with a `command` are started on first request, health-probed, reused, and stopped after `idle_timeout` |
+| **Unified memory budget** | One pool across resident models on Apple Silicon, LRU eviction, in-use models pinned so a live generation is never evicted |
+| **Admission control** | Per-backend semaphore plus bounded wait queue — saturation is `429` with `Retry-After`, not a swap spiral |
+| **Circuit breaker** | Three consecutive *gone* failures open a backend for 30 s; `400`/`429`/client-cancel deliberately do not count |
+| **Draining shutdown** | `SIGTERM` stops accepting, finishes in-flight generations, *then* stops the children — in that order |
+| **Loopback guard** | `Host`/`Origin` checked before routing, so DNS rebinding cannot turn a visited page into a client |
+| **Real histograms** | Time-to-first-token and total duration tracked separately, because one average cannot tell a long answer from a cold load |
+| **Single static binary** | Runs under `launchd` with no runtime, no Python, no plugin loading |
 
-Verified on macOS 27.2 / M3 Max against a real `fm` binary and a real Ollama instance. See [Verification](#verification).
+<details>
+<summary>Milestone history</summary>
+
+| Milestone | Scope |
+|---|---|
+| M0 | Wire fidelity, HTTP layer, SSE, golden tests |
+| M1 | Ollama adapter, alias routing, capability matrix |
+| M2 | llama.cpp + process supervisor |
+| M3 | MLX / LM Studio, memory budget, LRU unload |
+| M4 | vLLM / SGLang remote, fallback chains |
+| M5 | Metrics, structured logs, bench |
+| M6 | Homebrew formula, LaunchAgent, release pipeline, docs |
+| M7 | Admission control, stream idle, loopback guard |
+| M8 | Drain on shutdown, busy-aware reaping, circuit breaker, latency histograms |
+
+</details>
 
 ## Install
 
@@ -43,8 +106,15 @@ fmux config init            # -> ~/.fmux/config.yaml
 fmux doctor                 # config, backends, aliases, port, fm wiring
 ```
 
-The tap ships a prebuilt binary for the release tag, so no Go toolchain is
-needed.
+The tap ships a prebuilt binary for the release tag, so no Go toolchain is needed.
+
+### Go
+
+```bash
+go install github.com/isLinXu/fmux/cmd/fmux@latest
+fmux config init
+fmux service install
+```
 
 ### From source
 
@@ -56,26 +126,28 @@ fmux service install        # run at login, restart on crash
 fmux doctor                 # config, backends, aliases, port, fm wiring
 ```
 
-The full operational guide — plist layout, the `launchctl` EIO trap, upgrades,
-removal — is in [docs/deployment.md](docs/deployment.md).
+The full operational guide — plist layout, the `launchctl` EIO trap, upgrades, removal — is in [docs/deployment.md](docs/deployment.md).
 
-## Wire up `fm`
+## Quick start
 
-`fm` keeps its providers in `~/.fm/config.json`. Point the default one at the
-gateway and every alias becomes a model:
+Point `fm` at the gateway. `fm` keeps its providers in `~/.fm/config.json`, so the whole setup is three commands:
 
 ```bash
 fm config add model-provider fmux http://127.0.0.1:1976/v1
 fm config set default-model-provider fmux
 fm config set default-model qwen3.8:27b
-
-fm models     # ✓ qwen3.8:27b
-fm chat
 ```
 
-No backend handy? `fmux serve --mock` starts a deterministic fake backend, so
-the whole path — `fm` → gateway → SSE → terminal — can be exercised without a
-single weight on disk.
+```console
+$ fm models
+✓ qwen3.8:27b
+
+$ fm chat
+```
+
+Every alias declared in the gateway becomes a model here.
+
+No backend handy? `fmux serve --mock` starts a deterministic fake backend, so the entire path — `fm` → gateway → SSE → terminal — can be exercised without a single weight on disk.
 
 ## Configuration
 
@@ -104,11 +176,42 @@ profiles:
   fast: { temperature: 0.2, max_tokens: 512 }
 ```
 
-`type` decides the capability matrix and whether the backend is treated as local (process-managed, budget-accounted) or remote (HTTP only).
+`type` decides the capability matrix and whether the backend is treated as **local** (process-managed, budget-accounted) or **remote** (HTTP only). See [docs/adapters.md](docs/adapters.md) for the per-type capability table.
 
-## Process supervision
+---
 
-A local model on macOS is not just an endpoint. llama.cpp and MLX serve exactly one model per process, loading an 18 GB checkpoint takes tens of seconds, and leaving it resident after the last request is how a 128 GB machine starts swapping. None of that exists in a pure HTTP router, so the gateway manages it:
+## How it works
+
+The rest of this section explains the design decisions that make the gateway behave correctly on a machine with one GPU and a shared memory pool. If you only want to run it, the [Quick start](#quick-start) is enough.
+
+### Request lifecycle
+
+```mermaid
+flowchart TD
+    A["POST /v1/chat/completions"] --> B["guard<br/>Host / Origin must be loopback"]
+    B --> C["decode into ir.ChatRequest<br/>Validate model + messages"]
+    C --> D["compat.Normalize<br/>drop empty system msgs, nil out tools:[]"]
+    D --> E["router.Resolve<br/>alias to ordered targets"]
+    E --> F["breaker.Allow<br/>drop open circuits unless none left"]
+    F --> G{"for each target"}
+    G --> H["router.Prepare<br/>capability gate + profile"]
+    H -->|mismatch| X["400, stop"]
+    H --> I["gate.Acquire<br/>slot or bounded wait, 429 on overflow"]
+    I --> J["budget.Pin<br/>this model must not be evicted"]
+    J --> K["adapter.Prepare<br/>start process, acquire memory"]
+    K --> L["stream ? ChatStream : Chat"]
+    L -->|ok| M["breaker.Succeed, return"]
+    L -->|gone| N["breaker.Fail, next target"]
+    N --> G
+```
+
+**The order of `gate` before `Prepare` is load-bearing.** Admission first, because starting an 18 GB process or evicting a resident model for a request that will only queue is wasted work, and because N concurrent cold requests would otherwise all try to start the same backend. Prepare second, because once a slot is held the caller owns the backend and may safely block on a cold start.
+
+### Process and memory model
+
+This is the part that does not exist in a pure HTTP router, and the reason the project is macOS-specific rather than another LiteLLM.
+
+**Processes are demand-started.** A backend with a `command` is not started at boot. The first request to one of its aliases calls `supervisor.Ensure`, which spawns the process and polls its health endpoint until it answers or `startup_timeout` expires. Later requests reuse the process. A background watcher stops it once `idle_timeout` passes with no requests, releasing its budget entry through the supervisor's `onStop` hook.
 
 ```yaml
 - name: llamacpp-8b
@@ -120,21 +223,17 @@ A local model on macOS is not just an endpoint. llama.cpp and MLX serve exactly 
   startup_timeout: 120s  # wait this long for /health before giving up
 ```
 
-The first request to that alias starts the process and waits for its health probe; later requests reuse it; after `idle_timeout` it is stopped and its memory released. A backend with no `command` (Ollama, LM Studio) is left to its own manager.
+Idle is measured from the **end** of the last request, not its start. A request that outlives `idle_timeout` — a long generation on a small machine — holds an in-flight claim on the process, so the reaper skips it and the clock restarts when it finishes. Otherwise a model that is busy working would be killed for being idle.
 
-Idle is measured from the end of the last request, not its start. A request that outlives `idle_timeout` — a long generation on a small machine — holds an in-flight claim on the process, so the reaper skips it and the clock restarts when it finishes. Otherwise a model that is busy working would be killed for being idle.
+**Memory is a single pool.** On Apple Silicon the GPU shares RAM with the CPU, so "VRAM" is not a separate budget. `budget_mb` caps the sum of `memory_mb` over resident models; acquiring a new one evicts the least recently used first — `keep_alive: 0` for Ollama, a process stop for supervised backends. Eviction is advisory: an oversized model is still admitted with a warning, because a wrong estimate should not turn into a failed request.
 
-### Memory budget
+> Set the budget so it is reached **before** the swap file is. On a 128 GB Mac, 40 GB is a more useful ceiling than 96: a model that fits but leaves the machine swapping runs at a tenth of its speed, and nothing in the gateway can tell you that from the inside.
+>
+> `memory_mb` should come from `ollama ps` or a process's RSS, not from the parameter count — the same 27B weighs 17 GB or 27 GB depending on the context length its checkpoint declares, because the KV cache is sized from that number.
 
-```yaml
-budget_mb: 98304   # 96 GB on a 128 GB machine
-```
+**In-use models are pinned.** LRU alone is not safe: the least recently used model may be the one currently generating on another backend, and unloading it would kill a request halfway through an answer. Every request pins its model for its lifetime, and eviction skips pinned residents. If every candidate is pinned, the load proceeds over budget and logs why.
 
-Every request records its model's `memory_mb`. When a new model would exceed the budget, the least recently used one is unloaded first — for Ollama that is a `keep_alive: 0` call, for a supervised backend it is a process stop. The budget is advisory: an oversized model is still served, with a warning, because refusing to answer is worse than a brief spike.
-
-Set the budget so it is reached **before** the swap file is. On a 128 GB Mac, 40 GB is a more useful ceiling than 96: a model that fits but leaves the machine swapping runs at a tenth of its speed, and nothing in the gateway can tell you that from the inside. `memory_mb` should come from `ollama ps` or a process's RSS, not from the parameter count — the same 27B weighs 17 GB or 27 GB depending on the context length its checkpoint declares, because the KV cache is sized from that number.
-
-A model that is currently generating is **pinned** and never chosen as a victim. Without that, a request for a second model could unload the model another request is halfway through answering on — the eviction would look successful and the victim request would fail mid-stream.
+**Three levels of process, one owner each.** The gateway itself is a launchd job (`com.fmux.gateway`, managed by `fmux service`). The inference servers it supervises are its children, started and stopped by request pressure and `idle_timeout`. Ollama and LM Studio are owned by nobody here — they have their own managers, so the gateway only talks to their HTTP API. The rule is: one owner per process, and the gateway never fights another manager for the same server.
 
 ### Admission control
 
@@ -147,7 +246,7 @@ A local model is not a web service. A 27B checkpoint on a Mac answers one reques
   queue_timeout: 3m    # how long a waiter may wait before 429
 ```
 
-Admission runs **before** process start and memory eviction, so a request that is only going to queue never triggers an 18 GB load, and ten simultaneous cold requests cannot all try to start the same backend. A backend the gateway starts itself defaults to `max_concurrency: 1`; everything else defaults to unlimited.
+The bound belongs to the **backend**, not the gateway, because the resource being protected is one GPU and one KV cache. A remote vLLM with continuous batching genuinely serves dozens at once; a single llama.cpp process does not. A global limit would have to be wrong for one of them.
 
 Saturation is a `429` with `Retry-After` and `type: rate_limit_error` — the request was fine, the timing was not. If the alias has a fallback chain, a busy primary hands the request to the next target instead of failing it.
 
@@ -155,36 +254,65 @@ Saturation is a `429` with `Retry-After` and `type: rate_limit_error` — the re
 
 A fallback chain only helps if the gateway remembers that a target just failed. Otherwise every request pays the dead backend's connect timeout first, forever, and the fallback only ever saves the request — not the latency.
 
-```yaml
-# built in, no configuration needed
-# 3 consecutive backend failures -> skip that target for 30s
-```
+Three consecutive failures open a backend for 30 seconds. The classification is the delicate part:
 
-Only failures that mean "the backend is not there" count: refused connections, resets, `502`, `503`, `504`. A `400` means the backend is alive and disliked the request; counting it would take a healthy backend out of service for everyone. `429` means busy, not dead. After the cooldown one request is let through as a probe; if it succeeds the circuit closes, if it fails it reopens immediately. If every target is open the gateway tries anyway rather than refusing to answer.
+| Outcome | Counts as failure? | Why |
+|---|---|---|
+| connection refused / reset / no route | yes | the backend is not there |
+| `502`, `503`, `504` | yes | the backend says it cannot serve |
+| `400`, `404` | no | the backend answered; the request was wrong |
+| `429` from `gate` | no | busy is not dead |
+| `stream_idle` | no | one stall is not a pattern, and a restart costs a minute |
+| client cancelled | no | that says nothing about the backend |
+
+After the cooldown exactly one request is let through as a probe. If it succeeds the circuit closes; if it fails it reopens immediately rather than requiring another three failures. A probe that never reports back expires with the next cooldown, so the breaker cannot get stuck open.
+
+If every target in a chain is open, the request is attempted anyway. A gateway that answers `503` because its only backend is down is strictly worse than one that tries and reports the real error.
 
 State is visible per backend in `GET /admin/backends` (`circuit.open`, `circuit.consecutive_failures`, `circuit.trips`).
 
-### Loopback only
+### Shutdown
 
-The gateway binds to `127.0.0.1`, but that alone does not make it private: any web page can POST to loopback, and `text/plain` skips the CORS preflight. A `Host`/`Origin` check therefore runs before anything touches a backend, and DNS rebinding cannot turn a visited site into a client of the local model.
+```
+SIGTERM
+  ├─ stop accepting new connections
+  ├─ wait for in-flight handlers, up to timeouts.drain
+  ├─ close any that are still running (and say so at WARN)
+  └─ stop the child processes
+```
+
+The order **is** the design. Stopping the children first — the obvious version — turns every generation that is halfway through into a truncated stream with no error event, and because the process is gone the client's retry pays a full cold load. The backends are what in-flight requests are reading from, so they go last.
+
+Two details make the drain real rather than decorative:
+
+- `timeouts.drain` (default `2m`) has to cover the longest legitimate answer, not the typical one. When it expires the connection is closed and the log says `drain deadline hit, cutting in-flight requests` at `WARN`.
+- The plist sets `ExitTimeOut` to `drain + 15s`. launchd's default is 20 seconds, so without it launchd would SIGKILL the process in the middle of the drain it was told to perform.
+
+`fmux service restart` sends `SIGTERM` and waits for the job to actually exit before starting it again, instead of `kickstart -k`, which would skip the drain entirely.
+
+`launchctl bootstrap` reports `Input/output error` for a job that is already loaded, for a malformed plist, and for a shell that is not allowed to spawn jobs — identically, with no hint which. `service install` checks the job's real state afterwards instead of trusting the exit code. Details in [docs/deployment.md](docs/deployment.md#the-launchctl-eio-trap).
+
+### Trust boundary
+
+The gateway binds to `127.0.0.1`, but that alone does not make it private: any web page can POST to loopback, and a `text/plain` body skips the CORS preflight entirely. Without a `Host` check, DNS rebinding makes every visited site a client of the local model. The guard compares `Host` and any `Origin` against the loopback names before routing, and answers `403` otherwise.
 
 ```yaml
 allowed_hosts: ["127.0.0.1", "localhost", "::1"]   # extras only; loopback is implicit
 ```
 
-Every response carries `X-Request-Id`, echoed from the client when present, so one log line maps to one complaint.
+Every response carries `X-Request-Id` — echoed when the client supplies one, generated otherwise — and that id appears in every log line for the request, so a client-side complaint maps to exactly one trace.
 
 ### Observability
 
 ```bash
-fmux ps                     # live process state + resident models
+fmux ps                                  # live process state + resident models
 curl -s localhost:1976/admin/processes | jq
-curl -s localhost:1976/metrics          # Prometheus text
+curl -s localhost:1976/metrics           # Prometheus text
 ```
 
 `fmux ps` reads a running gateway, because process state only exists inside the serving process:
 
-```
+```console
 BACKEND       STATE    PID    BUSY   RESTARTS  LAST USED  NOTE
 llamacpp-8b   running  91386  1 req  0         00:11:57
 RESIDENT MODEL   BACKEND      SIZE      IN USE
@@ -192,7 +320,7 @@ Qwen3-8B-Q4_K_M  llamacpp-8b  6144 MB   1 req
 budget: 6144 / 98304 MB
 ```
 
-`BUSY` is the process's in-flight request count and `IN USE` is the model's pin count. A process that is serving a request is never reaped for being idle, and a pinned model is never evicted to make room — the two columns are the answer to "why is this still running" and "why is the budget not shrinking".
+`BUSY` is the process's in-flight request count and `IN USE` is the model's pin count. A process serving a request is never reaped for being idle, and a pinned model is never evicted to make room — the two columns answer "why is this still running" and "why is the budget not shrinking".
 
 `/metrics` carries two histograms rather than a single average, because on a local model the average hides the thing worth knowing:
 
@@ -203,10 +331,9 @@ budget: 6144 / 98304 MB
 
 A 30-second answer that produced its first token in 200 ms is a healthy model on a long generation. The same 30 seconds with a 25-second first token is a model that had to be loaded from disk. One number cannot tell those apart; two can.
 
-## Running as a service
+### Running as a service
 
-A gateway that only lives as long as a terminal is not a gateway. `fmux`
-manages its own LaunchAgent:
+A gateway that only lives as long as a terminal is not a gateway. `fmux` manages its own LaunchAgent:
 
 ```bash
 fmux service install     # write the plist and hand it to launchd
@@ -216,33 +343,9 @@ fmux service restart     # reload the config without cutting answers
 fmux service uninstall
 ```
 
-The plist runs `serve --config ~/.fmux/config.yaml`, restarts on crash (not on
-clean exit), and pins `NO_PROXY` for loopback so a login-session proxy cannot
-break the gateway's own calls to Ollama.
+The plist runs `serve --config ~/.fmux/config.yaml`, restarts on crash (not on clean exit), and pins `NO_PROXY` for loopback so a login-session proxy cannot break the gateway's own calls to Ollama.
 
-### Restarting without cutting answers
-
-`SIGTERM` drains before it kills. The order is the whole point:
-
-```
-SIGTERM -> stop accepting -> wait for in-flight generations -> stop the backends -> exit
-```
-
-Killing the child processes first is the tempting version and the wrong one: they are what the in-flight requests are reading from, so every generation halfway done becomes a truncated stream with no error event, and a supervised backend that was killed mid-request has to be loaded from disk again on the retry.
-
-Two details make the drain real rather than decorative:
-
-- `timeouts.drain` (default `2m`) has to cover the longest legitimate answer, not the typical one. When it expires the connection is closed and the log says so at `WARN` — `drain deadline hit, cutting in-flight requests`.
-- The plist sets `ExitTimeOut` to `drain + 15s`. launchd's default is 20 seconds, so without it launchd would SIGKILL the process in the middle of the drain it was told to perform.
-
-`fmux service restart` sends `SIGTERM` and waits for the job to actually exit before starting it again, instead of `kickstart -k`, which would skip the drain entirely. A second `SIGTERM` (or Ctrl-C) skips the wait and exits immediately.
-
-`launchctl bootstrap` reports `Input/output error` for a job that is already
-loaded, for a malformed plist, and for a shell that is not allowed to spawn
-jobs — identically, with no hint which. `service install` checks the job's real
-state afterwards instead of trusting the exit code, and prints the one-line
-command to run by hand when the plist is valid but the caller is blocked.
-Details in [docs/deployment.md](docs/deployment.md#the-launchctl-eio-trap).
+---
 
 ## Endpoints
 
@@ -271,7 +374,7 @@ Captured from the real binary, replayed in every test run:
 
 ## Verification
 
-Measured on the machine above, real `fm` binary, real Ollama:
+Measured on macOS 27.2 / M3 Max, against a real `fm` binary and a real Ollama instance.
 
 | Path | Result |
 |---|---|
@@ -301,52 +404,52 @@ Measured on the machine above, real `fm` binary, real Ollama:
 | Dead primary in a fallback chain, 8 requests | first 3 hit it, the rest go straight to the fallback |
 | Backend answering `400` repeatedly | circuit stays closed, every request still attempted |
 
-## Layout
+## Project layout
 
 ```
-cmd/fmux/          CLI: serve, config, service, backends, models, ps, doctor, version
-internal/ir/       internal representation (polymorphic content, chunk, usage)
-internal/compat/   fm quirk normalization
-internal/router/   alias resolution + capability gate
-internal/adapter/  adapter interface, OpenAI base, mock
-internal/adapter/local/  OpenAI adapter + process/memory pre-flight
-internal/supervisor/     child process lifecycle, health probe, idle reap
-internal/budget/         unified memory accounting + LRU eviction + in-use pins
-internal/gate/           per-backend admission control (semaphore + bounded queue)
-internal/breaker/        consecutive-failure circuit per backend
-internal/metrics/        Prometheus counters, histograms, inflight and rejection gauges
-internal/launchd/        LaunchAgent plist + launchctl state
-internal/api/      HTTP layer, SSE writer, loopback guard, admin + metrics endpoints
-internal/config/   YAML config
-internal/build/    config -> adapters, supervisor, budget
-test/conformance/  golden captures + real-fm end-to-end tests
-test/fixtures/     fake OpenAI server used by the supervision tests
-scripts/           capture_fm.py, install-launchagent.sh, bench.sh
-docs/              fm-compat, architecture, adapters, deployment
-Formula/fmux.rb    Homebrew formula (also generated by goreleaser for the tap)
-.goreleaser.yaml   darwin arm64/amd64 archives + tap update on tag
+cmd/fmux/                 CLI: serve, config, service, backends, models, ps, doctor, version
+internal/ir/              internal representation (polymorphic content, chunk, usage)
+internal/compat/          fm quirk normalization
+internal/router/          alias resolution + capability gate
+internal/adapter/         adapter interface, OpenAI base, mock
+internal/adapter/local/   OpenAI adapter + process/memory pre-flight
+internal/supervisor/      child process lifecycle, health probe, idle reap
+internal/budget/          unified memory accounting + LRU eviction + in-use pins
+internal/gate/            per-backend admission control (semaphore + bounded queue)
+internal/breaker/         consecutive-failure circuit per backend
+internal/metrics/         Prometheus counters, histograms, inflight and rejection gauges
+internal/launchd/         LaunchAgent plist + launchctl state
+internal/api/             HTTP layer, SSE writer, loopback guard, admin + metrics endpoints
+internal/config/          YAML config
+internal/build/           config -> adapters, supervisor, budget
+test/conformance/         golden captures + real-fm end-to-end tests
+test/fixtures/            fake OpenAI server used by the supervision tests
+scripts/                  capture_fm.py, install-launchagent.sh, bench.sh
+docs/                     fm-compat, architecture, adapters, deployment
+Formula/fmux.rb           Homebrew formula (also generated by goreleaser for the tap)
+.goreleaser.yaml          darwin arm64/amd64 archives + tap update on tag
 ```
 
 ## Development
 
 ```bash
-make test        # unit + conformance + e2e (skips fm/python tests if absent)
-make conformance # only the real-fm tests
-make e2e         # only the process-supervision tests
-make capture     # re-record golden samples from the installed fm binary
-make release-check  # goreleaser check + snapshot build
+make test            # unit + conformance + e2e (skips fm/python tests if absent)
+make conformance     # only the real-fm tests
+make e2e             # only the process-supervision tests
+make capture         # re-record golden samples from the installed fm binary
+make release-check   # goreleaser check + snapshot build
 ```
 
 `make capture` is the maintenance lever: after a macOS update, run it and diff. If the wire format moved, the diff says exactly how.
 
 ## Non-goals
 
-- Modifying or extending `fm` itself — it lives on the sealed system volume and its eligibility check is backed by a private entitlement.
-- Downloading or quantizing models — that is Ollama's / llama.cpp's / HF's job.
-- Multi-tenant auth — this binds to loopback for a single user.
-- Managing local backends on Linux/Windows — remote HTTP only there.
-- Running vLLM or SGLang on macOS — both are CUDA-first with no official Apple Silicon support, so they are remote-only here.
+- **Modifying or extending `fm` itself** — it lives on the sealed system volume and its eligibility check is backed by a private entitlement.
+- **Downloading or quantizing models** — that is Ollama's, llama.cpp's or Hugging Face's job.
+- **Multi-tenant auth** — this binds to loopback for a single user.
+- **Managing local backends on Linux/Windows** — remote HTTP only there.
+- **Running vLLM or SGLang on macOS** — both are CUDA-first with no official Apple Silicon support, so they are remote-only here.
 
 ## License
 
-MIT
+[MIT](LICENSE)
