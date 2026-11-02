@@ -173,10 +173,22 @@ The rest of this section explains the design decisions that make the gateway beh
 
 ### Request lifecycle
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lifecycle-dark.svg">
-  <img alt="Request lifecycle: guard, normalize, resolve alias, breaker, capability gate, admission, budget pin, adapter, stream" src="docs/assets/lifecycle-light.svg">
-</picture>
+```text
+POST /v1/chat/completions
+  |  guard        Host / Origin must be loopback          -> 403 otherwise
+  |  decode       polymorphic content, absent fields
+  |  normalize    drop empty system messages, nil out tools:[]
+  |  resolve      alias -> ordered []Target
+  |  breaker      skip targets whose circuit is open
+  |
+  +-- for each target, in order:
+        prepare     capability gate + profile defaults   -> 400 on mismatch
+        gate        slot, or bounded wait                -> 429 on overflow
+        pin         this model must not be evicted now
+        adapter     start the process, acquire memory
+        stream      SSE, bounded by stream_idle
+        breaker     succeed -> return; gone -> next target
+```
 
 **The order of `gate` before `Prepare` is load-bearing.** Admission first, because starting an 18 GB process or evicting a resident model for a request that will only queue is wasted work, and because N concurrent cold requests would otherwise all try to start the same backend. Prepare second, because once a slot is held the caller owns the backend and may safely block on a cold start.
 

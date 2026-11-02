@@ -1,23 +1,18 @@
 flowchart LR
     subgraph clients["Clients"]
+        direction TB
         fm["fm CLI"]
-        sdk["curl / SDKs / editors"]
+        sdk["curl / SDKs"]
     end
 
-    subgraph gw["fmux gateway  127.0.0.1:1976"]
-        api["OpenAI surface"]
-        compat["fm quirk normalizer"]
-        router["alias + capability router"]
-        gate["admission control"]
-        budget["memory budget"]
-        sup["process supervisor"]
-    end
+    gw["fmux gateway<br/>127.0.0.1:1976<br/><br/>compat<br/>router<br/>admission<br/>budget<br/>supervisor"]
 
     subgraph backends["Backends"]
+        direction TB
         o["Ollama"]
         l["llama.cpp"]
         m["MLX / LM Studio"]
-        r["vLLM / SGLang  (remote)"]
+        r["vLLM / SGLang"]
     end
 
     clients --> gw
