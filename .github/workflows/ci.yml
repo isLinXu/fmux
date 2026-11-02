@@ -10,7 +10,10 @@ jobs:
     # The conformance suite replays request bodies captured from the real `fm`
     # binary, and the e2e suite starts a child process. Both need a macOS
     # runner; neither needs a GPU or a model.
-    runs-on: macos-14
+    # macos-14 is retired on Nov 2, 2026 (actions/runner-images#13518);
+    # macos-15 is the current stable. Use the label so future bumps are
+    # explicit instead of silently floating with macos-latest.
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 

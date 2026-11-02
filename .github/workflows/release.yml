@@ -9,7 +9,10 @@ permissions:
 
 jobs:
   release:
-    runs-on: macos-14
+    # macos-14 is retired Nov 2, 2026 (actions/runner-images#13518).
+    # goreleaser builds darwin/arm64 + darwin/amd64 natively on an Apple
+    # Silicon runner; macos-15 (Sequoia, arm64) is the current stable.
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
