@@ -303,9 +303,18 @@ Every response carries `X-Request-Id` — echoed when the client supplies one, g
 
 ```bash
 fmux ps                                  # live process state + resident models
+fmux doctor --probe                      # actual residency vs the configured memory_mb
 curl -s localhost:1976/admin/processes | jq
 curl -s localhost:1976/metrics           # Prometheus text
 ```
+
+`memory_mb` is a guess, and a wrong one is invisible: the budget silently stops being a budget. `fmux doctor --probe` reads the resident size of each running backend from the kernel and tells you what to put in the config instead:
+
+```
+WARN  memory:fake   50 MB configured, 32 MB resident (-36%); set memory_mb: 32
+```
+
+This matters most for the same model at different context lengths — a 27B checkpoint weighs 17 GB or 27 GB depending on what its metadata declares, because the KV cache is sized from that number.
 
 `fmux ps` reads a running gateway, because process state only exists inside the serving process:
 

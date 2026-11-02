@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -156,6 +158,7 @@ type doctorCheck struct {
 
 func newDoctorCmd() *cobra.Command {
 	var cfgPath string
+	var probe bool
 	c := &cobra.Command{
 		Use:   "doctor",
 		Short: "Diagnose configuration, backends and fm integration",
@@ -165,6 +168,9 @@ func newDoctorCmd() *cobra.Command {
 				return err
 			}
 			checks := runDoctor(cmd.Context(), cfg)
+			if probe {
+				checks = append(checks, probeResidency(cmd.Context(), cfg)...)
+			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
 			failures := 0
@@ -183,7 +189,88 @@ func newDoctorCmd() *cobra.Command {
 		},
 	}
 	c.Flags().StringVar(&cfgPath, "config", "", "config file (default ~/.fmux/config.yaml)")
+	c.Flags().BoolVar(&probe, "probe", false,
+		"measure the actual resident size of running backends and compare it with memory_mb")
 	return c
+}
+
+// probeResidency compares each configured memory_mb against what the process
+// actually holds.
+//
+// memory_mb is a guess, and a wrong one is invisible: the budget silently
+// stops being a budget. The same 27B checkpoint weighs 17 GB or 27 GB
+// depending on the context length it declares, because the KV cache is sized
+// from that number -- so the only honest source is the running process.
+//
+// It reads from a running gateway, because that is the only place the child
+// PID lives.
+func probeResidency(ctx context.Context, cfg *config.Config) []doctorCheck {
+	var out []doctorCheck
+	add := func(name, status, detail string) {
+		out = append(out, doctorCheck{name: name, status: status, detail: detail})
+	}
+
+	client := &http.Client{Timeout: 5 * time.Second}
+	url := "http://" + cfg.Listen + "/admin/processes"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		add("probe", "warn", "could not build request: "+err.Error())
+		return out
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		add("probe", "warn", "gateway is not running; start it, send one request, then retry")
+		return out
+	}
+	defer resp.Body.Close()
+
+	var payload struct {
+		Processes []struct {
+			Name  string `json:"name"`
+			State string `json:"state"`
+			PID   int    `json:"pid"`
+		} `json:"processes"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		add("probe", "warn", "could not read /admin/processes: "+err.Error())
+		return out
+	}
+
+	configured := make(map[string]int, len(cfg.Backends))
+	for _, b := range cfg.Backends {
+		configured[b.Name] = b.MemoryMB
+	}
+
+	measured := 0
+	for _, p := range payload.Processes {
+		if p.State != "running" || p.PID <= 0 {
+			continue
+		}
+		actual, err := rssMB(p.PID)
+		if err != nil {
+			add("memory:"+p.Name, "warn", "process is running but rss is unreadable: "+err.Error())
+			continue
+		}
+		measured++
+
+		want := configured[p.Name]
+		switch {
+		case want <= 0:
+			add("memory:"+p.Name, "warn", fmt.Sprintf(
+				"resident %d MB but memory_mb is unset; the budget is not accounting for it", actual))
+		case math.Abs(float64(actual-want))/float64(want) <= 0.15:
+			add("memory:"+p.Name, "ok", fmt.Sprintf("%d MB configured, %d MB resident", want, actual))
+		default:
+			pct := float64(actual-want) / float64(want) * 100
+			add("memory:"+p.Name, "warn", fmt.Sprintf(
+				"%d MB configured, %d MB resident (%+.0f%%); set memory_mb: %d",
+				want, actual, pct, actual))
+		}
+	}
+	if measured == 0 {
+		add("probe", "warn", "no supervised backend is running; send one request and retry")
+	}
+	return out
 }
 
 func runDoctor(ctx context.Context, cfg *config.Config) []doctorCheck {
