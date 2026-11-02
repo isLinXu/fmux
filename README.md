@@ -49,6 +49,15 @@
 
 `fmux` turns that single URL into a proper gateway. `fm` stays the client; the gateway becomes the abstraction layer.
 
+The first two backends are not merely awkward, they are unreachable. [`scripts/probe-ondevice.swift`](scripts/probe-ondevice.swift) asks Apple's public Foundation Models API directly; on the reference machine it answers:
+
+```console
+$ ./probe-ondevice
+availability=unavailable reason=deviceNotEligible
+```
+
+That is macOS 27.2 on an M3 Max with 128 GB. The hardware is far past capable, so the verdict is the region gate — which is the whole reason a gateway between `fm` and something else has to exist.
+
 A second reason, and the one that shapes the code: **`fm`'s wire format has quirks that strict backends reject.** Every one of them was captured from the real binary into `test/conformance/golden/` and is replayed by the test suite on every run.
 
 A third reason decides the architecture: **a generic HTTP proxy assumes every backend is an always-on endpoint.** On a Mac that assumption is wrong. llama.cpp and MLX serve one model per process; an 18 GB checkpoint takes tens of seconds to load; leaving it resident after the last request is how a 128 GB machine starts swapping; and on Apple Silicon the GPU shares RAM with the CPU, so there is no separate VRAM to budget. So the gateway also owns process lifecycle and a unified memory pool. Nothing here is vendor-specific — a remote vLLM over HTTP is just another target, and a generic proxy can sit in front of it if you want one.
