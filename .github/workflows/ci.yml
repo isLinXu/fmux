@@ -40,8 +40,11 @@ jobs:
       - name: vet
         run: go vet ./...
 
+      # -race: the gate, budget and supervisor packages are all shared state
+      # under concurrent requests, which is where a data race would actually
+      # hurt. It roughly doubles this step and is worth it.
       - name: test
-        run: go test ./... -count=1
+        run: go test ./... -race -count=1
 
       - name: build
         run: go build -trimpath -o bin/fmux ./cmd/fmux

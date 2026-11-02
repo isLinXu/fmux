@@ -166,13 +166,17 @@ func (g *Gate) Acquire(ctx context.Context, backend string) (func(), error) {
 		g.notifyRejected(backend, "saturated")
 		return nil, fmt.Errorf("%w: %s is serving %d request(s)", ErrQueueFull, backend, len(gt.sem))
 	}
-	if int(gt.waiting.Load()) >= gt.limits.Queue {
+	// Claim a waiter slot atomically. Reading the count and then incrementing
+	// in two steps lets goroutines that arrive together all observe room and
+	// all enter, so queue_depth stops being a hard bound under load -- which
+	// is exactly the situation it exists for.
+	if gt.waiting.Add(1) > int64(gt.limits.Queue) {
+		gt.waiting.Add(-1)
 		gt.rejected.Add(1)
 		g.notifyRejected(backend, "queue_full")
-		return nil, fmt.Errorf("%w: %s has %d request(s) waiting", ErrQueueFull, backend, gt.waiting.Load())
+		return nil, fmt.Errorf("%w: %s already has %d request(s) waiting", ErrQueueFull, backend, gt.limits.Queue)
 	}
 
-	gt.waiting.Add(1)
 	start := time.Now()
 	timer := time.NewTimer(gt.limits.Timeout)
 	defer func() {
