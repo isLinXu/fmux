@@ -10,8 +10,8 @@
 [![platform](https://img.shields.io/badge/platform-macOS%20arm64%20%7C%20amd64-lightgrey)](#install)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/fmux-architecture-dark.svg">
-  <img alt="fm clients reach Ollama, llama.cpp, MLX, LM Studio, vLLM and SGLang through a single fmux gateway" src="docs/assets/fmux-architecture-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/fmux-arch-dark.svg">
+  <img alt="fm clients reach Ollama, llama.cpp, MLX, LM Studio, vLLM and SGLang through a single fmux gateway" src="docs/assets/fmux-arch-light.svg">
 </picture>
 
 ---
