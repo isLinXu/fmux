@@ -17,6 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Cheap and instant, so it runs before anything installs: a README link
+      # to a renamed section renders as a normal page with one dead link,
+      # which nobody notices until someone clicks it.
+      - name: docs links
+        run: python3 scripts/check_docs.py
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod

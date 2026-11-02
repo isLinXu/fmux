@@ -20,6 +20,7 @@
 
 - [Why this exists](#why-this-exists)
 - [Features](#features)
+- [Requirements](#requirements)
 - [Install](#install)
 - [Quick start](#quick-start)
 - [Configuration](#configuration)
@@ -83,6 +84,15 @@ A third reason decides the architecture: **a generic HTTP proxy assumes every ba
 | M8 | Drain on shutdown, busy-aware reaping, circuit breaker, latency histograms |
 
 </details>
+
+## Requirements
+
+| Requirement | What you need |
+|---|---|
+| **OS** | macOS, arm64 or amd64. Remote-only backends work on Linux, but that is not a shipped build target. |
+| **A backend** | Ollama, llama.cpp, MLX-LM, LM Studio, vLLM or SGLang. None needed to try it out: `fmux serve --mock` runs the whole path with a deterministic fake. |
+| **Go 1.24+** | Only for `go install` or building from source. The Homebrew tap ships a prebuilt binary. |
+| **`fm`** | Optional. The gateway is a plain OpenAI-compatible endpoint; `fm` is one client among others. |
 
 ## Install
 
