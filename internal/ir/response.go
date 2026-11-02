@@ -34,6 +34,18 @@ type Chunk struct {
 	Usage   *Usage        `json:"usage,omitempty"`
 }
 
+// ModelCapabilities is what a model can actually do.
+//
+// Without this a client has no way to know: it finds out by sending a request
+// and getting a 400 back. The same `fm respond --schema` works against Ollama
+// and fails against MLX, and nothing in /v1/models said so.
+type ModelCapabilities struct {
+	Stream     bool `json:"stream"`
+	Vision     bool `json:"vision"`
+	JSONSchema bool `json:"json_schema"`
+	Tools      bool `json:"tools"`
+}
+
 // ModelInfo describes one model exposed through /v1/models.
 type ModelInfo struct {
 	ID      string `json:"id"`
@@ -41,10 +53,13 @@ type ModelInfo struct {
 	Created int64  `json:"created"`
 	OwnedBy string `json:"owned_by,omitempty"`
 
-	// Extra metadata, surfaced by /admin/models and stripped from /v1/models.
-	Backend    string   `json:"backend,omitempty"`
-	ContextLen int      `json:"context_length,omitempty"`
-	Tags       []string `json:"tags,omitempty"`
+	// Extra metadata. Non-standard fields are ignored by OpenAI clients, and
+	// carrying them beats making people curl /admin/backends to find out what
+	// an alias can do.
+	Backend      string             `json:"backend,omitempty"`
+	ContextLen   int                `json:"context_length,omitempty"`
+	Tags         []string           `json:"tags,omitempty"`
+	Capabilities *ModelCapabilities `json:"capabilities,omitempty"`
 }
 
 // ModelList is the /v1/models envelope.

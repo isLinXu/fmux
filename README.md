@@ -177,6 +177,13 @@ profiles:
 
 `type` decides the capability matrix and whether the backend is treated as **local** (process-managed, budget-accounted) or **remote** (HTTP only). See [docs/adapters.md](docs/adapters.md) for the per-type capability table.
 
+The same `fm` command can succeed against one alias and return `400 unsupported_capability` against another — `fm respond --schema` works on Ollama and fails on MLX. So `/v1/models` reports what each alias can actually do:
+
+```json
+{ "id": "qwen-fast", "backend": "ollama", "context_length": 32768,
+  "capabilities": { "stream": true, "vision": true, "json_schema": true, "tools": true } }
+```
+
 ---
 
 ## How it works
@@ -358,7 +365,7 @@ The plist runs `serve --config ~/.fmux/config.yaml`, restarts on crash (not on c
 | Path | Purpose |
 |---|---|
 | `POST /v1/chat/completions` | The only endpoint a client needs |
-| `GET /v1/models` | Aliases, plus backend-reported models |
+| `GET /v1/models` | Aliases with their capabilities (`stream`, `vision`, `json_schema`, `tools`) and context length, plus backend-reported models |
 | `GET /healthz` | Liveness |
 | `GET /metrics` | Prometheus text: requests, tokens, latency and TTFT histograms, evictions, inflight, queue waits, rejections |
 | `GET /admin/backends` | Capability matrix, health, admission policy and circuit state per backend |

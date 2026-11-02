@@ -34,6 +34,21 @@ func (s *Server) handleModels(w http.ResponseWriter, r *http.Request) {
 		if a.Model != "" && a.Model != n {
 			info.Tags = []string{"alias:" + a.Model}
 		}
+		// Capabilities come from the backend this alias is pinned to. A
+		// fallback alias has no single answer -- it depends which target ends
+		// up serving -- so it is left unset rather than guessed.
+		if a.Backend != "" {
+			if ad, ok := s.reg.Get(a.Backend); ok && ad != nil {
+				c := ad.Caps()
+				info.ContextLen = c.MaxContext
+				info.Capabilities = &ir.ModelCapabilities{
+					Stream:     c.Stream,
+					Vision:     c.Vision,
+					JSONSchema: c.JSONSchema,
+					Tools:      c.Tools,
+				}
+			}
+		}
 		out = append(out, info)
 	}
 
