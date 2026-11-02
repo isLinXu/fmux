@@ -9,23 +9,10 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-macOS%20arm64%20%7C%20amd64-lightgrey)](#install)
 
-```mermaid
-flowchart LR
-    fm["fm CLI"]
-    sdk["curl · SDKs · editors"]
-    gw["fmux · 127.0.0.1:1976/v1<br/>compat · router · gate · breaker · budget · supervisor"]
-    ollama["Ollama"]
-    llama["llama.cpp"]
-    mlx["MLX · LM Studio"]
-    remote["vLLM · SGLang<br/>remote"]
-
-    fm --> gw
-    sdk --> gw
-    gw --> ollama
-    gw --> llama
-    gw --> mlx
-    gw --> remote
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/architecture-dark.svg">
+  <img alt="fm clients reach Ollama, llama.cpp, MLX, LM Studio, vLLM and SGLang through a single fmux gateway" src="docs/assets/architecture-light.svg">
+</picture>
 
 ---
 
@@ -186,24 +173,10 @@ The rest of this section explains the design decisions that make the gateway beh
 
 ### Request lifecycle
 
-```mermaid
-flowchart TD
-    A["POST /v1/chat/completions"] --> B["guard<br/>Host / Origin must be loopback"]
-    B --> C["decode into ir.ChatRequest<br/>Validate model + messages"]
-    C --> D["compat.Normalize<br/>drop empty system msgs, nil out tools:[]"]
-    D --> E["router.Resolve<br/>alias to ordered targets"]
-    E --> F["breaker.Allow<br/>drop open circuits unless none left"]
-    F --> G{"for each target"}
-    G --> H["router.Prepare<br/>capability gate + profile"]
-    H -->|mismatch| X["400, stop"]
-    H --> I["gate.Acquire<br/>slot or bounded wait, 429 on overflow"]
-    I --> J["budget.Pin<br/>this model must not be evicted"]
-    J --> K["adapter.Prepare<br/>start process, acquire memory"]
-    K --> L["stream ? ChatStream : Chat"]
-    L -->|ok| M["breaker.Succeed, return"]
-    L -->|gone| N["breaker.Fail, next target"]
-    N --> G
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lifecycle-dark.svg">
+  <img alt="Request lifecycle: guard, normalize, resolve alias, breaker, capability gate, admission, budget pin, adapter, stream" src="docs/assets/lifecycle-light.svg">
+</picture>
 
 **The order of `gate` before `Prepare` is load-bearing.** Admission first, because starting an 18 GB process or evicting a resident model for a request that will only queue is wasted work, and because N concurrent cold requests would otherwise all try to start the same backend. Prepare second, because once a slot is held the caller owns the backend and may safely block on a cold start.
 

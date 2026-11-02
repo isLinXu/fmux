@@ -1,0 +1,15 @@
+flowchart TD
+    A["POST /v1/chat/completions"] --> B["guard: Host and Origin must be loopback"]
+    B --> C["decode and validate"]
+    C --> D["compat: drop empty system messages"]
+    D --> E["router: alias to ordered targets"]
+    E --> F["breaker: skip targets with an open circuit"]
+    F --> G{"for each target"}
+    G --> H["prepare: capability gate and profile"]
+    H --> I["gate: acquire a slot or queue"]
+    I --> J["budget: pin the model against eviction"]
+    J --> K["adapter: start the process if needed"]
+    K --> L["stream chunks to the client"]
+    L --> M["success: return"]
+    L --> N["gone: try the next target"]
+    N --> G

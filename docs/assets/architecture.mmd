@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph clients["Clients"]
+        fm["fm CLI"]
+        sdk["curl / SDKs / editors"]
+    end
+
+    subgraph gw["fmux gateway  127.0.0.1:1976"]
+        api["OpenAI surface"]
+        compat["fm quirk normalizer"]
+        router["alias + capability router"]
+        gate["admission control"]
+        budget["memory budget"]
+        sup["process supervisor"]
+    end
+
+    subgraph backends["Backends"]
+        o["Ollama"]
+        l["llama.cpp"]
+        m["MLX / LM Studio"]
+        r["vLLM / SGLang  (remote)"]
+    end
+
+    clients --> gw
+    gw --> backends
