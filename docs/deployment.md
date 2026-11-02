@@ -5,7 +5,7 @@ user; there is no service account, no TLS and no auth to configure.
 
 ## 1. Install
 
-**From source** (works today, no release needed):
+**From source**:
 
 ```bash
 git clone https://github.com/isLinXu/fmux && cd fmux
@@ -19,11 +19,11 @@ the binary to `~/.local/bin`. Make sure that directory is on `PATH`:
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 ```
 
-**Homebrew** (after the tap exists):
+**Homebrew**:
 
 ```bash
 brew install isLinXu/tap/fmux
-# or, before the first tagged release:
+# or build from the formula in this repo:
 brew install --HEAD ./Formula/fmux.rb
 ```
 

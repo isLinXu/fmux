@@ -34,6 +34,20 @@ Verified on macOS 27.2 / M3 Max against a real `fm` binary and a real Ollama ins
 
 ## Install
 
+### Homebrew
+
+```bash
+brew install isLinXu/tap/fmux
+brew services start fmux    # run at login, restart on crash
+fmux config init            # -> ~/.fmux/config.yaml
+fmux doctor                 # config, backends, aliases, port, fm wiring
+```
+
+The tap ships a prebuilt binary for the release tag, so no Go toolchain is
+needed.
+
+### From source
+
 ```bash
 git clone https://github.com/isLinXu/fmux && cd fmux
 make install                # -> ~/.local/bin/fmux
@@ -42,9 +56,8 @@ fmux service install        # run at login, restart on crash
 fmux doctor                 # config, backends, aliases, port, fm wiring
 ```
 
-`brew install isLinXu/tap/fmux` once a release is tagged. The full operational
-guide — plist layout, the `launchctl` EIO trap, upgrades, removal — is in
-[docs/deployment.md](docs/deployment.md).
+The full operational guide — plist layout, the `launchctl` EIO trap, upgrades,
+removal — is in [docs/deployment.md](docs/deployment.md).
 
 ## Wire up `fm`
 
