@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"runtime"
 	"runtime/debug"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -22,8 +23,35 @@ import (
 	"github.com/isLinXu/fmux/internal/supervisor"
 )
 
-// Version is stamped at build time.
+// Version is stamped at build time by the linker (see .goreleaser.yaml and
+// the Makefile). It must stay a plain string literal: `-X` only rewrites
+// variables initialised from a constant, so moving this to `var Version =
+// resolveVersion(...)` would silently break the stamp.
 var Version = "0.0.0-dev"
+
+// go install passes no ldflags, which used to leave every such build
+// reporting 0.0.0-dev with no way to tell which release was running. The Go
+// toolchain records the module version in the build info, so fall back to it
+// when the linker did not stamp anything.
+func init() {
+	Version = resolveVersion(Version)
+}
+
+func resolveVersion(stamped string) string {
+	if stamped != "" && stamped != "0.0.0-dev" {
+		return stamped
+	}
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "0.0.0-dev"
+	}
+	if v := info.Main.Version; v != "" && v != "(devel)" {
+		// The toolchain reports the tag as v0.1.1, while goreleaser stamps
+		// 0.1.1. Trim so `fmux version` reads the same either way.
+		return strings.TrimPrefix(v, "v")
+	}
+	return "0.0.0-dev"
+}
 
 // Server holds the HTTP dependencies.
 type Server struct {
