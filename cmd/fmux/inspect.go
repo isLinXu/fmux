@@ -17,6 +17,7 @@ import (
 
 	"github.com/isLinXu/fmux/internal/adapter"
 	"github.com/isLinXu/fmux/internal/build"
+	"github.com/isLinXu/fmux/internal/capprobe"
 	"github.com/isLinXu/fmux/internal/config"
 	"github.com/isLinXu/fmux/internal/router"
 	"github.com/spf13/cobra"
@@ -158,7 +159,7 @@ type doctorCheck struct {
 
 func newDoctorCmd() *cobra.Command {
 	var cfgPath string
-	var probe bool
+	var probe, caps bool
 	c := &cobra.Command{
 		Use:   "doctor",
 		Short: "Diagnose configuration, backends and fm integration",
@@ -170,6 +171,9 @@ func newDoctorCmd() *cobra.Command {
 			checks := runDoctor(cmd.Context(), cfg)
 			if probe {
 				checks = append(checks, probeResidency(cmd.Context(), cfg)...)
+			}
+			if caps {
+				checks = append(checks, probeCapabilities(cmd.Context(), cfg)...)
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
@@ -191,7 +195,88 @@ func newDoctorCmd() *cobra.Command {
 	c.Flags().StringVar(&cfgPath, "config", "", "config file (default ~/.fmux/config.yaml)")
 	c.Flags().BoolVar(&probe, "probe", false,
 		"measure the actual resident size of running backends and compare it with memory_mb")
+	c.Flags().BoolVar(&caps, "caps", false,
+		"ask each backend what it actually supports instead of trusting the type's capability matrix")
 	return c
+}
+
+// probeCapabilities checks the declared capability matrix against the live
+// backend.
+//
+// The matrix is derived from `type`, which encodes what a server family
+// usually supports. An older llama.cpp build may reject a grammar parameter; a
+// build without vision compiled in will reject an image. Either way the gateway
+// advertises something the backend refuses, and the client discovers it as a
+// 400 on a request it had every reason to trust.
+//
+// This sends up to four one-token requests per backend. On a cold model that
+// means loading it, so the cost is real and the flag is opt-in.
+func probeCapabilities(ctx context.Context, cfg *config.Config) []doctorCheck {
+	var out []doctorCheck
+	add := func(name, status, detail string) {
+		out = append(out, doctorCheck{name: name, status: status, detail: detail})
+	}
+
+	reg, err := build.Registry(cfg)
+	if err != nil {
+		add("caps", "fail", err.Error())
+		return out
+	}
+
+	for _, ad := range reg.All() {
+		model := modelForBackend(cfg, ad.Name())
+		if model == "" {
+			add("caps:"+ad.Name(), "warn", "no model configured for this backend; cannot probe")
+			continue
+		}
+
+		rep := capprobe.Run(ctx, ad, model, 20*time.Second)
+		name := "caps:" + ad.Name()
+
+		if !rep.Baseline {
+			add(name, "warn", "probe skipped, a plain request failed: "+
+				firstDetail(rep.Checks))
+			continue
+		}
+		if rep.Agrees() {
+			add(name, "ok", "declared capabilities confirmed by the backend")
+			continue
+		}
+		for _, m := range rep.Mismatches() {
+			add(name, "warn", fmt.Sprintf(
+				"%s is declared for type %q but the backend rejected it (%s); requests using it will fail",
+				m.Capability, ad.Type(), m.Detail))
+		}
+	}
+	return out
+}
+
+// modelForBackend picks a model name to probe with: the first alias bound to
+// this backend, else the backend's own model list.
+func modelForBackend(cfg *config.Config, backend string) string {
+	names := make([]string, 0, len(cfg.Aliases))
+	for n := range cfg.Aliases {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		if a := cfg.Aliases[n]; a.Backend == backend && a.Model != "" {
+			return a.Model
+		}
+	}
+	for _, b := range cfg.Backends {
+		if b.Name == backend && len(b.ModelList) > 0 {
+			return b.ModelList[0]
+		}
+	}
+	return ""
+}
+
+func firstDetail(checks []capprobe.Check) string {
+	if len(checks) == 0 {
+		return "probe returned no result"
+	}
+	return checks[0].Detail
 }
 
 // probeResidency compares each configured memory_mb against what the process

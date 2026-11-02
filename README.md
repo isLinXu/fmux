@@ -177,6 +177,15 @@ profiles:
 
 `type` decides the capability matrix and whether the backend is treated as **local** (process-managed, budget-accounted) or **remote** (HTTP only). See [docs/adapters.md](docs/adapters.md) for the per-type capability table.
 
+That matrix describes what a server family *usually* supports. A build can disagree — an older llama.cpp may not accept a grammar parameter, a build without vision compiled in will reject an image. `fmux doctor --caps` settles it with real requests and compares:
+
+```
+WARN  caps:llamacpp  json_schema is declared for type "llamacpp" but the backend
+                     rejected it (HTTP 400: ...grammar is not supported...)
+```
+
+It costs up to four one-token requests per backend, so it is opt-in rather than something the gateway does on every start.
+
 The same `fm` command can succeed against one alias and return `400 unsupported_capability` against another — `fm respond --schema` works on Ollama and fails on MLX. So `/v1/models` reports what each alias can actually do:
 
 ```json
@@ -311,6 +320,7 @@ Every response carries `X-Request-Id` — echoed when the client supplies one, g
 ```bash
 fmux ps                                  # live process state + resident models
 fmux doctor --probe                      # actual residency vs the configured memory_mb
+fmux doctor --caps                       # ask each backend what it really supports
 curl -s localhost:1976/admin/processes | jq
 curl -s localhost:1976/metrics           # Prometheus text
 ```
