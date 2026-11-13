@@ -1,0 +1,2470 @@
+{
+  "target": "/usr/bin/fm",
+  "date": "2026-11-04",
+  "environment": {
+    "macOS": "27.2",
+    "build": "26B123",
+    "configuration_isolated": true,
+    "local_backend": "Ollama-compatible MLX runner",
+    "local_model": "qwen3.8:27b-32k"
+  },
+  "matrix_summary": [
+    {
+      "status": "BLOCKED",
+      "count": 15
+    },
+    {
+      "status": "FAIL",
+      "count": 2
+    },
+    {
+      "status": "NOT_RUN",
+      "count": 2
+    },
+    {
+      "status": "PASS",
+      "count": 75
+    },
+    {
+      "status": "UNSUPPORTED",
+      "count": 1
+    }
+  ],
+  "matrix_cases": [
+    {
+      "name": "help.chat",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm chat\u001b[0m\n  \u001b[38;2;153;153;153mStart an interactive chat session.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm chat\n    \u001b[38;2;153;153;153m%\u001b[0m fm chat --resume my-session\n    \u001b[38;2;153;153;153m%\u001b[0m fm chat --instructions 'You are a funny comedian'\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m--[no-]ax-screen-reader      \u001b[0mRender plain lines for a screen reader\n    \u001b[1m--continue                   \u001b[0mContinue the most recent chat session\n    \u001b[1m-h, --help                   \u001b[0mShow help information\n    \u001b[1m-i, --instructions <t>       \u001b[0mInstructions for the model\n    \u001b[1m-m, --model <model>          \u001b[0mModel to use (system, pcc)\n    \u001b[1m--model-provider <p>         \u001b[0mChat Completions model provider name or base URL\n    \u001b[1m--model-provider-header <h>  \u001b[0mExtra model provider header 'Name: Value' (repeatable)\n    \u001b[1m-r, --resume <name>          \u001b[0mResume a saved chat session\n    \u001b[1m--set-ax-bell <b>            \u001b[0mPersist the screen reader completion bell (true or false)\n    \u001b[1m--set-ax-screen-reader       \u001b[0mPersist screen reader mode on\n    \u001b[1m--set-default-model <m>      \u001b[0mPersist default model (system or pcc)\n    \u001b[1m--set-no-ax-screen-reader    \u001b[0mPersist screen reader mode off\n    \u001b[1m--tool <name>                \u001b[0mBuilt-in tool to enable (barcode, ocr; repeatable)\n\n  \u001b[3m\u001b[38;2;153;153;153mSessions are saved to ~/.fm/sessions/ and can be resumed with --resume.\u001b[0m\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.04904970899224281
+    },
+    {
+      "name": "help.config",
+      "status": "PASS",
+      "command": [
+        "config",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm config\u001b[0m\n  \u001b[38;2;153;153;153mView and edit the CLI configuration.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm config list\n    \u001b[38;2;153;153;153m%\u001b[0m fm config get default-model\n    \u001b[38;2;153;153;153m%\u001b[0m fm config path\n    \u001b[38;2;153;153;153m%\u001b[0m fm config add model-provider <name> <url>\n    \u001b[38;2;153;153;153m%\u001b[0m fm config set default-model-provider <name-or-url>\n    \u001b[38;2;153;153;153m%\u001b[0m fm config set default-model <model>\n\n  \u001b[38;2;55;195;160m\u001b[1mSUBCOMMANDS\u001b[0m\n    \u001b[1madd model-provider <name> <url>  \u001b[0mAdd or replace a named model provider\n    \u001b[1mget <key>                        \u001b[0mPrint one configuration value\n    \u001b[1m-h, --help                       \u001b[0mShow help information\n    \u001b[1mlist                             \u001b[0mPrint the current configuration\n    \u001b[1mpath                             \u001b[0mPrint the configuration file path\n    \u001b[1mremove model-provider <name>     \u001b[0mRemove a named model provider\n    \u001b[1mset <key> <value>                \u001b[0mSet default-model-provider or default-model\n\n  \u001b[3m\u001b[38;2;153;153;153mConfiguration is stored in ~/.fm/config.json.\u001b[0m\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.019879542000126094
+    },
+    {
+      "name": "help.count-tokens",
+      "status": "PASS",
+      "command": [
+        "count-tokens",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm count-tokens\u001b[0m\n  \u001b[38;2;153;153;153mCount the tokens in a prompt, instructions, or transcript.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm count-tokens 'What is Swift?'\n    \u001b[38;2;153;153;153m%\u001b[0m fm count-tokens -i 'You are a helpful assistant' 'What is Swift?'\n    \u001b[38;2;153;153;153m%\u001b[0m fm count-tokens -i 'Answer concisely'\n    \u001b[38;2;153;153;153m%\u001b[0m fm count-tokens --image photo.jpg --text 'Describe this image'\n    \u001b[38;2;153;153;153m%\u001b[0m echo 'What is Swift?' | fm count-tokens\n    \u001b[38;2;153;153;153m%\u001b[0m fm count-tokens --transcript session.json\n\n  \u001b[38;2;55;195;160m\u001b[1mARGUMENTS\u001b[0m\n    \u001b[1m<prompt>                \u001b[0mPrompt to count tokens for\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-h, --help              \u001b[0mShow help information\n    \u001b[1m--image <path>          \u001b[0mImage to include in the prompt (repeatable)\n    \u001b[1m-i, --instructions <t>  \u001b[0mInstructions to include in the count\n    \u001b[1m-q, --quiet             \u001b[0mPrint only the integer count\n    \u001b[1m--text <t>              \u001b[0mAdditional text segment to include (repeatable)\n    \u001b[1m--transcript <f>        \u001b[0mSaved transcript to count as a framed conversation\n\n  \u001b[3m\u001b[38;2;153;153;153mOnly works with the on-device system model. Output is 'Token count: N' in a terminal and a bare integer when piped; use --quiet to force the bare form.\u001b[0m\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02235529199242592
+    },
+    {
+      "name": "help.license",
+      "status": "PASS",
+      "command": [
+        "license",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm license\u001b[0m\n  \u001b[38;2;153;153;153mShow and agree to the Foundation Models CLI Legal Notice & Terms.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm license\n    \u001b[38;2;153;153;153m%\u001b[0m fm license --status\n    \u001b[38;2;153;153;153m%\u001b[0m fm license --show\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-h, --help  \u001b[0mShow help information\n    \u001b[1m--show      \u001b[0mPrint the license text without prompting\n    \u001b[1m--status    \u001b[0mReport whether the license has been agreed to\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.021306709008058533
+    },
+    {
+      "name": "help.models",
+      "status": "PASS",
+      "command": [
+        "models",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm models\u001b[0m\n  \u001b[38;2;153;153;153mCheck model availability.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm models\n    \u001b[38;2;153;153;153m%\u001b[0m fm models --model-provider http://localhost:1976/api/v1\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-h, --help            \u001b[0mShow help information\n    \u001b[1m--model-provider <p>  \u001b[0mChat Completions model provider name or base URL\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.021120958001120016
+    },
+    {
+      "name": "help.quota-usage",
+      "status": "PASS",
+      "command": [
+        "quota-usage",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm quota-usage\u001b[0m\n  \u001b[38;2;153;153;153mCheck model quota usage.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm quota-usage\n    \u001b[38;2;153;153;153m%\u001b[0m fm quota-usage --model system\n    \u001b[38;2;153;153;153m%\u001b[0m fm quota-usage --model pcc\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-h, --help           \u001b[0mShow help information\n    \u001b[1m-m, --model <model>  \u001b[0mModel to check (system, pcc); checks all if omitted\n\n  \u001b[38;2;55;195;160m\u001b[1mMODELS\u001b[0m\n    \u001b[1msystem               \u001b[0mOn-device Apple Foundation Model \u001b[38;2;153;153;153m(default)\u001b[0m\n    \u001b[1mpcc                  \u001b[0mApple Foundation Model on Private Cloud Compute\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.03506083300453611
+    },
+    {
+      "name": "help.respond",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm respond\u001b[0m\n  \u001b[38;2;153;153;153mGenerate a response to a prompt.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond 'What is Swift?'\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond --model pcc 'What is Swift?'\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond --use-case content-tagging 'Analyze this text'\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond --image photo.jpg --text 'What is in this image?'\n    \u001b[38;2;153;153;153m%\u001b[0m echo 'What is Swift?' | fm respond\n\n  \u001b[38;2;55;195;160m\u001b[1mARGUMENTS\u001b[0m\n    \u001b[1m<prompt>                     \u001b[0mPrompt for the model to respond to\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-m, --model <model>          \u001b[0mModel to use (system, pcc)\n    \u001b[1m--model-provider <p>         \u001b[0mChat Completions model provider name or base URL\n    \u001b[1m--model-provider-header <h>  \u001b[0mExtra model provider header 'Name: Value' (repeatable)\n    \u001b[1m-i, --instructions <t>       \u001b[0mInstructions for the model to follow\n    \u001b[1m--schema <file>              \u001b[0mPath to a structured output schema file\n    \u001b[1m--text <text>                \u001b[0mText segment to include in the prompt\n    \u001b[1m--image <path>               \u001b[0mImage file path to include in the prompt\n    \u001b[1m--label <name>               \u001b[0mLabel for the corresponding --image (paired by order)\n    \u001b[1m--tool <name>                \u001b[0mBuilt-in tool to enable (barcode, ocr; repeatable)\n    \u001b[1m--resume <f>                 \u001b[0mContinue a saved conversation from its transcript\n    \u001b[1m--save-transcript <f>        \u001b[0mSave transcript to a file after responding\n    \u001b[1m--[no-]stream                \u001b[0mStream the output as it's generated (default: on)\n    \u001b[1m-g, --greedy                 \u001b[0mUse greedy sampling\n    \u001b[1m-v, --verbose                \u001b[0mPrint verbose output\n    \u001b[1m-h, --help                   \u001b[0mShow help information\n\n  \u001b[38;2;55;195;160m\u001b[1mSYSTEM MODEL OPTIONS\u001b[0m\n    \u001b[1m--use-case <case>            \u001b[0mModel use case (general, content-tagging)\n    \u001b[1m--guardrails <level>         \u001b[0mGuardrail level (default, permissive-content-transformations)\n\n  \u001b[38;2;55;195;160m\u001b[1mMODELS\u001b[0m\n    \u001b[1msystem                       \u001b[0mOn-device Apple Foundation Model \u001b[38;2;153;153;153m(default)\u001b[0m\n    \u001b[1mpcc                          \u001b[0mApple Foundation Model on Private Cloud Compute\n    \u001b[1m<model>                      \u001b[0mModel from a custom model provider\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.026001624995842576
+    },
+    {
+      "name": "help.schema",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm schema\u001b[0m\n  \u001b[38;2;153;153;153mGenerate a structured output generation schema.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mSUBCOMMANDS\u001b[0m\n    \u001b[1mobject  \u001b[0mGenerate a structured output schema for an object type\n\n  \u001b[38;2;55;195;160m\u001b[1mEXAMPLES\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm schema object --name Person --string name --int age\n    \u001b[38;2;153;153;153m%\u001b[0m fm schema object --name Dog --string breed --boolean friendly\n\n  \u001b[3m\u001b[38;2;153;153;153mRun 'fm schema object --help' for detailed property declaration syntax.\u001b[0m\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.025392500014277175
+    },
+    {
+      "name": "help.serve",
+      "status": "PASS",
+      "command": [
+        "serve",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm serve\u001b[0m\n  \u001b[38;2;153;153;153mStart a Chat Completions API server for Foundation Models.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm serve\n    \u001b[38;2;153;153;153m%\u001b[0m fm serve --port 1976\n    \u001b[38;2;153;153;153m%\u001b[0m fm serve --host 0.0.0.0 --port 1976\n    \u001b[38;2;153;153;153m%\u001b[0m fm serve --socket /tmp/fm.sock\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-h, --help                   \u001b[0mShow help information\n    \u001b[1m--host <host>                \u001b[0mHost address to bind to (TCP mode)\n    \u001b[1m--model-provider <p>         \u001b[0mChat Completions model provider name or base URL\n    \u001b[1m--model-provider-header <h>  \u001b[0mExtra model provider header 'Name: Value' (repeatable)\n    \u001b[1m--port <port>                \u001b[0mPort to listen on, 1–65535 (TCP mode)\n    \u001b[1m--socket <path>              \u001b[0mUnix domain socket path (socket mode)\n\n  \u001b[38;2;55;195;160m\u001b[1mENDPOINTS\u001b[0m\n    \u001b[1mGET  /health                 \u001b[0mHealth check\n    \u001b[1mGET  /v1/models              \u001b[0mList available models\n    \u001b[1mPOST /v1/chat/completions    \u001b[0mChat completions (streaming & non-streaming)\n\n  \u001b[38;2;55;195;160m\u001b[1mMODELS\u001b[0m\n    \u001b[1msystem                       \u001b[0mOn-device Apple Foundation Model \u001b[38;2;153;153;153m(default)\u001b[0m\n    \u001b[1mpcc                          \u001b[0mApple Foundation Model on Private Cloud Compute\n    \u001b[1m<model>                      \u001b[0mModel from a custom model provider\n\n  \u001b[3m\u001b[38;2;153;153;153mUse --socket for Unix domain socket transport (recommended for local Python bindings).\u001b[0m\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.022978249995503575
+    },
+    {
+      "name": "help.schema.object",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--help"
+      ],
+      "stdout": "\n  \u001b[38;2;55;195;160m\u001b[1mfm schema object\u001b[0m\n  \u001b[38;2;153;153;153mGenerate a structured output schema for an object type.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm schema object --name Person --string name --int age --description 'Age in years'\n    \u001b[38;2;153;153;153m%\u001b[0m fm schema object --name Restaurant --string name --string address.street --string address.zip\n    \u001b[38;2;153;153;153m%\u001b[0m fm schema object --name Restaurant --string title \\\n      --nested address --schema \"$(fm schema object --name Address --string zipcode)\"\n    \u001b[38;2;153;153;153m%\u001b[0m fm schema object --name SearchResult --anyOf \\\n      --schema \"$(fm schema object --name Found --string name)\" \\\n      --schema \"$(fm schema object --name NotFound --string reason)\"\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-h, --help            \u001b[0mShow help information\n    \u001b[1m--name <name>         \u001b[0mName of the root object type (required)\n\n  \u001b[38;2;55;195;160m\u001b[1mPROPERTY DECLARATIONS\u001b[0m\n    \u001b[1m--anyOf               \u001b[0mBuild an anyOf union; subsequent --schema args become choices\n    \u001b[1m--boolean <name>      \u001b[0mDeclare a boolean property\n    \u001b[1m--double <name>       \u001b[0mDeclare a floating-point property\n    \u001b[1m--integer <name>      \u001b[0mDeclare an integer property\n    \u001b[1m--object <name>       \u001b[0mDeclare a nested object property (follow with --schema)\n    \u001b[1m--schema <json>       \u001b[0mProvide a structured output schema (after --object or --anyOf)\n    \u001b[1m--string <name>       \u001b[0mDeclare a string property\n\n  \u001b[38;2;55;195;160m\u001b[1mPROPERTY MODIFIERS\u001b[0m\n    \u001b[1m--array               \u001b[0mMark the preceding property as an array of that type\n    \u001b[1m--description <text>  \u001b[0mSet a description on the preceding property\n    \u001b[1m--optional            \u001b[0mMark the preceding property as optional\n\n  \u001b[3m\u001b[38;2;153;153;153mUse dot notation in property names (e.g. 'address.street') to create nested objects.\u001b[0m\n\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02420587500091642
+    },
+    {
+      "name": "config.path",
+      "status": "PASS",
+      "command": [
+        "config",
+        "path"
+      ],
+      "stdout": "/tmp/fmux-fm-verification.uziQMh/home/.fm/config.json\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.023595499980729073
+    },
+    {
+      "name": "config.add",
+      "status": "PASS",
+      "command": [
+        "config",
+        "add",
+        "model-provider",
+        "verify",
+        "http://127.0.0.1:60433/v1"
+      ],
+      "stdout": "Added model provider 'verify'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.025080999999772757
+    },
+    {
+      "name": "config.set.provider",
+      "status": "PASS",
+      "command": [
+        "config",
+        "set",
+        "default-model-provider",
+        "verify"
+      ],
+      "stdout": "Set default-model-provider to 'verify'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.021563874994171783
+    },
+    {
+      "name": "config.set.model",
+      "status": "PASS",
+      "command": [
+        "config",
+        "set",
+        "default-model",
+        "cap-model"
+      ],
+      "stdout": "Set default-model to 'cap-model'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.021174084016820416
+    },
+    {
+      "name": "config.get.model",
+      "status": "PASS",
+      "command": [
+        "config",
+        "get",
+        "default-model"
+      ],
+      "stdout": "cap-model\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.020645667013013735
+    },
+    {
+      "name": "config.get.provider",
+      "status": "PASS",
+      "command": [
+        "config",
+        "get",
+        "default-model-provider"
+      ],
+      "stdout": "verify\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.022469791991170496
+    },
+    {
+      "name": "config.list",
+      "status": "PASS",
+      "command": [
+        "config",
+        "list"
+      ],
+      "stdout": "default-model-provider  verify\ndefault-model           cap-model\nmodel-providers         verify  http://127.0.0.1:60433/v1\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.019244249997427687
+    },
+    {
+      "name": "config.replace",
+      "status": "PASS",
+      "command": [
+        "config",
+        "add",
+        "model-provider",
+        "temporary",
+        "http://127.0.0.1:60433/v1"
+      ],
+      "stdout": "Added model provider 'temporary'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.018475916993338615
+    },
+    {
+      "name": "config.replace.again",
+      "status": "PASS",
+      "command": [
+        "config",
+        "add",
+        "model-provider",
+        "temporary",
+        "http://127.0.0.1:60433/v1/updated"
+      ],
+      "stdout": "Added model provider 'temporary'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.026105166994966567
+    },
+    {
+      "name": "config.remove",
+      "status": "PASS",
+      "command": [
+        "config",
+        "remove",
+        "model-provider",
+        "temporary"
+      ],
+      "stdout": "Removed model provider 'temporary'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.022048333019483835
+    },
+    {
+      "name": "config.remove.verify_absent",
+      "status": "PASS",
+      "command": [
+        "config",
+        "list"
+      ],
+      "stdout": "default-model-provider  verify\ndefault-model           cap-model\nmodel-providers         verify  http://127.0.0.1:60433/v1\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.016576833004364744
+    },
+    {
+      "name": "config.invalid.key",
+      "status": "PASS",
+      "command": [
+        "config",
+        "set",
+        "unknown-option",
+        "x"
+      ],
+      "stdout": "",
+      "stderr": "Error: Unknown key 'unknown-option'. Use 'default-model-provider' or 'default-model'.\nUsage: fm <command> [options]\n       fm respond 'What is Swift?'\n       fm respond --model pcc 'What is Swift?'\n       fm chat\n  See 'fm --help' for more information.\n",
+      "returncode": 64,
+      "reason": "",
+      "duration_s": 0.031958374980604276
+    },
+    {
+      "name": "models.named",
+      "status": "PASS",
+      "command": [
+        "models",
+        "--model-provider",
+        "verify"
+      ],
+      "stdout": "  verify  http://127.0.0.1:60433/v1\n  ✓ cap-model\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.032120624993694946
+    },
+    {
+      "name": "models.url",
+      "status": "PASS",
+      "command": [
+        "models",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1"
+      ],
+      "stdout": "  http://127.0.0.1:60433/v1\n  ✓ cap-model\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.03309666601126082
+    },
+    {
+      "name": "models.default",
+      "status": "BLOCKED",
+      "command": [
+        "models"
+      ],
+      "stdout": "  Apple Foundation Models\n  ✗ system     (deviceNotEligible)\n  ✗ pcc        (Private Cloud Compute is not available in this context. Please use the Terminal app.)\n  ────────────────────────────────────────────────────────────────────────────────────────────────────\n  verify                                                                     http://127.0.0.1:60433/v1\n  ✓ cap-model\n",
+      "stderr": "",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.03567929202108644
+    },
+    {
+      "name": "schema.types_modifiers",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Sample",
+        "--string",
+        "name",
+        "--integer",
+        "age",
+        "--double",
+        "ratio",
+        "--boolean",
+        "enabled",
+        "--string",
+        "tags",
+        "--array",
+        "--string",
+        "note",
+        "--optional",
+        "--description",
+        "Optional note"
+      ],
+      "stdout": "{\n  \"x-order\" : [\n    \"name\",\n    \"age\",\n    \"ratio\",\n    \"enabled\",\n    \"tags\",\n    \"note\"\n  ],\n  \"type\" : \"object\",\n  \"required\" : [\n    \"name\",\n    \"age\",\n    \"ratio\",\n    \"enabled\",\n    \"tags\"\n  ],\n  \"additionalProperties\" : false,\n  \"properties\" : {\n    \"name\" : {\n      \"type\" : \"string\"\n    },\n    \"tags\" : {\n      \"type\" : \"array\",\n      \"items\" : {\n        \"type\" : \"string\"\n      }\n    },\n    \"enabled\" : {\n      \"type\" : \"boolean\"\n    },\n    \"ratio\" : {\n      \"type\" : \"number\"\n    },\n    \"age\" : {\n      \"type\" : \"integer\"\n    },\n    \"note\" : {\n      \"type\" : \"string\",\n      \"description\" : \"Optional note\"\n    }\n  },\n  \"title\" : \"Sample\"\n}\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02047258400125429
+    },
+    {
+      "name": "schema.nested.--object",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Person",
+        "--object",
+        "address",
+        "--schema",
+        "{\"type\":\"object\",\"title\":\"Address\",\"properties\":{\"zip\":{\"type\":\"string\"}},\"required\":[\"zip\"],\"additionalProperties\":false}"
+      ],
+      "stdout": "{\n  \"x-order\" : [\n    \"address\"\n  ],\n  \"type\" : \"object\",\n  \"$defs\" : {\n    \"Address\" : {\n      \"title\" : \"Address\",\n      \"additionalProperties\" : false,\n      \"required\" : [\n        \"zip\"\n      ],\n      \"type\" : \"object\",\n      \"properties\" : {\n        \"zip\" : {\n          \"type\" : \"string\"\n        }\n      },\n      \"x-order\" : [\n        \"zip\"\n      ]\n    }\n  },\n  \"properties\" : {\n    \"address\" : {\n      \"$ref\" : \"#\\/$defs\\/Address\"\n    }\n  },\n  \"required\" : [\n    \"address\"\n  ],\n  \"title\" : \"Person\",\n  \"additionalProperties\" : false\n}\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.018716583988862112
+    },
+    {
+      "name": "schema.nested.--nested",
+      "status": "FAIL",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Person",
+        "--nested",
+        "address",
+        "--schema",
+        "{\"type\":\"object\",\"title\":\"Address\",\"properties\":{\"zip\":{\"type\":\"string\"}},\"required\":[\"zip\"],\"additionalProperties\":false}"
+      ],
+      "stdout": "",
+      "stderr": "Error: SchemaError(errorDescription: Optional(\"Unknown argument: --nested\"))\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.019936833006795496
+    },
+    {
+      "name": "schema.dot_notation",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Person",
+        "--string",
+        "address.street",
+        "--integer",
+        "address.number"
+      ],
+      "stdout": "{\n  \"title\" : \"Person\",\n  \"properties\" : {\n    \"address\" : {\n      \"$ref\" : \"#\\/$defs\\/Address\"\n    }\n  },\n  \"type\" : \"object\",\n  \"additionalProperties\" : false,\n  \"required\" : [\n    \"address\"\n  ],\n  \"$defs\" : {\n    \"Address\" : {\n      \"title\" : \"Address\",\n      \"required\" : [\n        \"street\",\n        \"number\"\n      ],\n      \"type\" : \"object\",\n      \"x-order\" : [\n        \"street\",\n        \"number\"\n      ],\n      \"additionalProperties\" : false,\n      \"properties\" : {\n        \"street\" : {\n          \"type\" : \"string\"\n        },\n        \"number\" : {\n          \"type\" : \"integer\"\n        }\n      }\n    }\n  },\n  \"x-order\" : [\n    \"address\"\n  ]\n}\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.021822083013830706
+    },
+    {
+      "name": "schema.integer_alias",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Person",
+        "--int",
+        "age"
+      ],
+      "stdout": "{\n  \"properties\" : {\n    \"age\" : {\n      \"type\" : \"integer\"\n    }\n  },\n  \"required\" : [\n    \"age\"\n  ],\n  \"x-order\" : [\n    \"age\"\n  ],\n  \"additionalProperties\" : false,\n  \"type\" : \"object\",\n  \"title\" : \"Person\"\n}\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02702375000808388
+    },
+    {
+      "name": "schema.anyOf",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Union",
+        "--anyOf",
+        "--schema",
+        "{\"type\":\"object\",\"title\":\"Address\",\"properties\":{\"zip\":{\"type\":\"string\"}},\"required\":[\"zip\"],\"additionalProperties\":false}",
+        "--schema",
+        "{\"type\":\"object\",\"title\":\"Other\",\"properties\":{\"zip\":{\"type\":\"string\"}},\"required\":[\"zip\"],\"additionalProperties\":false}"
+      ],
+      "stdout": "{\n  \"title\" : \"Union\",\n  \"$defs\" : {\n    \"Address\" : {\n      \"additionalProperties\" : false,\n      \"x-order\" : [\n        \"zip\"\n      ],\n      \"required\" : [\n        \"zip\"\n      ],\n      \"properties\" : {\n        \"zip\" : {\n          \"type\" : \"string\"\n        }\n      },\n      \"type\" : \"object\",\n      \"title\" : \"Address\"\n    },\n    \"Other\" : {\n      \"additionalProperties\" : false,\n      \"title\" : \"Other\",\n      \"type\" : \"object\",\n      \"properties\" : {\n        \"zip\" : {\n          \"type\" : \"string\"\n        }\n      },\n      \"x-order\" : [\n        \"zip\"\n      ],\n      \"required\" : [\n        \"zip\"\n      ]\n    }\n  },\n  \"anyOf\" : [\n    {\n      \"$ref\" : \"#\\/$defs\\/Address\"\n    },\n    {\n      \"$ref\" : \"#\\/$defs\\/Other\"\n    }\n  ]\n}\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.029242207994684577
+    },
+    {
+      "name": "schema.missing.name",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--string",
+        "name"
+      ],
+      "stdout": "",
+      "stderr": "Error: Missing expected argument '--name <name>'\nHelp:  --name <name>  Name of the root object type.\nUsage: fm schema object --name Restaurant \\\n         --string 'name' --description 'Name of the restaurant' \\\n         --double 'average_rating' --description 'Rating between 1 and 5' --optional \\\n         --string 'tags' --array --description 'Tags for the restaurant' --optional \\\n         --string 'address.street' --string 'address.zip'\n\n       fm schema object --name Restaurant \\\n         --string 'title' \\\n         --nested 'address' --schema \"$(fm schema object --name Address --string zipcode --string country)\"\n\n       fm schema object --name SearchResult \\\n         --anyOf \\\n         --schema \"$(fm schema object --name Found --string name)\" \\\n         --schema \"$(fm schema object --name NotFound --string reason)\"\n  See 'fm schema object --help' for more information.\n",
+      "returncode": 64,
+      "reason": "",
+      "duration_s": 0.02768708299845457
+    },
+    {
+      "name": "schema.bad.nested",
+      "status": "PASS",
+      "command": [
+        "schema",
+        "object",
+        "--name",
+        "Bad",
+        "--object",
+        "address",
+        "--schema",
+        "not-json"
+      ],
+      "stdout": "",
+      "stderr": "Error: DecodingError.dataCorrupted: Data was corrupted. Debug description: The given data was not valid JSON.. Underlying error: Error Domain=NSCocoaErrorDomain Code=3840 \"Unexpected character 'o' in expected null value around line 1, column 2.\" UserInfo={NSDebugDescription=Unexpected character 'o' in expected null value around line 1, column 2., NSJSONSerializationErrorIndex=1}\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.023491333005949855
+    },
+    {
+      "name": "license.status",
+      "status": "PASS",
+      "command": [
+        "license",
+        "--status"
+      ],
+      "stdout": "Agreed to license FM1 version 1.1 on 2026年10月25日 21:19.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02682304198970087
+    },
+    {
+      "name": "license.show",
+      "status": "PASS",
+      "command": [
+        "license",
+        "--show"
+      ],
+      "stdout": "LEGAL NOTICE & TERMS\n\nPLEASE READ THESE TERMS CAREFULLY BEFORE USING THE FOUNDATION MODELS CLI. BY\nUSING THE FOUNDATION MODELS CLI, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF\nTHE APPLICABLE SOFTWARE LICENSE AGREEMENT FOR macOS AT\nhttps://www.apple.com/legal/sla/. YOU ARE ALSO AGREEING TO NOT PROGRAMMATICALLY\nACCESS OR USE APPLE MODELS THROUGH APPLE SOFTWARE OR SERVICES EXCEPT AS EXPRESSLY\nPERMITTED. IF YOU DO NOT AGREE TO THESE TERMS, DO NOT USE THE FOUNDATION\nMODELS CLI.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.01621004199841991
+    },
+    {
+      "name": "license.agreement",
+      "status": "NOT_RUN",
+      "command": [
+        "license"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "reason": "No legal assent is made on the user's behalf."
+    },
+    {
+      "name": "respond.stream",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "hi"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.05801533299381845,
+      "request": {
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model",
+        "messages": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [],
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.buffered",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--no-stream",
+        "hi"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.07077191700227559,
+      "request": {
+        "model": "cap-model",
+        "stream_options": {
+          "include_usage": true
+        },
+        "tools": [],
+        "messages": [
+          {
+            "content": "hi",
+            "role": "user"
+          }
+        ],
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.instructions",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "-i",
+        "be concise",
+        "hi"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.07256433300790377,
+      "request": {
+        "model": "cap-model",
+        "messages": [
+          {
+            "role": "system",
+            "content": "be concise"
+          },
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.stdin",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.04581770798540674,
+      "request": {
+        "model": "cap-model",
+        "stream_options": {
+          "include_usage": true
+        },
+        "tools": [],
+        "messages": [
+          {
+            "role": "user",
+            "content": "stdin prompt"
+          }
+        ],
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.text",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--text",
+        "alpha",
+        "--text",
+        "beta"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.04233912500785664,
+      "request": {
+        "tools": [],
+        "stream": true,
+        "model": "cap-model",
+        "messages": [
+          {
+            "content": [
+              {
+                "type": "text",
+                "text": "alpha"
+              },
+              {
+                "text": "beta",
+                "type": "text"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.headers",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--model-provider-header",
+        "X-Fm-Verify: one",
+        "--model-provider-header",
+        "X-Extra: two",
+        "hi"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.04192325001349673,
+      "request": {
+        "model": "cap-model",
+        "messages": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [],
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream": true
+      },
+      "headers": {
+        "X-Extra": "two",
+        "User-Agent": "com.apple.FoundationModels",
+        "X-Fm-Verify": "one"
+      }
+    },
+    {
+      "name": "respond.verbose",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--verbose",
+        "hi"
+      ],
+      "stdout": "pong\n\u001b[38;2;255;193;7m\nCreating session with default instructions\n\u001b[0m\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.04300983398570679,
+      "request": {
+        "messages": [
+          {
+            "content": "hi",
+            "role": "user"
+          }
+        ],
+        "tools": [],
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model",
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.schema",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--schema",
+        "/tmp/fmux-fm-verification.uziQMh/sample.json",
+        "sample"
+      ],
+      "stdout": "{\"age\": 0, \"ratio\": 0.0, \"note\": \"\", \"name\": \"\", \"enabled\": false, \"tags\": [\"\"]}\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.03375991701614112,
+      "request": {
+        "stream": true,
+        "tools": [],
+        "stream_options": {
+          "include_usage": true
+        },
+        "messages": [
+          {
+            "content": "sample",
+            "role": "user"
+          }
+        ],
+        "response_format": {
+          "json_schema": {
+            "strict": true,
+            "name": "Sample",
+            "schema": {
+              "required": [
+                "name",
+                "age",
+                "ratio",
+                "enabled",
+                "tags"
+              ],
+              "title": "Sample",
+              "type": "object",
+              "x-order": [
+                "name",
+                "age",
+                "ratio",
+                "enabled",
+                "tags",
+                "note"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "age": {
+                  "type": "integer"
+                },
+                "ratio": {
+                  "type": "number"
+                },
+                "note": {
+                  "description": "Optional note",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "tags": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "type": "json_schema"
+        },
+        "model": "cap-model"
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.image",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--image",
+        "/tmp/fmux-fm-verification.uziQMh/ocr.png",
+        "--text",
+        "describe"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.22598779198597185,
+      "request": {
+        "messages": [
+          {
+            "content": [
+              {
+                "image_url": {
+                  "url": "data:image/jpeg;base64,/9j/4QC+RXhpZgAAT...[length=38279]",
+                  "detail": "auto"
+                },
+                "type": "image_url"
+              },
+              {
+                "text": "describe",
+                "type": "text"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "tools": [],
+        "stream": true,
+        "model": "cap-model",
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.image_labels",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:62041/v1",
+        "-m",
+        "cap-model",
+        "--tool",
+        "ocr",
+        "--image",
+        "/private/tmp/fmux-fm-verification.uziQMh/ocr.png",
+        "--label",
+        "text",
+        "--image",
+        "/private/tmp/fmux-fm-verification.uziQMh/qr.png",
+        "--label",
+        "barcode",
+        "describe"
+      ],
+      "stdout": "pong: [\"FM VERIFY 12345\"]\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 22.97758295800304,
+      "request": {
+        "stream_options": {
+          "include_usage": true
+        },
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "getText",
+              "parameters": {
+                "properties": {
+                  "image": {
+                    "$ref": "#/$defs/ImageReference",
+                    "description": "The label of the image to analyze."
+                  }
+                },
+                "x-order": [
+                  "image"
+                ],
+                "title": "Arguments",
+                "$defs": {
+                  "ImageReference": {
+                    "properties": {
+                      "attachmentLabel": {
+                        "type": "string",
+                        "enum": [
+                          "text",
+                          "barcode"
+                        ]
+                      }
+                    },
+                    "x-order": [
+                      "attachmentLabel"
+                    ],
+                    "title": "ImageReference",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "attachmentLabel"
+                    ],
+                    "description": "A reference for an image in the transcript."
+                  }
+                },
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "image"
+                ]
+              },
+              "description": "Reads text from an image attached to the conversation. The image argument's attachmentLabel must be the label of an attached image (the identifier shown with the image), not a schema reference, $ref, or type name."
+            }
+          }
+        ],
+        "stream": true,
+        "model": "cap-model",
+        "messages": [
+          {
+            "role": "system"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "describe"
+              },
+              {
+                "type": "text",
+                "text": "[text]"
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "detail": "auto",
+                  "url": "data:image/jpeg;base64,/9j/4QC+RXhpZgAAT...[length=38279]"
+                }
+              },
+              {
+                "type": "text",
+                "text": "[barcode]"
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/jpeg;base64,/9j/4Q/+RXhpZgAAT...[length=23731]",
+                  "detail": "auto"
+                }
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "tool_calls": [
+              {
+                "id": "verify-tool-1",
+                "function": {
+                  "name": "getText",
+                  "arguments": "{\"image\": {\"attachmentLabel\": \"text\"}}"
+                },
+                "type": "function"
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "content": "FM VERIFY 12345",
+            "tool_call_id": "verify-tool-1"
+          }
+        ]
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.tool.ocr",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:63277/v1",
+        "-m",
+        "cap-model",
+        "--tool",
+        "ocr",
+        "--image",
+        "/private/tmp/fmux-fm-verification.uziQMh/ocr.png",
+        "extract text"
+      ],
+      "stdout": "pong: [\"FM VERIFY 12345\"]\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.3014200830075424,
+      "request": {
+        "model": "cap-model",
+        "tools": [
+          {
+            "function": {
+              "description": "Reads text from an image attached to the conversation. The image argument's attachmentLabel must be the label of an attached image (the identifier shown with the image), not a schema reference, $ref, or type name.",
+              "parameters": {
+                "$defs": {
+                  "ImageReference": {
+                    "x-order": [
+                      "attachmentLabel"
+                    ],
+                    "description": "A reference for an image in the transcript.",
+                    "properties": {
+                      "attachmentLabel": {
+                        "type": "string",
+                        "enum": [
+                          "image_0"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "attachmentLabel"
+                    ],
+                    "additionalProperties": false,
+                    "type": "object",
+                    "title": "ImageReference"
+                  }
+                },
+                "x-order": [
+                  "image"
+                ],
+                "required": [
+                  "image"
+                ],
+                "properties": {
+                  "image": {
+                    "description": "The label of the image to analyze.",
+                    "$ref": "#/$defs/ImageReference"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "title": "Arguments"
+              },
+              "name": "getText"
+            },
+            "type": "function"
+          }
+        ],
+        "stream_options": {
+          "include_usage": true
+        },
+        "messages": [
+          {
+            "role": "system"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "text": "extract text",
+                "type": "text"
+              },
+              {
+                "text": "[image_0]",
+                "type": "text"
+              },
+              {
+                "image_url": {
+                  "url": "data:image/jpeg;base64,/9j/4QC+RXhpZgAAT...[length=38279]",
+                  "detail": "auto"
+                },
+                "type": "image_url"
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "tool_calls": [
+              {
+                "id": "verify-tool-1",
+                "type": "function",
+                "function": {
+                  "arguments": "{\"image\": {\"attachmentLabel\": \"image_0\"}}",
+                  "name": "getText"
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "verify-tool-1",
+            "content": "FM VERIFY 12345"
+          }
+        ],
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      },
+      "earlier_attempt": {
+        "status": "TIMEOUT",
+        "duration_s": 30.008862290997058,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "respond.tool.barcode",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:62041/v1",
+        "-m",
+        "cap-model",
+        "--tool",
+        "barcode",
+        "--image",
+        "/private/tmp/fmux-fm-verification.uziQMh/qr.png",
+        "extract text"
+      ],
+      "stdout": "pong: [\"{\\n  \\\"barcodeType\\\": \\\"qr\\\",\\n  \\\"content\\\": \\\"FM-VERIFY-QR-12345\\\"\\n}\"]\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 14.459221291996073,
+      "request": {
+        "model": "cap-model",
+        "messages": [
+          {
+            "role": "system"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "text": "extract text",
+                "type": "text"
+              },
+              {
+                "text": "[image_0]",
+                "type": "text"
+              },
+              {
+                "image_url": {
+                  "url": "data:image/jpeg;base64,/9j/4Q/+RXhpZgAAT...[length=23731]",
+                  "detail": "auto"
+                },
+                "type": "image_url"
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "tool_calls": [
+              {
+                "id": "verify-tool-1",
+                "function": {
+                  "arguments": "{\"image\": {\"attachmentLabel\": \"image_0\"}}",
+                  "name": "readBarcodes"
+                },
+                "type": "function"
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "content": "{\n  \"barcodeType\": \"qr\",\n  \"content\": \"FM-VERIFY-QR-12345\"\n}",
+            "tool_call_id": "verify-tool-1"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "parameters": {
+                "x-order": [
+                  "image"
+                ],
+                "$defs": {
+                  "ImageReference": {
+                    "x-order": [
+                      "attachmentLabel"
+                    ],
+                    "description": "A reference for an image in the transcript.",
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                      "attachmentLabel"
+                    ],
+                    "properties": {
+                      "attachmentLabel": {
+                        "type": "string",
+                        "enum": [
+                          "image_0"
+                        ]
+                      }
+                    },
+                    "title": "ImageReference"
+                  }
+                },
+                "type": "object",
+                "additionalProperties": false,
+                "title": "Arguments",
+                "properties": {
+                  "image": {
+                    "description": "The label of the image to analyze.",
+                    "$ref": "#/$defs/ImageReference"
+                  }
+                },
+                "required": [
+                  "image"
+                ]
+              },
+              "name": "readBarcodes",
+              "description": "Reads barcodes and QR codes from an image attached to the conversation. The image argument's attachmentLabel must be the label of an attached image (the identifier shown with the image), not a schema reference, $ref, or type name."
+            }
+          }
+        ],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.tools.repeat",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--tool",
+        "ocr",
+        "--tool",
+        "barcode",
+        "hi"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.0491392079857178,
+      "request": {
+        "model": "cap-model",
+        "tools": [],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "messages": [
+          {
+            "role": "system"
+          },
+          {
+            "content": "hi",
+            "role": "user"
+          }
+        ]
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.save_transcript",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--save-transcript",
+        "/tmp/fmux-fm-verification.uziQMh/transcript.json",
+        "hi"
+      ],
+      "stdout": "pong\n",
+      "stderr": "\u001b[38;2;255;107;128mTranscript saved to: /tmp/fmux-fm-verification.uziQMh/transcript.json\n\u001b[0m",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.047582457977114245,
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [],
+        "model": "cap-model",
+        "stream_options": {
+          "include_usage": true
+        },
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.resume",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--resume",
+        "/tmp/fmux-fm-verification.uziQMh/transcript.json",
+        "next"
+      ],
+      "stdout": "pong\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.0528878339973744,
+      "request": {
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model",
+        "tools": [],
+        "messages": [
+          {
+            "role": "user",
+            "content": "hi"
+          },
+          {
+            "role": "assistant",
+            "content": "pong"
+          },
+          {
+            "role": "user",
+            "content": "next"
+          }
+        ],
+        "stream": true
+      },
+      "headers": {
+        "User-Agent": "com.apple.FoundationModels"
+      }
+    },
+    {
+      "name": "respond.greedy.custom",
+      "status": "UNSUPPORTED",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "-g",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: Invalid request: Greedy sampling is not supported\n",
+      "returncode": 1,
+      "reason": "Custom provider explicitly rejects greedy sampling.",
+      "duration_s": 0.03324258400243707
+    },
+    {
+      "name": "respond.bad.image",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--image",
+        "/tmp/fmux-fm-verification.uziQMh/missing.png",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: \u001b[38;2;255;107;128mUnable to load image at '/tmp/fmux-fm-verification.uziQMh/missing.png'\u001b[0m\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.025113167008385062
+    },
+    {
+      "name": "respond.label_without_tool",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--image",
+        "/tmp/fmux-fm-verification.uziQMh/ocr.png",
+        "--label",
+        "text",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: \u001b[38;2;255;107;128m--label has no effect without an image-using tool. Enable --tool barcode or --tool ocr (or drop the --label flag).\u001b[0m\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.022831250011222437
+    },
+    {
+      "name": "respond.bad.schema",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--schema",
+        "/tmp/fmux-fm-verification.uziQMh/missing.json",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: \u001b[38;2;255;107;128mInvalid schema at '/tmp/fmux-fm-verification.uziQMh/missing.json': The file “missing.json” couldn’t be opened because there is no such file.\u001b[0m\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.030299375008326024
+    },
+    {
+      "name": "respond.bad.tool",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--tool",
+        "unknown-tool",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: \u001b[38;2;255;107;128mUnknown tool 'unknown-tool'. Known: barcode, ocr.\u001b[0m\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.025289207987952977
+    },
+    {
+      "name": "respond.bad.option",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--does-not-exist",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: Unknown option '--does-not-exist'\nUsage: fm respond 'What is Swift?'\n       fm respond --image photo.jpg --text 'What is in this image?'\n       fm respond --model pcc 'What is Swift?'\n       fm respond --use-case content-tagging 'Analyze this text'\n       echo 'What is Swift?' | fm respond\n  See 'fm respond --help' for more information.\n",
+      "returncode": 64,
+      "reason": "",
+      "duration_s": 0.024464459012961015
+    },
+    {
+      "name": "respond.provider_error",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "error-model",
+        "hi"
+      ],
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 503:\n{\"error\":{\"message\":\"verification unavailable\",\"type\":\"server_error\",\"code\":\"unavailable\"}}\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.036834416998317465
+    },
+    {
+      "name": "respond.no.prompt",
+      "status": "PASS",
+      "command": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "",
+      "stderr": "Error: \u001b[38;2;255;107;128mMissing prompt. Provide a positional prompt, --text, or --image option.\n\n\n  \u001b[38;2;55;195;160m\u001b[1mfm respond\u001b[0m\n  \u001b[38;2;153;153;153mGenerate a response to a prompt.\u001b[0m\n\n  \u001b[38;2;55;195;160m\u001b[1mUSAGE\u001b[0m\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond 'What is Swift?'\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond --model pcc 'What is Swift?'\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond --use-case content-tagging 'Analyze this text'\n    \u001b[38;2;153;153;153m%\u001b[0m fm respond --image photo.jpg --text 'What is in this image?'\n    \u001b[38;2;153;153;153m%\u001b[0m echo 'What is Swift?' | fm respond\n\n  \u001b[38;2;55;195;160m\u001b[1mARGUMENTS\u001b[0m\n    \u001b[1m<prompt>                     \u001b[0mPrompt for the model to respond to\n\n  \u001b[38;2;55;195;160m\u001b[1mOPTIONS\u001b[0m\n    \u001b[1m-m, --model <model>          \u001b[0mModel to use (system, pcc)\n    \u001b[1m--model-provider <p>         \u001b[0mChat Completions model provider name or base URL\n    \u001b[1m--model-provider-header <h>  \u001b[0mExtra model provider header 'Name: Value' (repeatable)\n    \u001b[1m-i, --instructions <t>       \u001b[0mInstructions for the model to follow\n    \u001b[1m--schema <file>              \u001b[0mPath to a structured output schema file\n    \u001b[1m--text <text>                \u001b[0mText segment to include in the prompt\n    \u001b[1m--image <path>               \u001b[0mImage file path to include in the prompt\n    \u001b[1m--label <name>               \u001b[0mLabel for the corresponding --image (paired by order)\n    \u001b[1m--tool <name>                \u001b[0mBuilt-in tool to enable (barcode, ocr; repeatable)\n    \u001b[1m--resume <f>                 \u001b[0mContinue a saved conversation from its transcript\n    \u001b[1m--save-transcript <f>        \u001b[0mSave transcript to a file after responding\n    \u001b[1m--[no-]stream                \u001b[0mStream the output as it's generated (default: on)\n    \u001b[1m-g, --greedy                 \u001b[0mUse greedy sampling\n    \u001b[1m-v, --verbose                \u001b[0mPrint verbose output\n    \u001b[1m-h, --help                   \u001b[0mShow help information\n\n  \u001b[38;2;55;195;160m\u001b[1mSYSTEM MODEL OPTIONS\u001b[0m\n    \u001b[1m--use-case <case>            \u001b[0mModel use case (general, content-tagging)\n    \u001b[1m--guardrails <level>         \u001b[0mGuardrail level (default, permissive-content-transformations)\n\n  \u001b[38;2;55;195;160m\u001b[1mMODELS\u001b[0m\n    \u001b[1msystem                       \u001b[0mOn-device Apple Foundation Model \u001b[38;2;153;153;153m(default)\u001b[0m\n    \u001b[1mpcc                          \u001b[0mApple Foundation Model on Private Cloud Compute\n    \u001b[1m<model>                      \u001b[0mModel from a custom model provider\n\u001b[0m\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.024241458013420925
+    },
+    {
+      "name": "models.builtin",
+      "status": "BLOCKED",
+      "command": [
+        "models"
+      ],
+      "stdout": "  Apple Foundation Models\n  ✗ system  (deviceNotEligible)\n  ✗ pcc     (Private Cloud Compute is not available in this context. Please use the Terminal app.)\n",
+      "stderr": "",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.025833124993368983
+    },
+    {
+      "name": "respond.system",
+      "status": "BLOCKED",
+      "command": [
+        "respond",
+        "-m",
+        "system",
+        "Reply OK"
+      ],
+      "stdout": "",
+      "stderr": "Error: This device does not support Apple Intelligence.\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.025072582997381687
+    },
+    {
+      "name": "respond.system.use_case",
+      "status": "BLOCKED",
+      "command": [
+        "respond",
+        "-m",
+        "system",
+        "--use-case",
+        "content-tagging",
+        "hello"
+      ],
+      "stdout": "",
+      "stderr": "Error: This device does not support Apple Intelligence.\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.027761165983974934
+    },
+    {
+      "name": "respond.system.guardrails",
+      "status": "BLOCKED",
+      "command": [
+        "respond",
+        "-m",
+        "system",
+        "--guardrails",
+        "permissive-content-transformations",
+        "hello"
+      ],
+      "stdout": "",
+      "stderr": "Error: This device does not support Apple Intelligence.\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.0248835000093095
+    },
+    {
+      "name": "respond.system.greedy",
+      "status": "BLOCKED",
+      "command": [
+        "respond",
+        "-m",
+        "system",
+        "-g",
+        "hello"
+      ],
+      "stdout": "",
+      "stderr": "Error: This device does not support Apple Intelligence.\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.023230999999213964
+    },
+    {
+      "name": "respond.pcc.generation",
+      "status": "NOT_RUN",
+      "command": [
+        "respond",
+        "-m",
+        "pcc"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "reason": "Cloud inference is not triggered; availability is probed using quota only."
+    },
+    {
+      "name": "count_tokens.prompt",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens",
+        "Hello world"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.12137666600756347
+    },
+    {
+      "name": "count_tokens.quiet",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens",
+        "--quiet",
+        "Hello world"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.24134708300698549
+    },
+    {
+      "name": "count_tokens.instructions",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens",
+        "-i",
+        "Be concise",
+        "Hello"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.1516901660070289
+    },
+    {
+      "name": "count_tokens.instructions_only",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens",
+        "-i",
+        "Be concise"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.26140491702244617
+    },
+    {
+      "name": "count_tokens.stdin",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.1709302499948535
+    },
+    {
+      "name": "count_tokens.image_text",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens",
+        "--image",
+        "/tmp/fmux-fm-verification.uziQMh/ocr.png",
+        "--text",
+        "Describe"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.26853320898953825
+    },
+    {
+      "name": "count_tokens.transcript",
+      "status": "BLOCKED",
+      "command": [
+        "count-tokens",
+        "--transcript",
+        "/tmp/fmux-fm-verification.uziQMh/transcript.json"
+      ],
+      "stdout": "",
+      "stderr": "Error: The operation couldn’t be completed. (ModelManagerServices.ModelManagerError error 1026.)\n",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.1570498340006452
+    },
+    {
+      "name": "quota.all",
+      "status": "BLOCKED",
+      "command": [
+        "quota-usage"
+      ],
+      "stdout": "System: \u001b[38;2;255;193;7mNot applicable (quota only applies to PCC)\u001b[0m\nPCC: unavailable (\u001b[38;2;255;107;128mPrivate Cloud Compute is not available in this context. Please use the Terminal app.\u001b[0m)\n",
+      "stderr": "",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.03374079198692925
+    },
+    {
+      "name": "quota.system",
+      "status": "PASS",
+      "command": [
+        "quota-usage",
+        "-m",
+        "system"
+      ],
+      "stdout": "System: \u001b[38;2;255;193;7mNot applicable (quota only applies to PCC)\u001b[0m\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02941104202182032
+    },
+    {
+      "name": "quota.pcc",
+      "status": "BLOCKED",
+      "command": [
+        "quota-usage",
+        "-m",
+        "pcc"
+      ],
+      "stdout": "PCC: unavailable (\u001b[38;2;255;107;128mPrivate Cloud Compute is not available in this context. Please use the Terminal app.\u001b[0m)\n",
+      "stderr": "",
+      "returncode": 1,
+      "reason": "exit=1",
+      "duration_s": 0.030776791012613103
+    },
+    {
+      "name": "quota.invalid.model",
+      "status": "PASS",
+      "command": [
+        "quota-usage",
+        "-m",
+        "bad-model"
+      ],
+      "stdout": "",
+      "stderr": "Error: The value 'bad-model' is invalid for '-m <model>'. Please provide one of 'system' and 'pcc'.\nHelp:  -m <model>  Model to check: system or pcc (default: all)\nUsage: fm quota-usage\n  See 'fm quota-usage --help' for more information.\n",
+      "returncode": 64,
+      "reason": "",
+      "duration_s": 0.022627290978562087
+    },
+    {
+      "name": "chat.interactive",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "  you> /help\r\n note> Commands:\r\n         1. /help  Show this help\r\n         2. /quit  Exit\r\n         3. /clear  New session\r\n         4. /save [name]  Save session\r\n         5. /resume <name>  Resume session\r\n         6. /sessions  List sessions\r\n         7. /model <name>  Switch model (system, pcc, or a model provider model)\r\n         8. /instructions [text]  Set or edit instructions\r\n         9. /tools [add|remove <name>]  List, add, or remove built-in tools (barcode, ocr)\r\n         10. /tokens  Show context window usage\r\n note> Type a number to pick one.\r\n note> Type 'exit' or press Ctrl+D to leave.\r\n  you> hi\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /exit\r\n\r\n\r\nResume conversation with: fm chat --resume 8C1257B3-2E57-440A-92C6-23038B9C34A7\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "/help",
+        "hi",
+        "/exit"
+      ],
+      "request": {
+        "stream_options": {
+          "include_usage": true
+        },
+        "tools": [],
+        "messages": [
+          {
+            "content": "hi",
+            "role": "user"
+          }
+        ],
+        "stream": true,
+        "model": "cap-model"
+      },
+      "session_files": [
+        "3D938106-D7A2-447E-9A3A-B669A33CFB08.json",
+        "4F2FC1B9-BD74-4F29-91FD-D9BA012D0960.json",
+        "5560AC2F-A6F2-4775-87ED-1D3E5175C1F0.json",
+        "7BB0C9FA-A3DB-4A91-AA98-99BD398860BF.json",
+        "8C1257B3-2E57-440A-92C6-23038B9C34A7.json"
+      ]
+    },
+    {
+      "name": "chat.continue",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--continue"
+      ],
+      "stdout": "Resumed session '8C1257B3-2E57-440A-92C6-23038B9C34A7'\r\n\r\n  you> hi\r\nmodel> pong\r\n\r\n─────────────────────────────────────────────────────────────\r\n  you> next\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /exit\r\n\r\n\r\nResume conversation with: fm chat --resume 8C1257B3-2E57-440A-92C6-23038B9C34A7\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "next",
+        "/exit"
+      ],
+      "request": {
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model",
+        "stream": true,
+        "tools": [],
+        "messages": [
+          {
+            "content": "hi",
+            "role": "user"
+          },
+          {
+            "content": "pong",
+            "role": "assistant"
+          },
+          {
+            "content": "next",
+            "role": "user"
+          }
+        ]
+      }
+    },
+    {
+      "name": "chat.resume",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--resume",
+        "3D938106-D7A2-447E-9A3A-B669A33CFB08"
+      ],
+      "stdout": "Resumed session '3D938106-D7A2-447E-9A3A-B669A33CFB08'\r\n\r\n  you> hi\r\nmodel> pong\r\n\r\n─────────────────────────────────────────────────────────────\r\n  you> next\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /exit\r\n\r\n\r\nResume conversation with: fm chat --resume 3D938106-D7A2-447E-9A3A-B669A33CFB08\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "next",
+        "/exit"
+      ],
+      "request": {
+        "messages": [
+          {
+            "content": "be concise",
+            "role": "system"
+          },
+          {
+            "content": "hi",
+            "role": "user"
+          },
+          {
+            "content": "pong",
+            "role": "assistant"
+          },
+          {
+            "content": "next",
+            "role": "user"
+          }
+        ],
+        "stream": true,
+        "tools": [],
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model"
+      }
+    },
+    {
+      "name": "chat.instructions_tools",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "-i",
+        "be concise",
+        "--tool",
+        "ocr",
+        "--tool",
+        "barcode"
+      ],
+      "stdout": "  you> hi\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /exit\r\n\r\n\r\nResume conversation with: fm chat --resume 9C0F68D7-D64D-48D1-823E-E7AC9E035601\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "hi",
+        "/exit"
+      ],
+      "request": {
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model",
+        "messages": [
+          {
+            "content": "be concise",
+            "role": "system"
+          },
+          {
+            "content": "hi",
+            "role": "user"
+          }
+        ],
+        "stream": true,
+        "tools": []
+      }
+    },
+    {
+      "name": "chat.persist_preferences",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--set-ax-screen-reader",
+        "--set-ax-bell",
+        "false",
+        "--set-default-model",
+        "system"
+      ],
+      "stdout": "Default model set to 'system'.\nScreen reader mode set to true.\nScreen reader completion bell set to false.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.01862700001220219
+    },
+    {
+      "name": "chat.persist_no_ax",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--set-no-ax-screen-reader",
+        "--set-ax-bell",
+        "true",
+        "--set-default-model",
+        "pcc"
+      ],
+      "stdout": "Default model set to 'pcc'.\nScreen reader mode set to false.\nScreen reader completion bell set to true.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.016110958997160196
+    },
+    {
+      "name": "chat.no_ax_renderer",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--no-ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:62041/v1",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "\u001b[?2004h\u001b[>1u\u001b[?25l\u001b[30S\u001b[1;1H\u001b]11;?\u0007\u001b[38;2;130;215;90m \u001b[38;2;125;211;95mF\u001b[38;2;121;207;100mo\u001b[38;2;117;203;105mu\u001b[38;2;112;199;110mn\u001b[38;2;108;195;116md\u001b[38;2;104;191;121ma\u001b[38;2;99;187;126mt\u001b[38;2;95;184;131mi\u001b[38;2;91;180;137mo\u001b[38;2;86;176;142mn\u001b[38;2;82;172;147m \u001b[38;2;78;168;152mM\u001b[38;2;73;164;157mo\u001b[38;2;69;160;163md\u001b[38;2;65;157;168me\u001b[38;2;60;153;173ml\u001b[38;2;56;149;178ms\u001b[38;2;52;145;184m \u001b[38;2;47;141;189mC\u001b[38;2;43;137;194mh\u001b[38;2;39;133;199ma\u001b[38;2;35;130;205mt\u001b[0m\r\n\u001b[38;2;153;153;153m model: cap-model · /help for help\u001b[0m\r\n\u001b[6;1H\u001b[K\u001b[3;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[4;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[5;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[4;4H\u001b7\u001b[6;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b[4;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[4;3H\r\u001b[38;2;136;136;136m│\u001b[0m >                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[4C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[6;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b[4;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[4;3H\r\u001b[38;2;136;136;136m│\u001b[0m > h                                                                                              \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[5C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[6;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b[4;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[4;3H\r\u001b[38;2;136;136;136m│\u001b[0m > hi                                                                                             \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[6C\u001b[7m \u001b[27m\u001b[1D\u001b[4;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[4;3H\r\u001b[38;2;136;136;136m│\u001b[0m >                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[4C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[3;1H\u001b[K\u001b[4;1H\u001b[K\u001b[5;1H\u001b[K\u001b[6;1H\u001b[K\u001b[3;1H\r\n\u001b[8;1H\u001b[K\u001b[5;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[6;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[7;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[6;4H\u001b7\u001b[8;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b8\u001b7\u001b[5;1H\u001b[K\u001b[6;1H\u001b[K\u001b[7;1H\u001b[K\u001b[8;1H\u001b[K\u001b[4;1H \u001b[48;2;38;38;42m\u001b[38;2;180;180;180m> hi                                                                                              \u001b[0m\r\n\u001b[9;1H\u001b[K\u001b[6;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[7;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[7;4H\u001b7\u001b[9;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b8\u001b7\u001b[6;1H\u001b[K\u001b[7;1H\u001b[K\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[5;1H\r\n\u001b[10;1H\u001b[K\u001b[7;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[8;4H\u001b7\u001b[10;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b8\u001b7\u001b[6;1H\r\u001b[K\u001b[38;2;130;215;90m·\u001b[0m \u001b[3m\u001b[38;2;153;153;153mThinking… [0秒]\u001b[0m\u001b8\u001b7\u001b[6;1H\r\u001b[K\u001b8\u001b7\u001b[7;1H\u001b[K\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[6;1H\u001b[10;1H\u001b[K\u001b[7;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[8;4H\u001b7\u001b[10;1H\u001b[K\u001b[38;2;153;153;153m cap-model\u001b[0m\u001b8\u001b8\u001b7\u001b[7;1H\u001b[K\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[6;1H\u001b[10;1H\u001b[K\u001b[7;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[8;4H\u001b7\u001b[10;1H\u001b[K\u001b[38;2;153;153;153m cap-model · ↑ 0 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[7;1H\u001b[K\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[6;1H\u001b[10;1H\u001b[K\u001b[7;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[8;4H\u001b7\u001b[10;1H\u001b[K\u001b[38;2;153;153;153m cap-model · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[7;1H\u001b[K\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[6;1H pong\r\n\u001b[11;1H\u001b[K\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[9;4H\u001b7\u001b[11;1H\u001b[K\u001b[38;2;153;153;153m cap-model · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[11;1H\u001b[K\u001b[7;1H\u001b[11;1H\u001b[K\u001b[8;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[9;4H\u001b7\u001b[11;1H\u001b[K\u001b[38;2;153;153;153m cap-model · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[8;1H\u001b[K\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[11;1H\u001b[K\u001b[7;1H\r\n\u001b[12;1H\u001b[K\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[10;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[11;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[10;4H\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m >                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[4C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b[12;1H\u001b[K\u001b[13;1H\u001b[K\u001b[14;1H\u001b[K\u001b[15;1H\u001b[K\u001b[16;1H\u001b[K\u001b[17;1H\u001b[K\u001b[18;1H\u001b[K\u001b[19;1H\u001b[K\u001b[20;1H\u001b[K\u001b[21;1H\u001b[K\u001b[22;1H\u001b[K\u001b[23;1H\u001b[K\u001b[24;1H\u001b[K\u001b[25;1H\u001b[K\u001b[26;1H\u001b[K\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[10;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[11;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[10;4H\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b7\u001b[13;1H\u001b[K  \u001b[2m/?           \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mShow help\u001b[0m\u001b[14;1H\u001b[K  \u001b[2m/appearance  \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mSet appearance\u001b[0m\u001b[15;1H\u001b[K  \u001b[2m/clear       \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mNew session\u001b[0m\u001b[16;1H\u001b[K  \u001b[2m/exit        \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mExit\u001b[0m\u001b[17;1H\u001b[K  \u001b[2m/help        \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mShow help\u001b[0m\u001b[18;1H\u001b[K  \u001b[2m/instructions\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mSet or edit instructions\u001b[0m\u001b[19;1H\u001b[K  \u001b[2m/model       \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mSwitch model\u001b[0m\u001b[20;1H\u001b[K  \u001b[2m/q           \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mExit\u001b[0m\u001b[21;1H\u001b[K  \u001b[2m/quit        \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mExit\u001b[0m\u001b[22;1H\u001b[K  \u001b[2m/resume      \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mResume session\u001b[0m\u001b[23;1H\u001b[K  \u001b[2m/save        \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mSave session\u001b[0m\u001b[24;1H\u001b[K  \u001b[2m/sessions    \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mList sessions\u001b[0m\u001b[25;1H\u001b[K  \u001b[2m/tools       \u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mManage tools\u001b[0m\u001b[26;1H\u001b[K  \u001b[2m↑↓ to select  \u001b[2m·\u001b[0m  \u001b[2mtab to complete\u001b[0m\u001b8\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m > /                                                                                              \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[5C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b7\u001b[13;1H\u001b[K  /q\u001b[2m\u001b[3muit\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mExit\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mtab to complete\u001b[0m\u001b[14;1H\u001b[K\u001b[15;1H\u001b[K\u001b[16;1H\u001b[K\u001b[17;1H\u001b[K\u001b[18;1H\u001b[K\u001b[19;1H\u001b[K\u001b[20;1H\u001b[K\u001b[21;1H\u001b[K\u001b[22;1H\u001b[K\u001b[23;1H\u001b[K\u001b[24;1H\u001b[K\u001b[25;1H\u001b[K\u001b[26;1H\u001b[K\u001b8\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m > \u001b[38;2;35;130;205m/q\u001b[0m                                                                                             \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[6C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b7\u001b[13;1H\u001b[K  /qu\u001b[2m\u001b[3mit\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mExit\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mtab to complete\u001b[0m\u001b[14;1H\u001b[K\u001b[15;1H\u001b[K\u001b[16;1H\u001b[K\u001b[17;1H\u001b[K\u001b[18;1H\u001b[K\u001b[19;1H\u001b[K\u001b[20;1H\u001b[K\u001b[21;1H\u001b[K\u001b[22;1H\u001b[K\u001b[23;1H\u001b[K\u001b[24;1H\u001b[K\u001b[25;1H\u001b[K\u001b[26;1H\u001b[K\u001b8\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m > /qu                                                                                            \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[7C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b7\u001b[13;1H\u001b[K  /qui\u001b[2m\u001b[3mt\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mExit\u001b[0m  \u001b[2m·\u001b[0m  \u001b[2mtab to complete\u001b[0m\u001b[14;1H\u001b[K\u001b[15;1H\u001b[K\u001b[16;1H\u001b[K\u001b[17;1H\u001b[K\u001b[18;1H\u001b[K\u001b[19;1H\u001b[K\u001b[20;1H\u001b[K\u001b[21;1H\u001b[K\u001b[22;1H\u001b[K\u001b[23;1H\u001b[K\u001b[24;1H\u001b[K\u001b[25;1H\u001b[K\u001b[26;1H\u001b[K\u001b8\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m > /qui                                                                                           \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[8C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b[13;1H\u001b[K\u001b[14;1H\u001b[K\u001b[15;1H\u001b[K\u001b[16;1H\u001b[K\u001b[17;1H\u001b[K\u001b[18;1H\u001b[K\u001b[19;1H\u001b[K\u001b[20;1H\u001b[K\u001b[21;1H\u001b[K\u001b[22;1H\u001b[K\u001b[23;1H\u001b[K\u001b[24;1H\u001b[K\u001b[25;1H\u001b[K\u001b[26;1H\u001b[K\u001b[12;1H\u001b[K\u001b[9;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[10;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[11;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[10;4H\u001b7\u001b[12;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b7\u001b8\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m > \u001b[38;2;35;130;205m/quit\u001b[0m                                                                                          \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[9C\u001b[7m \u001b[27m\u001b[1D\u001b[10;1H\u001b[38;2;136;136;136m│\u001b[0m                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\u001b[10;3H\r\u001b[38;2;136;136;136m│\u001b[0m >                                                                                                \u001b[38;2;136;136;136m│\u001b[0m\r\u001b[4C\u001b[7m \u001b[27m\u001b[1D\u001b7\u001b[9;1H\u001b[K\u001b[10;1H\u001b[K\u001b[11;1H\u001b[K\u001b[12;1H\u001b[K\u001b[8;1H\r\n\u001b[13;1H\u001b[K\u001b[10;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[11;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[12;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[11;4H\u001b7\u001b[13;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[10;1H\u001b[K\u001b[11;1H\u001b[K\u001b[12;1H\u001b[K\u001b[13;1H\u001b[K\u001b[9;1H \u001b[48;2;38;38;42m\u001b[38;2;180;180;180m> /quit                                                                                           \u001b[0m\r\n\u001b[14;1H\u001b[K\u001b[11;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[12;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[13;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[12;4H\u001b7\u001b[14;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b7\u001b[11;1H\u001b[K\u001b[12;1H\u001b[K\u001b[13;1H\u001b[K\u001b[14;1H\u001b[K\u001b[10;1H\r\n\u001b[15;1H\u001b[K\u001b[12;1H\u001b[K\u001b[38;2;136;136;136m╭──────────────────────────────────────────────────────────────────────────────────────────────────╮\u001b[0m\u001b[13;1H\u001b[K\u001b[38;2;136;136;136m│\u001b[0m                                                                                                  \u001b[38;2;136;136;136m│\u001b[0m\u001b[14;1H\u001b[K\u001b[38;2;136;136;136m╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\u001b[0m\u001b[13;4H\u001b7\u001b[15;1H\u001b[K\u001b[38;2;153;153;153m cap-model · turn 1 · ↑ 3 · ↓ 1\u001b[0m\u001b8\u001b8\u001b[12;1H\u001b[K\n\u001b[K\n\u001b[K\n\u001b[K\n\u001b[12;1H\r\n\u001b[<u\u001b[?2004l\u001b[0m\u001b7\u001b[r\u001b8\u001b[?25hResume conversation with: fm chat --resume C4FB410D-FA34-463C-B5A8-F9B31427893D\r\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "hi",
+        "/quit"
+      ],
+      "request": {
+        "tools": [],
+        "model": "cap-model",
+        "stream_options": {
+          "include_usage": true
+        },
+        "messages": [
+          {
+            "content": "Format responses using Markdown: use headings (#, ##, ###), bold (**text**), inline code (`text`), fenced code blocks, and bullet lists (- item). Do NOT wrap the entire response in a code fence.",
+            "role": "system"
+          },
+          {
+            "content": "hi",
+            "role": "user"
+          }
+        ],
+        "stream": true
+      }
+    },
+    {
+      "name": "chat.runtime_commands",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "  you> /instructions Be concise\r\n note> Instructions set.\r\n  you> /tools\r\n note> Tools:\r\n         1. barcode — off\r\n         2. ocr — off\r\n note> Type a number to pick one.\r\n note> Picking one turns it on or off. Or use /tools add <name> and /tools remove <name>.\r\n  you> /tools add ocr\r\n note> Added tool 'ocr' (getText).\r\n  you> /tools add barcode\r\n note> Added tool 'barcode' (readBarcodes).\r\n  you> /tools remove ocr\r\n note> Removed tool 'ocr'.\r\n  you> /model cap-model\r\n note> Unknown model 'cap-model'. Available: system, pcc.\r\n  you> hi\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /save verify-session\r\n note> Saved session as 'verify-session'.\r\n  you> /sessions\r\n note> Saved sessions:\r\n         1. 3D938106-D7A2-447E-9A3A-B669A33CFB08\r\n         2. 4622DE28-F017-49AA-ABC2-3F1BCDD81E8C\r\n         3. 4F2FC1B9-BD74-4F29-91FD-D9BA012D0960\r\n         4. 5560AC2F-A6F2-4775-87ED-1D3E5175C1F0\r\n         5. 7BB0C9FA-A3DB-4A91-AA98-99BD398860BF\r\n         6. 8C1257B3-2E57-440A-92C6-23038B9C34A7\r\n         7. 9C0F68D7-D64D-48D1-823E-E7AC9E035601\r\n         8. verify-session\r\n note> Type a number to pick one.\r\n note> Or resume one by name with /resume <name>.\r\n  you> /tokens\r\n note> 4 tokens used (3 in, 1 out). Context window size is not available for model 'cap-model'.\r\n  you> /clear\r\n note> Started a new session.\r\n  you> fresh\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\n/resume verify-session\r\nmodel> pong\r\n  you>  note> Resumed session 'verify-session' on model 'cap-model'.\r\n\r\n  you> hi\r\nmodel> pong\r\n\r\n  you> next\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /quit\r\n\r\n\r\nResume conversation with: fm chat --resume verify-session\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 3,
+      "returncode": 0,
+      "inputs": [
+        "/instructions Be concise",
+        "/tools",
+        "/tools add ocr",
+        "/tools add barcode",
+        "/tools remove ocr",
+        "/model cap-model",
+        "hi",
+        "/save verify-session",
+        "/sessions",
+        "/tokens",
+        "/clear",
+        "fresh",
+        "/resume verify-session",
+        "next",
+        "/quit"
+      ],
+      "request": {
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "messages": [
+          {
+            "content": "Be concise",
+            "role": "system"
+          },
+          {
+            "content": "hi",
+            "role": "user"
+          },
+          {
+            "content": "pong",
+            "role": "assistant"
+          },
+          {
+            "content": "next",
+            "role": "user"
+          }
+        ],
+        "model": "cap-model",
+        "tools": []
+      }
+    },
+    {
+      "name": "chat.provider_headers",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "-m",
+        "cap-model",
+        "--model-provider-header",
+        "X-Fm-Verify: chat"
+      ],
+      "stdout": "  you> hi\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /quit\r\n\r\n\r\nResume conversation with: fm chat --resume 1CCC0264-A02E-4FA1-BBAA-BD9661CAE350\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "hi",
+        "/quit"
+      ],
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "tools": [],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "model": "cap-model"
+      }
+    },
+    {
+      "name": "serve.tcp",
+      "status": "PASS",
+      "command": [
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "60986",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "--model-provider-header",
+        "X-Fm-Verify: serve"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "evidence": "[{\"path\": \"/health\", \"stream\": null, \"response\": \"{\\\"status\\\":\\\"fm serve is running\\\",\\\"models\\\":[{\\\"available\\\":false,\\\"name\\\":\\\"system\\\",\\\"reason\\\":\\\"This device does not support Apple Intelligence.\\\"},{\\\"available\\\":false,\\\"name\\\":\\\"pcc\\\",\\\"reason\\\":\\\"Private Cloud Compute is not available in this context. Please use the Terminal app.\\\"}]}\"}, {\"path\": \"/v1/models\", \"stream\": null, \"response\": \"{\\\"object\\\":\\\"list\\\",\\\"data\\\":[{\\\"id\\\":\\\"system\\\",\\\"created\\\":1793722576,\\\"owned_by\\\":\\\"Apple\\\",\\\"object\\\":\\\"model\\\"},{\\\"id\\\":\\\"pcc\\\",\\\"created\\\":1793722576,\\\"owned_by\\\":\\\"Apple\\\",\\\"object\\\":\\\"model\\\"},{\\\"id\\\":\\\"cap-model\\\",\\\"created\\\":1793722576,\\\"owned_by\\\":\\\"Apple\\\",\\\"object\\\":\\\"model\\\"}]}\"}, {\"path\": \"/v1/chat/completions\", \"stream\": false, \"response\": \"{\\\"model\\\":\\\"cap-model\\\",\\\"id\\\":\\\"chatcmpl-99C3E839-891E-499A-9D88-04588A93313B\\\",\\\"created\\\":1793722576,\\\"usage\\\":{\\\"total_tokens\\\":4,\\\"completion_tokens_details\\\":{\\\"reasoning_tokens\\\":0},\\\"prompt_tokens_details\\\":{\\\"cached_tokens\\\":0},\\\"prompt_tokens\\\":3,\\\"completion_tokens\\\":1},\\\"choices\\\":[{\\\"index\\\":0,\\\"message\\\":{\\\"role\\\":\\\"assistant\\\",\\\"refusal\\\":null,\\\"content\\\":\\\"pong\\\"},\\\"finish_reason\\\":\\\"stop\\\"}],\\\"object\\\":\\\"chat.completion\\\"}\"}, {\"path\": \"/v1/chat/completions\", \"stream\": true, \"response\": \"data: {\\\"id\\\":\\\"chatcmpl-F4B9E084-B534-4627-9074-744C19E242BF\\\",\\\"object\\\":\\\"chat.completion.chunk\\\",\\\"choices\\\":[{\\\"delta\\\":{\\\"role\\\":\\\"assistant\\\"},\\\"index\\\":0}],\\\"created\\\":1793722576,\\\"model\\\":\\\"cap-model\\\"}\\n\\ndata: {\\\"id\\\":\\\"chatcmpl-F4B9E084-B534-4627-9074-744C19E242BF\\\",\\\"object\\\":\\\"chat.completion.chunk\\\",\\\"choices\\\":[{\\\"delta\\\":{\\\"content\\\":\\\"pong\\\"},\\\"index\\\":0}],\\\"created\\\":1793722576,\\\"model\\\":\\\"cap-model\\\"}\\n\\ndata: {\\\"id\\\":\\\"chatcmpl-F4B9E084-B534-4627-9074-744C19E242BF\\\",\\\"object\\\":\\\"chat.completion.chunk\\\",\\\"choices\\\":[{\\\"finish_reason\\\":\\\"stop\\\",\\\"delta\\\":{},\\\"index\\\":0}],\\\"created\\\":1793722576,\\\"model\\\":\\\"cap-model\\\"}\\n\\ndata: [DONE]\\n\\n\"}]"
+    },
+    {
+      "name": "serve.unix",
+      "status": "PASS",
+      "command": [
+        "serve",
+        "--socket",
+        "/tmp/fmux-fm-verification.uziQMh/fm.sock",
+        "--model-provider",
+        "http://127.0.0.1:60433/v1",
+        "--model-provider-header",
+        "X-Fm-Verify: serve"
+      ],
+      "stdout": "",
+      "stderr": "",
+      "evidence": "[{\"path\": \"/health\", \"stream\": null, \"response\": \"{\\\"status\\\":\\\"fm serve is running\\\",\\\"models\\\":[{\\\"name\\\":\\\"system\\\",\\\"available\\\":false,\\\"reason\\\":\\\"This device does not support Apple Intelligence.\\\"},{\\\"name\\\":\\\"pcc\\\",\\\"available\\\":false,\\\"reason\\\":\\\"Private Cloud Compute is not available in this context. Please use the Terminal app.\\\"}]}\"}, {\"path\": \"/v1/models\", \"stream\": null, \"response\": \"{\\\"object\\\":\\\"list\\\",\\\"data\\\":[{\\\"created\\\":1793722576,\\\"owned_by\\\":\\\"Apple\\\",\\\"id\\\":\\\"system\\\",\\\"object\\\":\\\"model\\\"},{\\\"created\\\":1793722576,\\\"owned_by\\\":\\\"Apple\\\",\\\"id\\\":\\\"pcc\\\",\\\"object\\\":\\\"model\\\"},{\\\"created\\\":1793722576,\\\"owned_by\\\":\\\"Apple\\\",\\\"id\\\":\\\"cap-model\\\",\\\"object\\\":\\\"model\\\"}]}\"}, {\"path\": \"/v1/chat/completions\", \"stream\": false, \"response\": \"{\\\"id\\\":\\\"chatcmpl-57CC7E16-32F4-4C37-AC1A-3F6C4325405C\\\",\\\"choices\\\":[{\\\"index\\\":0,\\\"finish_reason\\\":\\\"stop\\\",\\\"message\\\":{\\\"role\\\":\\\"assistant\\\",\\\"content\\\":\\\"pong\\\",\\\"refusal\\\":null}}],\\\"usage\\\":{\\\"prompt_tokens\\\":3,\\\"completion_tokens_details\\\":{\\\"reasoning_tokens\\\":0},\\\"total_tokens\\\":4,\\\"completion_tokens\\\":1,\\\"prompt_tokens_details\\\":{\\\"cached_tokens\\\":0}},\\\"object\\\":\\\"chat.completion\\\",\\\"created\\\":1793722576,\\\"model\\\":\\\"cap-model\\\"}\"}, {\"path\": \"/v1/chat/completions\", \"stream\": true, \"response\": \"data: {\\\"created\\\":1793722576,\\\"id\\\":\\\"chatcmpl-04B6F305-90AA-494C-9059-504CBADC84E3\\\",\\\"object\\\":\\\"chat.completion.chunk\\\",\\\"model\\\":\\\"cap-model\\\",\\\"choices\\\":[{\\\"index\\\":0,\\\"delta\\\":{\\\"role\\\":\\\"assistant\\\"}}]}\\n\\ndata: {\\\"created\\\":1793722576,\\\"id\\\":\\\"chatcmpl-04B6F305-90AA-494C-9059-504CBADC84E3\\\",\\\"object\\\":\\\"chat.completion.chunk\\\",\\\"model\\\":\\\"cap-model\\\",\\\"choices\\\":[{\\\"index\\\":0,\\\"delta\\\":{\\\"content\\\":\\\"pong\\\"}}]}\\n\\ndata: {\\\"model\\\":\\\"cap-model\\\",\\\"choices\\\":[{\\\"index\\\":0,\\\"delta\\\":{},\\\"finish_reason\\\":\\\"stop\\\"}],\\\"object\\\":\\\"chat.completion.chunk\\\",\\\"id\\\":\\\"chatcmpl-04B6F305-90AA-494C-9059-504CBADC84E3\\\",\\\"created\\\":1793722576}\\n\\ndata: [DONE]\\n\\n\"}]"
+    },
+    {
+      "name": "serve.invalid.port",
+      "status": "PASS",
+      "command": [
+        "serve",
+        "--port",
+        "70000"
+      ],
+      "stdout": "",
+      "stderr": "Error: Port must be between 1 and 65535\nUsage: fm serve\n       fm serve --port 1976\n       fm serve --host 0.0.0.0 --port 1976\n       fm serve --socket /tmp/fm.sock\n       fm serve --model-provider http://localhost:1976/api/v1\n  See 'fm serve --help' for more information.\n",
+      "returncode": 64,
+      "reason": "",
+      "duration_s": 0.029550292005296797
+    },
+    {
+      "name": "serve.conflicting.transport",
+      "status": "PASS",
+      "command": [
+        "serve",
+        "--socket",
+        "/tmp/fmux-fm-verification.uziQMh/conflict.sock",
+        "--port",
+        "19888"
+      ],
+      "stdout": "",
+      "stderr": "Error: --socket cannot be used with --host or --port\nUsage: fm serve\n       fm serve --port 1976\n       fm serve --host 0.0.0.0 --port 1976\n       fm serve --socket /tmp/fm.sock\n       fm serve --model-provider http://localhost:1976/api/v1\n  See 'fm serve --help' for more information.\n",
+      "returncode": 64,
+      "reason": "",
+      "duration_s": 0.061932832992170006
+    },
+    {
+      "name": "config.user_unchanged",
+      "status": "PASS",
+      "command": [
+        "sha256",
+        "~/.fm/config.json"
+      ],
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "supplement.provider.refresh",
+      "status": "PASS",
+      "command": [
+        "config",
+        "add",
+        "model-provider",
+        "verify",
+        "http://127.0.0.1:62041/v1"
+      ],
+      "stdout": "Added model provider 'verify'.\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.02021333298762329
+    },
+    {
+      "name": "chat.persist.model_readback",
+      "status": "PASS",
+      "command": [
+        "config",
+        "get",
+        "default-model"
+      ],
+      "stdout": "system\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.016947833995800465
+    },
+    {
+      "name": "chat.persist.pcc_readback",
+      "status": "PASS",
+      "command": [
+        "config",
+        "get",
+        "default-model"
+      ],
+      "stdout": "pcc\n",
+      "stderr": "",
+      "returncode": 0,
+      "reason": "",
+      "duration_s": 0.015339875011704862
+    },
+    {
+      "name": "chat.reject_mixed_set",
+      "status": "PASS",
+      "command": [
+        "chat",
+        "--set-default-model",
+        "system",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "",
+      "stderr": "Error: \u001b[38;2;255;107;128mThe --set- options write settings and exit. They can be combined with each other, but not with options that start a chat session.\u001b[0m\n",
+      "returncode": 1,
+      "reason": "",
+      "duration_s": 0.017136915994342417
+    },
+    {
+      "name": "chat.runtime.model_named",
+      "status": "FAIL",
+      "command": [
+        "chat",
+        "--ax-screen-reader",
+        "--model-provider",
+        "verify",
+        "-m",
+        "cap-model"
+      ],
+      "stdout": "  you> /model cap-model\r\n note> Unknown model 'cap-model'. Available: system, pcc.\r\n  you> hi\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> pong\r\n  you> /quit\r\n\r\n\r\nResume conversation with: fm chat --resume 156F9E9E-1BA4-4ABB-A048-79492015102F\r\n",
+      "stderr": "",
+      "natural_exit": true,
+      "request_count": 1,
+      "returncode": 0,
+      "inputs": [
+        "/model cap-model",
+        "hi",
+        "/quit"
+      ],
+      "request": {
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "tools": [],
+        "messages": [
+          {
+            "role": "user",
+            "content": "hi"
+          }
+        ],
+        "model": "cap-model"
+      },
+      "reason": "The active custom model is not selectable via /model."
+    }
+  ],
+  "live_cases": [
+    {
+      "name": "live.original_swift",
+      "command": [
+        "respond",
+        "What is Swift?"
+      ],
+      "status": "TIMEOUT",
+      "returncode": -15,
+      "duration_s": 35.008,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "live.short_buffered",
+      "command": [
+        "respond",
+        "--model-provider",
+        "fmux",
+        "-m",
+        "qwen-fast",
+        "--no-stream",
+        "-i",
+        "Answer with exactly OK, without reasoning.",
+        "Say OK. /no_think"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "duration_s": 7.206,
+      "stdout": "OK\n",
+      "stderr": ""
+    },
+    {
+      "name": "live.structured",
+      "command": [
+        "respond",
+        "--model-provider",
+        "fmux",
+        "-m",
+        "qwen-json",
+        "--no-stream",
+        "--schema",
+        "/tmp/fmux-fm-verification.uziQMh/live-person.json",
+        "Name is Ada; age is 36. /no_think"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "duration_s": 20.803,
+      "stdout": "{\"name\": \"Ada\", \"age\": 36}\n",
+      "stderr": ""
+    },
+    {
+      "name": "live.models",
+      "command": [
+        "models",
+        "--model-provider",
+        "fmux"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "duration_s": 0.041,
+      "stdout": "  fmux  http://127.0.0.1:1976/v1\n  ✓ qwen-fast   \n  ✓ qwen-json   \n  ✓ qwen-quality\n  ✓ qwen3.8:27b \n",
+      "stderr": ""
+    }
+  ],
+  "diagnostics": {
+    "ondevice": "availability=unavailable reason=deviceNotEligible",
+    "vision": "ocr=FM VERIFY 12345\nbarcode=FM-VERIFY-QR-12345\n",
+    "pcc_real_terminal": "PCC: unavailable (The operation couldn’t be completed. (fm.UnavailableError error 1.))\n",
+    "fmux_conformance": "=== RUN   TestFmRespondThroughGateway\n--- PASS: TestFmRespondThroughGateway (0.04s)\n=== RUN   TestFmToolQuirkThroughGateway\n--- PASS: TestFmToolQuirkThroughGateway (0.04s)\n=== RUN   TestFmSchemaThroughGateway\n--- PASS: TestFmSchemaThroughGateway (0.04s)\n=== RUN   TestFmModelsThroughGateway\n--- PASS: TestFmModelsThroughGateway (0.03s)\nPASS\nok  \tgithub.com/isLinXu/fmux/test/conformance\t1.618s\n"
+  },
+  "notes": [
+    "PASS for negative tests means invalid input was correctly rejected.",
+    "OCR initial 30-second timeout is preserved in earlier_attempt; warm retry succeeded.",
+    "The original Swift prompt was bounded at 35 seconds; this is not the backend timeout or proof of truncation.",
+    "Cloud inference and legal agreement were not performed.",
+    "Image data URLs in evidence are shortened; fixtures contain only synthetic verification data."
+  ]
+}

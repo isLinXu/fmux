@@ -1,0 +1,1118 @@
+{
+  "date": "2026-11-04",
+  "scope": "SSE protocol correctness and approved metrics export repair; isolated build only",
+  "assertions": [
+    {
+      "name": "direct.normal",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "normal",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0407,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.fragmented",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "fragmented",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0393,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.crlf",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "crlf",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0384,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.large",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "large",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0395,
+      "output_chars": 70002,
+      "stdout": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.missing_usage",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "missing_usage",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0383,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.missing_finish",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "missing_finish",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0408,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.eof",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "eof",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0428,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.http401",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "http401",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0549,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 401:\n{\"error\": {\"message\": \"injected HTTP error\", \"type\": \"server_error\", \"code\": \"401\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.http429",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "http429",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0599,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 429:\n{\"error\": {\"message\": \"injected HTTP error\", \"type\": \"server_error\", \"code\": \"429\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.http503",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "http503",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0539,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 503:\n{\"error\": {\"message\": \"injected HTTP error\", \"type\": \"server_error\", \"code\": \"503\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0609,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0521,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.event_error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "event_error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0493,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.event_error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "event_error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0513,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.malformed_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "malformed_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.047,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.malformed_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "malformed_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0408,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.multiline",
+      "status": "FAIL",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53502/v1",
+        "-m",
+        "multiline",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.039,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": "Unexpected completion/error semantics"
+    },
+    {
+      "name": "gateway.normal",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "normal",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0403,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.fragmented",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "fragmented",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0435,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.crlf",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "crlf",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.048,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.large",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "large",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0499,
+      "output_chars": 70002,
+      "stdout": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.missing_usage",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "missing_usage",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0493,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.missing_finish",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "missing_finish",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.061,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.eof",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "eof",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0814,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.http401",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "http401",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0505,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 401:\n{\"error\":{\"message\":\"backend returned 401 Unauthorized: {\\\"error\\\": {\\\"message\\\": \\\"injected HTTP error\\\", \\\"type\\\": \\\"server_error\\\", \\\"code\\\": \\\"401\\\"}}\",\"type\":\"permission_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.http429",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "http429",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0456,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 429:\n{\"error\":{\"message\":\"backend returned 429 Too Many Requests: {\\\"error\\\": {\\\"message\\\": \\\"injected HTTP error\\\", \\\"type\\\": \\\"server_error\\\", \\\"code\\\": \\\"429\\\"}}\",\"type\":\"rate_limit_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.http503",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "http503",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0519,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 503:\n{\"error\":{\"message\":\"backend returned 503 Service Unavailable: {\\\"error\\\": {\\\"message\\\": \\\"injected HTTP error\\\", \\\"type\\\": \\\"server_error\\\", \\\"code\\\": \\\"503\\\"}}\",\"type\":\"api_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0529,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 502:\n{\"error\":{\"message\":\"injected upstream failure\",\"type\":\"server_error\",\"code\":\"injected_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0575,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.event_error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "event_error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0564,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 502:\n{\"error\":{\"message\":\"injected upstream failure\",\"type\":\"server_error\",\"code\":\"injected_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.event_error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "event_error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0497,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.malformed_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "malformed_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0386,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 502:\n{\"error\":{\"message\":\"decode chunk \\\"{not-json}\\\": invalid character 'n' looking for beginning of object key string\",\"type\":\"api_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.malformed_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "malformed_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0411,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: decode chunk \"{not-json}\": invalid character 'n' looking for beginning of object key string\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.multiline",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "multiline",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0485,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "wire.error_before",
+      "status": "PASS",
+      "http_status": 502,
+      "body": "{\"error\":{\"message\":\"injected upstream failure\",\"type\":\"server_error\",\"code\":\"injected_error\"}}"
+    },
+    {
+      "name": "wire.error_after",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"error_after\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"error\":{\"message\":\"injected upstream failure\",\"type\":\"server_error\",\"code\":\"injected_error\"}}\n\n"
+    },
+    {
+      "name": "wire.event_error_before",
+      "status": "PASS",
+      "http_status": 502,
+      "body": "{\"error\":{\"message\":\"injected upstream failure\",\"type\":\"server_error\",\"code\":\"injected_error\"}}"
+    },
+    {
+      "name": "wire.event_error_after",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"event_error_after\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"error\":{\"message\":\"injected upstream failure\",\"type\":\"server_error\",\"code\":\"injected_error\"}}\n\n"
+    },
+    {
+      "name": "wire.malformed_before",
+      "status": "PASS",
+      "http_status": 502,
+      "body": "{\"error\":{\"message\":\"decode chunk \\\"{not-json}\\\": invalid character 'n' looking for beginning of object key string\",\"type\":\"api_error\",\"code\":\"backend_error\"}}"
+    },
+    {
+      "name": "wire.malformed_after",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"malformed_after\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"error\":{\"message\":\"decode chunk \\\"{not-json}\\\": invalid character 'n' looking for beginning of object key string\",\"type\":\"api_error\",\"code\":\"stream_error\"}}\n\n"
+    },
+    {
+      "name": "wire.stall",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"stall\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"error\":{\"message\":\"stream idle timeout: no chunk from fault for 350ms\",\"type\":\"api_error\",\"code\":\"stream_idle\"}}\n\n"
+    },
+    {
+      "name": "wire.eof",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"eof\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"eof\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"eof\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "wire.missing_usage",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"missing_usage\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"missing_usage\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"missing_usage\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "fallback.http503_recovers",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "auto_http",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.055,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "fallback.sse_error_should_recover",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "auto_sse",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0521,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "cancel.propagates_to_backend",
+      "status": "PASS",
+      "first_line": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"stall\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n",
+      "cancelled_delta": 1
+    },
+    {
+      "name": "concurrency.bounded_gate",
+      "status": "PASS",
+      "statuses": [
+        200,
+        429,
+        200,
+        200,
+        200,
+        429,
+        429,
+        429
+      ],
+      "backend_peak": 2
+    },
+    {
+      "name": "history.save_first",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "normal",
+        "--save-transcript",
+        "/tmp/fmux-protocol-repair.TMCkcK/round-one.json",
+        "first-turn"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0549,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "\u001b[38;2;255;107;128mTranscript saved to: /tmp/fmux-protocol-repair.TMCkcK/round-one.json\n\u001b[0m",
+      "reason": ""
+    },
+    {
+      "name": "history.resume_second",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "normal",
+        "--resume",
+        "/tmp/fmux-protocol-repair.TMCkcK/round-one.json",
+        "--save-transcript",
+        "/tmp/fmux-protocol-repair.TMCkcK/round-two.json",
+        "second-turn"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0589,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "\u001b[38;2;255;107;128mTranscript saved to: /tmp/fmux-protocol-repair.TMCkcK/round-two.json\n\u001b[0m",
+      "reason": ""
+    },
+    {
+      "name": "history.resume_keeps_prior_turn",
+      "status": "PASS",
+      "request": {
+        "model": "normal",
+        "messages": [
+          {
+            "role": "user",
+            "content": "first-turn"
+          },
+          {
+            "role": "assistant",
+            "content": "alpha"
+          },
+          {
+            "role": "user",
+            "content": "second-turn"
+          }
+        ],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      }
+    },
+    {
+      "name": "history.resume_third",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:53503/v1",
+        "-m",
+        "normal",
+        "--resume",
+        "/tmp/fmux-protocol-repair.TMCkcK/round-two.json",
+        "third-turn"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0491,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "history.three_turns",
+      "status": "PASS",
+      "request": {
+        "model": "normal",
+        "messages": [
+          {
+            "role": "user",
+            "content": "first-turn"
+          },
+          {
+            "role": "assistant",
+            "content": "alpha"
+          },
+          {
+            "role": "user",
+            "content": "second-turn"
+          },
+          {
+            "role": "assistant",
+            "content": "alpha"
+          },
+          {
+            "role": "user",
+            "content": "third-turn"
+          }
+        ],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      }
+    },
+    {
+      "name": "chat.clear_removes_history",
+      "status": "PASS",
+      "returncode": 0,
+      "stdout": "  you> first-turn\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> alpha\r\n  you> /clear\r\n note> Started a new session.\r\n  you> second-turn\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> alpha\r\n  you> ",
+      "requests": [
+        {
+          "model": "normal",
+          "messages": [
+            {
+              "role": "user",
+              "content": "first-turn"
+            }
+          ],
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          }
+        },
+        {
+          "model": "normal",
+          "messages": [
+            {
+              "role": "user",
+              "content": "second-turn"
+            }
+          ],
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "resources.no_inflight_after_tests",
+      "status": "PASS",
+      "metrics": "# HELP fmux_requests_total Completed chat completion requests.\n# TYPE fmux_requests_total counter\nfmux_requests_total{backend=\"fault\",model=\"crlf\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"eof\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"error_after\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"error_before\",status=\"502\"} 3\nfmux_requests_total{backend=\"fault\",model=\"event_error_after\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"event_error_before\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"fragmented\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"hold\",status=\"200\"} 4\nfmux_requests_total{backend=\"fault\",model=\"http401\",status=\"401\"} 1\nfmux_requests_total{backend=\"fault\",model=\"http429\",status=\"429\"} 1\nfmux_requests_total{backend=\"fault\",model=\"http503\",status=\"503\"} 2\nfmux_requests_total{backend=\"fault\",model=\"large\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"malformed_after\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"malformed_before\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"missing_finish\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"missing_usage\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"multiline\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"normal\",status=\"200\"} 6\nfmux_requests_total{backend=\"fault\",model=\"stall\",status=\"502\"} 1\nfmux_requests_total{backend=\"fault\",model=\"stall\",status=\"504\"} 1\nfmux_requests_total{backend=\"healthy\",model=\"normal\",status=\"200\"} 2\n# HELP fmux_prompt_tokens_total Prompt tokens reported by backends.\n# TYPE fmux_prompt_tokens_total counter\nfmux_prompt_tokens_total{backend=\"fault\",model=\"crlf\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"eof\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"error_after\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"error_before\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"event_error_after\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"event_error_before\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"fragmented\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"hold\"} 12\nfmux_prompt_tokens_total{backend=\"fault\",model=\"http401\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"http429\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"http503\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"large\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"malformed_after\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"malformed_before\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"missing_finish\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"missing_usage\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"multiline\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"normal\"} 18\nfmux_prompt_tokens_total{backend=\"fault\",model=\"stall\"} 0\nfmux_prompt_tokens_total{backend=\"healthy\",model=\"normal\"} 6\n# HELP fmux_completion_tokens_total Completion tokens reported by backends.\n# TYPE fmux_completion_tokens_total counter\nfmux_completion_tokens_total{backend=\"fault\",model=\"crlf\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"eof\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"error_after\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"error_before\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"event_error_after\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"event_error_before\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"fragmented\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"hold\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"http401\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"http429\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"http503\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"large\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"malformed_after\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"malformed_before\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"missing_finish\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"missing_usage\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"multiline\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"normal\"} 6\nfmux_completion_tokens_total{backend=\"fault\",model=\"stall\"} 0\nfmux_completion_tokens_total{backend=\"healthy\",model=\"normal\"} 2\n# HELP fmux_request_duration_milliseconds Wall time per request, bucketed.\n# TYPE fmux_request_duration_milliseconds histogram\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"50\"} 33\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"100\"} 33\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"250\"} 37\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"500\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"1000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"2500\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"5000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"10000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"20000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"30000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"60000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"120000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"300000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"+Inf\"} 38\nfmux_request_duration_milliseconds_sum{backend=\"fault\"} 1209\nfmux_request_duration_milliseconds_count{backend=\"fault\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"50\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"100\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"250\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"500\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"1000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"2500\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"5000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"10000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"20000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"30000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"60000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"120000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"300000\"} 2\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"+Inf\"} 2\nfmux_request_duration_milliseconds_sum{backend=\"healthy\"} 1\nfmux_request_duration_milliseconds_count{backend=\"healthy\"} 2\n# HELP fmux_time_to_first_token_milliseconds Time from request start to the first streamed token.\n# TYPE fmux_time_to_first_token_milliseconds histogram\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"50\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"100\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"250\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"500\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"1000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"2500\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"5000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"10000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"20000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"30000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"60000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"120000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"300000\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"+Inf\"} 23\nfmux_time_to_first_token_milliseconds_sum{backend=\"fault\"} 30\nfmux_time_to_first_token_milliseconds_count{backend=\"fault\"} 23\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"50\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"100\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"250\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"500\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"1000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"2500\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"5000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"10000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"20000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"30000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"60000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"120000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"300000\"} 2\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"+Inf\"} 2\nfmux_time_to_first_token_milliseconds_sum{backend=\"healthy\"} 1\nfmux_time_to_first_token_milliseconds_count{backend=\"healthy\"} 2\n# HELP fmux_evictions_total Models unloaded to stay inside the memory budget.\n# TYPE fmux_evictions_total counter\nfmux_evictions_total 0\n# HELP fmux_inflight_requests Requests currently being served per backend.\n# TYPE fmux_inflight_requests gauge\nfmux_inflight_requests{backend=\"fault\"} 0\nfmux_inflight_requests{backend=\"healthy\"} 0\n# HELP fmux_queue_waits_total Requests that had to wait for an admission slot.\n# TYPE fmux_queue_waits_total counter\nfmux_queue_waits_total{backend=\"fault\"} 2\n# HELP fmux_queue_wait_milliseconds_sum Time spent waiting for an admission slot.\n# TYPE fmux_queue_wait_milliseconds_sum counter\nfmux_queue_wait_milliseconds_sum{backend=\"fault\"} 406\n# HELP fmux_rejected_total Requests refused by admission control.\n# TYPE fmux_rejected_total counter\nfmux_rejected_total{backend=\"fault\",reason=\"queue_full\"} 4\n# HELP fmux_uptime_seconds Seconds since the gateway started.\n# TYPE fmux_uptime_seconds gauge\nfmux_uptime_seconds 5\n"
+    },
+    {
+      "name": "shutdown.drains_active_request",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "{\"id\":\"test\",\"object\":\"chat.completion\",\"created\":1700000000,\"model\":\"hold\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":1,\"total_tokens\":4}}",
+      "gateway_exit": 0
+    },
+    {
+      "name": "metadata.eof",
+      "status": "PASS",
+      "source_case": "wire.eof",
+      "fields": {
+        "id": [
+          "chatcmpl-followup",
+          "chatcmpl-followup",
+          "chatcmpl-followup"
+        ],
+        "created": [
+          1700000000,
+          1700000000,
+          1700000000
+        ],
+        "model": [
+          "eof",
+          "eof",
+          "eof"
+        ]
+      }
+    },
+    {
+      "name": "metadata.missing_usage",
+      "status": "PASS",
+      "source_case": "wire.missing_usage",
+      "fields": {
+        "id": [
+          "chatcmpl-followup",
+          "chatcmpl-followup",
+          "chatcmpl-followup"
+        ],
+        "created": [
+          1700000000,
+          1700000000,
+          1700000000
+        ],
+        "model": [
+          "missing_usage",
+          "missing_usage",
+          "missing_usage"
+        ]
+      }
+    },
+    {
+      "name": "wire.metrics_samples_unique",
+      "status": "PASS",
+      "sample_count": 132
+    }
+  ],
+  "summary": {
+    "total": 58,
+    "passed": 57,
+    "failed": 1,
+    "remaining_failure": "fm direct.multiline; gateway.multiline passes"
+  },
+  "previous_fault_failures_resolved": [
+    "gateway.multiline",
+    "wire.error_before",
+    "wire.error_after",
+    "wire.event_error_before",
+    "wire.event_error_after",
+    "fallback.sse_error_should_recover"
+  ],
+  "benchmarks": {
+    "before": {
+      "Render": {
+        "runs": [
+          {
+            "ns_op": 260121,
+            "bytes_op": 67506,
+            "allocs_op": 2175
+          },
+          {
+            "ns_op": 304781,
+            "bytes_op": 67507,
+            "allocs_op": 2175
+          },
+          {
+            "ns_op": 332626,
+            "bytes_op": 67507,
+            "allocs_op": 2175
+          }
+        ],
+        "median": {
+          "ns_op": 304781,
+          "bytes_op": 67507,
+          "allocs_op": 2175
+        }
+      },
+      "RecordAndScrape": {
+        "runs": [
+          {
+            "ns_op": 5279,
+            "bytes_op": 6215,
+            "allocs_op": 69
+          },
+          {
+            "ns_op": 5325,
+            "bytes_op": 6217,
+            "allocs_op": 69
+          },
+          {
+            "ns_op": 5496,
+            "bytes_op": 6216,
+            "allocs_op": 69
+          }
+        ],
+        "median": {
+          "ns_op": 5325,
+          "bytes_op": 6216,
+          "allocs_op": 69
+        }
+      }
+    },
+    "after_isolated": {
+      "Render": {
+        "runs": [
+          {
+            "ns_op": 197384,
+            "bytes_op": 69011,
+            "allocs_op": 1665
+          },
+          {
+            "ns_op": 255646,
+            "bytes_op": 69010,
+            "allocs_op": 1665
+          },
+          {
+            "ns_op": 201087,
+            "bytes_op": 69012,
+            "allocs_op": 1665
+          }
+        ],
+        "median": {
+          "ns_op": 201087,
+          "bytes_op": 69011,
+          "allocs_op": 1665
+        }
+      },
+      "RecordAndScrape": {
+        "runs": [
+          {
+            "ns_op": 5715,
+            "bytes_op": 6141,
+            "allocs_op": 53
+          },
+          {
+            "ns_op": 5659,
+            "bytes_op": 6142,
+            "allocs_op": 53
+          },
+          {
+            "ns_op": 5514,
+            "bytes_op": 6143,
+            "allocs_op": 53
+          }
+        ],
+        "median": {
+          "ns_op": 5659,
+          "bytes_op": 6142,
+          "allocs_op": 53
+        }
+      }
+    },
+    "command": "go test ./internal/metrics -run '^$' -bench BenchmarkExport -benchmem -count=3",
+    "notes": [
+      "3 runs, Apple M3 Max, GOMAXPROCS default 16.",
+      "Initial after benchmark overlapped validation loads; retained in evidence but excluded from comparison.",
+      "No statistical significance or inference throughput claim; label aggregation reduces output rows."
+    ]
+  },
+  "go_race": {
+    "command": "go test ./... -race -count=1",
+    "exit_code": 0,
+    "log": "ok  \tgithub.com/isLinXu/fmux/cmd/fmux\t1.888s\n?   \tgithub.com/isLinXu/fmux/internal/adapter\t[no test files]\n?   \tgithub.com/isLinXu/fmux/internal/adapter/local\t[no test files]\n?   \tgithub.com/isLinXu/fmux/internal/adapter/mock\t[no test files]\nok  \tgithub.com/isLinXu/fmux/internal/adapter/openai\t1.979s\nok  \tgithub.com/isLinXu/fmux/internal/api\t3.638s\nok  \tgithub.com/isLinXu/fmux/internal/breaker\t1.795s\nok  \tgithub.com/isLinXu/fmux/internal/budget\t1.500s\nok  \tgithub.com/isLinXu/fmux/internal/build\t1.518s\nok  \tgithub.com/isLinXu/fmux/internal/capprobe\t2.147s\nok  \tgithub.com/isLinXu/fmux/internal/compat\t1.513s\nok  \tgithub.com/isLinXu/fmux/internal/config\t1.490s\nok  \tgithub.com/isLinXu/fmux/internal/gate\t1.778s\nok  \tgithub.com/isLinXu/fmux/internal/ir\t1.845s\nok  \tgithub.com/isLinXu/fmux/internal/launchd\t1.479s\nok  \tgithub.com/isLinXu/fmux/internal/metrics\t1.641s\n?   \tgithub.com/isLinXu/fmux/internal/router\t[no test files]\nok  \tgithub.com/isLinXu/fmux/internal/supervisor\t5.853s\nok  \tgithub.com/isLinXu/fmux/test/conformance\t2.027s\nok  \tgithub.com/isLinXu/fmux/test/e2e\t4.988s\n"
+  },
+  "go_version": "go version go1.27.3 darwin/arm64",
+  "build_sha256": "bb40ffb149522e935240adcb96f2beffb51566ab4be57cd044cba07b4a0be7d0",
+  "notes": [
+    "Original failure evidence is unchanged.",
+    "fm model menu was not retested in this batch; remains an external CLI limitation.",
+    "No real model performance run or deployed-service replacement.",
+    "TTFT measurement boundary and budget eviction lifecycle are unchanged."
+  ]
+}

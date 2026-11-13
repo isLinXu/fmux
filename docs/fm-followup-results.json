@@ -1,0 +1,4380 @@
+{
+  "date": "2026-11-04",
+  "scope": "Supplemental fm and fmux verification; no production fixes",
+  "assertions": [
+    {
+      "name": "direct.normal",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "normal",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0297,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.fragmented",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "fragmented",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0305,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.crlf",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "crlf",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0295,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.large",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "large",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0437,
+      "output_chars": 70002,
+      "stdout": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.missing_usage",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "missing_usage",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0295,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.missing_finish",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "missing_finish",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0275,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.eof",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "eof",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0261,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "direct.http401",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "http401",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.028,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 401:\n{\"error\": {\"message\": \"injected HTTP error\", \"type\": \"server_error\", \"code\": \"401\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.http429",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "http429",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0267,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 429:\n{\"error\": {\"message\": \"injected HTTP error\", \"type\": \"server_error\", \"code\": \"429\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.http503",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "http503",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0275,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 503:\n{\"error\": {\"message\": \"injected HTTP error\", \"type\": \"server_error\", \"code\": \"503\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0318,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0288,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.event_error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "event_error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0306,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.event_error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "event_error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0279,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: injected upstream failure\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.malformed_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "malformed_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0293,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.malformed_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "malformed_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0304,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "direct.multiline",
+      "status": "FAIL",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56160/v1",
+        "-m",
+        "multiline",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0278,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": "Unexpected completion/error semantics"
+    },
+    {
+      "name": "gateway.normal",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "normal",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0286,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.fragmented",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "fragmented",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0303,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.crlf",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "crlf",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0301,
+      "output_chars": 8,
+      "stdout": "中文🙂\n第二行\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.large",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "large",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0307,
+      "output_chars": 70002,
+      "stdout": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.missing_usage",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "missing_usage",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0332,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.missing_finish",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "missing_finish",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0306,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.eof",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "eof",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0293,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "gateway.http401",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "http401",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0417,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 401:\n{\"error\":{\"message\":\"backend returned 401 Unauthorized: {\\\"error\\\": {\\\"message\\\": \\\"injected HTTP error\\\", \\\"type\\\": \\\"server_error\\\", \\\"code\\\": \\\"401\\\"}}\",\"type\":\"permission_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.http429",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "http429",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0338,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 429:\n{\"error\":{\"message\":\"backend returned 429 Too Many Requests: {\\\"error\\\": {\\\"message\\\": \\\"injected HTTP error\\\", \\\"type\\\": \\\"server_error\\\", \\\"code\\\": \\\"429\\\"}}\",\"type\":\"rate_limit_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.http503",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "http503",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.032,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 503:\n{\"error\":{\"message\":\"backend returned 503 Service Unavailable: {\\\"error\\\": {\\\"message\\\": \\\"injected HTTP error\\\", \\\"type\\\": \\\"server_error\\\", \\\"code\\\": \\\"503\\\"}}\",\"type\":\"api_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0311,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0316,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.event_error_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "event_error_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0315,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.event_error_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "event_error_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0436,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.malformed_before",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "malformed_before",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0305,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 502:\n{\"error\":{\"message\":\"decode chunk \\\"{not-json}\\\": invalid character 'n' looking for beginning of object key string\",\"type\":\"api_error\",\"code\":\"backend_error\"}}\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.malformed_after",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "malformed_after",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0337,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: decode chunk \"{not-json}\": invalid character 'n' looking for beginning of object key string\n",
+      "reason": ""
+    },
+    {
+      "name": "gateway.multiline",
+      "status": "FAIL",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "multiline",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.0303,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: HTTP error with status code 502:\n{\"error\":{\"message\":\"decode chunk \\\"{\\\\\\\"id\\\\\\\": \\\\\\\"chatcmpl-followup\\\\\\\",\\\": unexpected end of JSON input\",\"type\":\"api_error\",\"code\":\"backend_error\"}}\n",
+      "reason": "Unexpected completion/error semantics"
+    },
+    {
+      "name": "wire.error_before",
+      "status": "FAIL",
+      "http_status": 200,
+      "body": "data: {\"id\":\"\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"error_before\",\"choices\":null}\n\ndata: {\"id\":\"chatcmpl-7e1ca55285754098417359ce\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"error_before\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-ed872ec8b24ab8d185614c7a\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"error_before\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-bdf171566a09a7b83e5e2dec\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"error_before\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":1,\"total_tokens\":3}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "wire.error_after",
+      "status": "FAIL",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"error_after\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"error_after\",\"choices\":null}\n\ndata: {\"id\":\"chatcmpl-272a2b09f2538b1bb2eb426e\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"error_after\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-6543e27236a3a50067dac216\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"error_after\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "wire.event_error_before",
+      "status": "FAIL",
+      "http_status": 200,
+      "body": "data: {\"id\":\"\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"event_error_before\",\"choices\":null}\n\ndata: {\"id\":\"chatcmpl-492b6848c402b4ea37a69274\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"event_error_before\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-bd7c5dff21eb70f41fb5caf2\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"event_error_before\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-0d40bb9f9e4f729901ce9732\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"event_error_before\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":1,\"total_tokens\":3}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "wire.event_error_after",
+      "status": "FAIL",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"event_error_after\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"event_error_after\",\"choices\":null}\n\ndata: {\"id\":\"chatcmpl-1ab7d7197f1b403c49e41c78\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"event_error_after\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-dfa39e705620fb889230a5e5\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"event_error_after\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "wire.malformed_before",
+      "status": "PASS",
+      "http_status": 502,
+      "body": "{\"error\":{\"message\":\"decode chunk \\\"{not-json}\\\": invalid character 'n' looking for beginning of object key string\",\"type\":\"api_error\",\"code\":\"backend_error\"}}"
+    },
+    {
+      "name": "wire.malformed_after",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"malformed_after\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"error\":{\"message\":\"decode chunk \\\"{not-json}\\\": invalid character 'n' looking for beginning of object key string\",\"type\":\"api_error\",\"code\":\"stream_error\"}}\n\n"
+    },
+    {
+      "name": "wire.stall",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"stall\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"error\":{\"message\":\"stream idle timeout: no chunk from fault for 350ms\",\"type\":\"api_error\",\"code\":\"stream_idle\"}}\n\n"
+    },
+    {
+      "name": "wire.eof",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"eof\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-7bb4817b29abc9c4566ebf49\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"eof\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-c9a4957f3b608863427a0637\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"eof\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "wire.missing_usage",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"missing_usage\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"missing_usage\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: {\"id\":\"chatcmpl-c1fc097afefcd187afa6e326\",\"object\":\"chat.completion.chunk\",\"created\":1793723771,\"model\":\"missing_usage\",\"choices\":[],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "name": "fallback.http503_recovers",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "auto_http",
+        "test"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0362,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "fallback.sse_error_should_recover",
+      "status": "FAIL",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "auto_sse",
+        "test"
+      ],
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.037,
+      "output_chars": 0,
+      "stdout": "",
+      "stderr": "Error: Failed to parse generated content.\n",
+      "reason": "Unexpected completion/error semantics"
+    },
+    {
+      "name": "cancel.propagates_to_backend",
+      "status": "PASS",
+      "first_line": "data: {\"id\":\"chatcmpl-followup\",\"object\":\"chat.completion.chunk\",\"created\":1700000000,\"model\":\"stall\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":null}]}\n",
+      "cancelled_delta": 1
+    },
+    {
+      "name": "concurrency.bounded_gate",
+      "status": "PASS",
+      "statuses": [
+        200,
+        429,
+        200,
+        429,
+        200,
+        200,
+        429,
+        429
+      ],
+      "backend_peak": 2
+    },
+    {
+      "name": "history.save_first",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "normal",
+        "--save-transcript",
+        "/tmp/fmux-fm-followup.x2VlJX/round-one.json",
+        "first-turn"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0471,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "\u001b[38;2;255;107;128mTranscript saved to: /tmp/fmux-fm-followup.x2VlJX/round-one.json\n\u001b[0m",
+      "reason": ""
+    },
+    {
+      "name": "history.resume_second",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "normal",
+        "--resume",
+        "/tmp/fmux-fm-followup.x2VlJX/round-one.json",
+        "--save-transcript",
+        "/tmp/fmux-fm-followup.x2VlJX/round-two.json",
+        "second-turn"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.0483,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "\u001b[38;2;255;107;128mTranscript saved to: /tmp/fmux-fm-followup.x2VlJX/round-two.json\n\u001b[0m",
+      "reason": ""
+    },
+    {
+      "name": "history.resume_keeps_prior_turn",
+      "status": "PASS",
+      "request": {
+        "model": "normal",
+        "messages": [
+          {
+            "role": "user",
+            "content": "first-turn"
+          },
+          {
+            "role": "assistant",
+            "content": "alpha"
+          },
+          {
+            "role": "user",
+            "content": "second-turn"
+          }
+        ],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      }
+    },
+    {
+      "name": "history.resume_third",
+      "status": "PASS",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:56161/v1",
+        "-m",
+        "normal",
+        "--resume",
+        "/tmp/fmux-fm-followup.x2VlJX/round-two.json",
+        "third-turn"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.05,
+      "output_chars": 6,
+      "stdout": "alpha\n",
+      "stderr": "",
+      "reason": ""
+    },
+    {
+      "name": "history.three_turns",
+      "status": "PASS",
+      "request": {
+        "model": "normal",
+        "messages": [
+          {
+            "role": "user",
+            "content": "first-turn"
+          },
+          {
+            "role": "assistant",
+            "content": "alpha"
+          },
+          {
+            "role": "user",
+            "content": "second-turn"
+          },
+          {
+            "role": "assistant",
+            "content": "alpha"
+          },
+          {
+            "role": "user",
+            "content": "third-turn"
+          }
+        ],
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      }
+    },
+    {
+      "name": "chat.clear_removes_history",
+      "status": "PASS",
+      "returncode": 0,
+      "stdout": "  you> first-turn\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> alpha\r\n  you> /clear\r\n note> Started a new session.\r\n  you> second-turn\r\n note> Thinking...\r\u001b[K note> Thought for less than a second.\r\nmodel> alpha\r\n  you> ",
+      "requests": [
+        {
+          "model": "normal",
+          "messages": [
+            {
+              "role": "user",
+              "content": "first-turn"
+            }
+          ],
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          }
+        },
+        {
+          "model": "normal",
+          "messages": [
+            {
+              "role": "user",
+              "content": "second-turn"
+            }
+          ],
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "resources.no_inflight_after_tests",
+      "status": "PASS",
+      "metrics": "# HELP fmux_requests_total Completed chat completion requests.\n# TYPE fmux_requests_total counter\nfmux_requests_total{backend=\"fault\",model=\"crlf\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"eof\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"error_after\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"error_before\",status=\"200\"} 3\nfmux_requests_total{backend=\"fault\",model=\"event_error_after\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"event_error_before\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"fragmented\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"hold\",status=\"200\"} 4\nfmux_requests_total{backend=\"fault\",model=\"http401\",status=\"401\"} 1\nfmux_requests_total{backend=\"fault\",model=\"http429\",status=\"429\"} 1\nfmux_requests_total{backend=\"fault\",model=\"http503\",status=\"503\"} 2\nfmux_requests_total{backend=\"fault\",model=\"large\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"malformed_after\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"malformed_before\",status=\"502\"} 2\nfmux_requests_total{backend=\"fault\",model=\"missing_finish\",status=\"200\"} 1\nfmux_requests_total{backend=\"fault\",model=\"missing_usage\",status=\"200\"} 2\nfmux_requests_total{backend=\"fault\",model=\"multiline\",status=\"502\"} 1\nfmux_requests_total{backend=\"fault\",model=\"normal\",status=\"200\"} 6\nfmux_requests_total{backend=\"fault\",model=\"stall\",status=\"502\"} 1\nfmux_requests_total{backend=\"fault\",model=\"stall\",status=\"504\"} 1\nfmux_requests_total{backend=\"healthy\",model=\"normal\",status=\"200\"} 1\n# HELP fmux_prompt_tokens_total Prompt tokens reported by backends.\n# TYPE fmux_prompt_tokens_total counter\nfmux_prompt_tokens_total{backend=\"fault\",model=\"crlf\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"eof\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"error_after\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"error_before\"} 6\nfmux_prompt_tokens_total{backend=\"fault\",model=\"event_error_after\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"event_error_before\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"fragmented\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"hold\"} 12\nfmux_prompt_tokens_total{backend=\"fault\",model=\"http401\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"http429\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"http503\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"large\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"malformed_after\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"malformed_before\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"missing_finish\"} 3\nfmux_prompt_tokens_total{backend=\"fault\",model=\"missing_usage\"} 4\nfmux_prompt_tokens_total{backend=\"fault\",model=\"multiline\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"normal\"} 18\nfmux_prompt_tokens_total{backend=\"fault\",model=\"stall\"} 0\nfmux_prompt_tokens_total{backend=\"fault\",model=\"stall\"} 0\nfmux_prompt_tokens_total{backend=\"healthy\",model=\"normal\"} 3\n# HELP fmux_completion_tokens_total Completion tokens reported by backends.\n# TYPE fmux_completion_tokens_total counter\nfmux_completion_tokens_total{backend=\"fault\",model=\"crlf\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"eof\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"error_after\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"error_before\"} 3\nfmux_completion_tokens_total{backend=\"fault\",model=\"event_error_after\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"event_error_before\"} 2\nfmux_completion_tokens_total{backend=\"fault\",model=\"fragmented\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"hold\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"http401\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"http429\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"http503\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"large\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"malformed_after\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"malformed_before\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"missing_finish\"} 1\nfmux_completion_tokens_total{backend=\"fault\",model=\"missing_usage\"} 4\nfmux_completion_tokens_total{backend=\"fault\",model=\"multiline\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"normal\"} 6\nfmux_completion_tokens_total{backend=\"fault\",model=\"stall\"} 0\nfmux_completion_tokens_total{backend=\"fault\",model=\"stall\"} 0\nfmux_completion_tokens_total{backend=\"healthy\",model=\"normal\"} 1\n# HELP fmux_request_duration_milliseconds Wall time per request, bucketed.\n# TYPE fmux_request_duration_milliseconds histogram\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"50\"} 33\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"100\"} 33\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"250\"} 37\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"500\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"1000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"2500\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"5000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"10000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"20000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"30000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"60000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"120000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"300000\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"fault\",le=\"+Inf\"} 38\nfmux_request_duration_milliseconds_sum{backend=\"fault\"} 1194\nfmux_request_duration_milliseconds_count{backend=\"fault\"} 38\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"50\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"100\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"250\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"500\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"1000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"2500\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"5000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"10000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"20000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"30000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"60000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"120000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"300000\"} 1\nfmux_request_duration_milliseconds_bucket{backend=\"healthy\",le=\"+Inf\"} 1\nfmux_request_duration_milliseconds_sum{backend=\"healthy\"} 1\nfmux_request_duration_milliseconds_count{backend=\"healthy\"} 1\n# HELP fmux_time_to_first_token_milliseconds Time from request start to the first streamed token.\n# TYPE fmux_time_to_first_token_milliseconds histogram\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"50\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"100\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"250\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"500\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"1000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"2500\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"5000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"10000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"20000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"30000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"60000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"120000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"300000\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"fault\",le=\"+Inf\"} 27\nfmux_time_to_first_token_milliseconds_sum{backend=\"fault\"} 14\nfmux_time_to_first_token_milliseconds_count{backend=\"fault\"} 27\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"50\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"100\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"250\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"500\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"1000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"2500\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"5000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"10000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"20000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"30000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"60000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"120000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"300000\"} 1\nfmux_time_to_first_token_milliseconds_bucket{backend=\"healthy\",le=\"+Inf\"} 1\nfmux_time_to_first_token_milliseconds_sum{backend=\"healthy\"} 1\nfmux_time_to_first_token_milliseconds_count{backend=\"healthy\"} 1\n# HELP fmux_evictions_total Models unloaded to stay inside the memory budget.\n# TYPE fmux_evictions_total counter\nfmux_evictions_total 0\n# HELP fmux_inflight_requests Requests currently being served per backend.\n# TYPE fmux_inflight_requests gauge\nfmux_inflight_requests{backend=\"fault\"} 0\nfmux_inflight_requests{backend=\"healthy\"} 0\n# HELP fmux_queue_waits_total Requests that had to wait for an admission slot.\n# TYPE fmux_queue_waits_total counter\nfmux_queue_waits_total{backend=\"fault\"} 2\n# HELP fmux_queue_wait_milliseconds_sum Time spent waiting for an admission slot.\n# TYPE fmux_queue_wait_milliseconds_sum counter\nfmux_queue_wait_milliseconds_sum{backend=\"fault\"} 410\n# HELP fmux_rejected_total Requests refused by admission control.\n# TYPE fmux_rejected_total counter\nfmux_rejected_total{backend=\"fault\",reason=\"queue_full\"} 4\n# HELP fmux_uptime_seconds Seconds since the gateway started.\n# TYPE fmux_uptime_seconds gauge\nfmux_uptime_seconds 4\n"
+    },
+    {
+      "name": "shutdown.drains_active_request",
+      "status": "PASS",
+      "http_status": 200,
+      "body": "{\"id\":\"test\",\"object\":\"chat.completion\",\"created\":1700000000,\"model\":\"hold\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"alpha\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":1,\"total_tokens\":4}}",
+      "gateway_exit": 0
+    },
+    {
+      "name": "menu.catalog_lists_plain_ids",
+      "status": "PASS",
+      "stdout": "  http://127.0.0.1:57189/v1\n  ✓ normal\n  ✓ backup\n",
+      "stderr": "",
+      "returncode": 0
+    },
+    {
+      "name": "menu.runtime_switch_plain_id",
+      "status": "FAIL",
+      "stdout": "  you> /model backup\r\n note> Unknown model 'backup'. Available: system, pcc.\r\n  you> /model normal\r\n note> Unknown model 'normal'. Available: system, pcc.\r\n  you> /quit\r\n",
+      "returncode": 0,
+      "posts": [],
+      "commands": [
+        "/model backup",
+        "/model normal",
+        "/quit"
+      ]
+    },
+    {
+      "name": "metadata.eof",
+      "status": "FAIL",
+      "source_case": "wire.eof",
+      "fields": {
+        "id": [
+          "chatcmpl-followup",
+          "chatcmpl-7bb4817b29abc9c4566ebf49",
+          "chatcmpl-c9a4957f3b608863427a0637"
+        ],
+        "created": [
+          1700000000,
+          1793723771,
+          1793723771
+        ],
+        "model": [
+          "eof",
+          "eof",
+          "eof"
+        ]
+      }
+    },
+    {
+      "name": "metadata.missing_usage",
+      "status": "FAIL",
+      "source_case": "wire.missing_usage",
+      "fields": {
+        "id": [
+          "chatcmpl-followup",
+          "chatcmpl-followup",
+          "chatcmpl-c1fc097afefcd187afa6e326"
+        ],
+        "created": [
+          1700000000,
+          1700000000,
+          1793723771
+        ],
+        "model": [
+          "missing_usage",
+          "missing_usage",
+          "missing_usage"
+        ]
+      }
+    }
+  ],
+  "summary": [
+    {
+      "status": "FAIL",
+      "count": 10
+    },
+    {
+      "status": "PASS",
+      "count": 49
+    }
+  ],
+  "live_traces": [
+    {
+      "name": "swift_original_alias",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:50710/v1",
+        "-m",
+        "qwen3.8:27b",
+        "--model-provider-header",
+        "X-Followup-Case: swift_original_alias",
+        "What is Swift?"
+      ],
+      "timeout_s": 110,
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 100.1105,
+      "first_terminal_output_s": 39.8774,
+      "terminal_output": "\"Swift\" can refer to several things, depending on context:\n\n## Swift (Programming Language)\nThe most common modern reference is **Apple's open-source programming language**, released in **2014**. Key points:\n- **Purpose:** Developed to replace Objective-C for building apps on Apple platforms (iOS, macOS, watchOS, tvOS, visionOS).\n- **Design goals:** Safety (with features like optionals to avoid null-pointer crashes), speed (comparable to C), and a clean, modern syntax.\n- **Ecosystem:** It powers the Xcode IDE and Apple's frameworks (SwiftUI, UIKit, etc.).\n- **Open source:** It runs on Linux and Windows too, and is used increasingly outside Apple's ecosystem (e.g., server-side with Vapor).\n\n## Swift (Bird)\nA **swift** (*Apodidae* family) is a small, fast-flying, migratory bird recognized by its:\n- Swept-back wings and forked tail.\n- Remarkable aerial agility and speed (some species exceed 100 mph).\n- Habit of catching insects mid-flight.\nThe name \"Swift\" for Apple's language is a tribute to these birds.\n\n## Other Uses\n- **The Swift River** – a river in the Netherlands.\n- **Swift** – a common given name or a brand name in various industries.\n- **Microsoft SWIFT / SWIFT (banking)** – the global interbank messaging network (Society for Worldwide Interbank Financial Telecommunication), used in finance.\n\nIf you had a specific meaning in mind, feel free to ask and I can go deeper!\n",
+      "trace": {
+        "name": "swift_original_alias",
+        "events": [
+          {
+            "time_s": 13.8313
+          },
+          {
+            "time_s": 14.0259
+          },
+          {
+            "time_s": 14.3331
+          },
+          {
+            "time_s": 14.3519
+          },
+          {
+            "time_s": 14.6366
+          },
+          {
+            "time_s": 14.6366
+          },
+          {
+            "time_s": 14.9878
+          },
+          {
+            "time_s": 14.9879
+          },
+          {
+            "time_s": 15.2801
+          },
+          {
+            "time_s": 15.2802
+          },
+          {
+            "time_s": 15.6202
+          },
+          {
+            "time_s": 15.6204
+          },
+          {
+            "time_s": 15.9642
+          },
+          {
+            "time_s": 15.9644
+          },
+          {
+            "time_s": 16.2314
+          },
+          {
+            "time_s": 16.2315
+          },
+          {
+            "time_s": 16.564
+          },
+          {
+            "time_s": 16.5642
+          },
+          {
+            "time_s": 16.8203
+          },
+          {
+            "time_s": 16.8203
+          },
+          {
+            "time_s": 17.1463
+          },
+          {
+            "time_s": 17.4329
+          },
+          {
+            "time_s": 17.433
+          },
+          {
+            "time_s": 17.8471
+          },
+          {
+            "time_s": 17.8472
+          },
+          {
+            "time_s": 17.8472
+          },
+          {
+            "time_s": 18.2566
+          },
+          {
+            "time_s": 18.2566
+          },
+          {
+            "time_s": 18.2566
+          },
+          {
+            "time_s": 18.6124
+          },
+          {
+            "time_s": 18.6124
+          },
+          {
+            "time_s": 18.9138
+          },
+          {
+            "time_s": 18.9139
+          },
+          {
+            "time_s": 18.9141
+          },
+          {
+            "time_s": 19.257
+          },
+          {
+            "time_s": 19.2571
+          },
+          {
+            "time_s": 19.2571
+          },
+          {
+            "time_s": 19.5708
+          },
+          {
+            "time_s": 19.5709
+          },
+          {
+            "time_s": 19.5709
+          },
+          {
+            "time_s": 20.1251
+          },
+          {
+            "time_s": 20.5333
+          },
+          {
+            "time_s": 20.5334
+          },
+          {
+            "time_s": 20.5334
+          },
+          {
+            "time_s": 20.9411
+          },
+          {
+            "time_s": 20.9412
+          },
+          {
+            "time_s": 21.3734
+          },
+          {
+            "time_s": 21.3734
+          },
+          {
+            "time_s": 21.3735
+          },
+          {
+            "time_s": 21.7428
+          },
+          {
+            "time_s": 21.7429
+          },
+          {
+            "time_s": 21.743
+          },
+          {
+            "time_s": 22.1439
+          },
+          {
+            "time_s": 22.144
+          },
+          {
+            "time_s": 22.144
+          },
+          {
+            "time_s": 22.144
+          },
+          {
+            "time_s": 22.7019
+          },
+          {
+            "time_s": 22.7019
+          },
+          {
+            "time_s": 22.7019
+          },
+          {
+            "time_s": 22.7019
+          },
+          {
+            "time_s": 23.0596
+          },
+          {
+            "time_s": 23.0596
+          },
+          {
+            "time_s": 23.0597
+          },
+          {
+            "time_s": 23.4075
+          },
+          {
+            "time_s": 23.4076
+          },
+          {
+            "time_s": 23.4076
+          },
+          {
+            "time_s": 24.0093
+          },
+          {
+            "time_s": 24.0103
+          },
+          {
+            "time_s": 24.0103
+          },
+          {
+            "time_s": 24.5642
+          },
+          {
+            "time_s": 24.5643
+          },
+          {
+            "time_s": 24.5643
+          },
+          {
+            "time_s": 24.5644
+          },
+          {
+            "time_s": 25.0138
+          },
+          {
+            "time_s": 25.0139
+          },
+          {
+            "time_s": 25.3172
+          },
+          {
+            "time_s": 25.3173
+          },
+          {
+            "time_s": 25.3173
+          },
+          {
+            "time_s": 25.8281
+          },
+          {
+            "time_s": 25.8282
+          },
+          {
+            "time_s": 25.8282
+          },
+          {
+            "time_s": 26.2066
+          },
+          {
+            "time_s": 26.2067
+          },
+          {
+            "time_s": 26.6079
+          },
+          {
+            "time_s": 26.608
+          },
+          {
+            "time_s": 26.608
+          },
+          {
+            "time_s": 26.608
+          },
+          {
+            "time_s": 27.0749
+          },
+          {
+            "time_s": 27.374
+          },
+          {
+            "time_s": 27.8141
+          },
+          {
+            "time_s": 27.8142
+          },
+          {
+            "time_s": 27.8142
+          },
+          {
+            "time_s": 27.8143
+          },
+          {
+            "time_s": 28.2569
+          },
+          {
+            "time_s": 28.6326
+          },
+          {
+            "time_s": 28.6327
+          },
+          {
+            "time_s": 28.6327
+          },
+          {
+            "time_s": 28.6327
+          },
+          {
+            "time_s": 29.148
+          },
+          {
+            "time_s": 29.1482
+          },
+          {
+            "time_s": 29.1482
+          },
+          {
+            "time_s": 29.1483
+          },
+          {
+            "time_s": 29.5353
+          },
+          {
+            "time_s": 30.0436
+          },
+          {
+            "time_s": 30.0437
+          },
+          {
+            "time_s": 30.5072
+          },
+          {
+            "time_s": 30.5073
+          },
+          {
+            "time_s": 30.5074
+          },
+          {
+            "time_s": 30.5074
+          },
+          {
+            "time_s": 31.2223
+          },
+          {
+            "time_s": 31.2223
+          },
+          {
+            "time_s": 31.2223
+          },
+          {
+            "time_s": 31.2223
+          },
+          {
+            "time_s": 31.2224
+          },
+          {
+            "time_s": 31.7753
+          },
+          {
+            "time_s": 31.7754
+          },
+          {
+            "time_s": 32.3286
+          },
+          {
+            "time_s": 32.3287
+          },
+          {
+            "time_s": 32.3287
+          },
+          {
+            "time_s": 32.728
+          },
+          {
+            "time_s": 32.7281
+          },
+          {
+            "time_s": 32.7281
+          },
+          {
+            "time_s": 33.2119
+          },
+          {
+            "time_s": 33.2121
+          },
+          {
+            "time_s": 33.2121
+          },
+          {
+            "time_s": 33.2121
+          },
+          {
+            "time_s": 33.6761
+          },
+          {
+            "time_s": 33.6762
+          },
+          {
+            "time_s": 33.6762
+          },
+          {
+            "time_s": 33.6763
+          },
+          {
+            "time_s": 34.1859
+          },
+          {
+            "time_s": 34.186
+          },
+          {
+            "time_s": 34.186
+          },
+          {
+            "time_s": 34.186
+          },
+          {
+            "time_s": 34.186
+          },
+          {
+            "time_s": 34.5256
+          },
+          {
+            "time_s": 34.5256
+          },
+          {
+            "time_s": 34.5257
+          },
+          {
+            "time_s": 34.5257
+          },
+          {
+            "time_s": 34.9035
+          },
+          {
+            "time_s": 35.2313
+          },
+          {
+            "time_s": 35.5478
+          },
+          {
+            "time_s": 35.5479
+          },
+          {
+            "time_s": 35.5479
+          },
+          {
+            "time_s": 35.5479
+          },
+          {
+            "time_s": 36.0884
+          },
+          {
+            "time_s": 36.0893
+          },
+          {
+            "time_s": 36.0893
+          },
+          {
+            "time_s": 36.5695
+          },
+          {
+            "time_s": 36.9673
+          },
+          {
+            "time_s": 36.9674
+          },
+          {
+            "time_s": 37.3912
+          },
+          {
+            "time_s": 37.3913
+          },
+          {
+            "time_s": 37.7275
+          },
+          {
+            "time_s": 37.7275
+          },
+          {
+            "time_s": 37.7276
+          },
+          {
+            "time_s": 38.0373
+          },
+          {
+            "time_s": 38.0373
+          },
+          {
+            "time_s": 38.0374
+          },
+          {
+            "time_s": 38.0374
+          },
+          {
+            "time_s": 38.3593
+          },
+          {
+            "time_s": 38.3594
+          },
+          {
+            "time_s": 38.3594
+          },
+          {
+            "time_s": 38.3594
+          },
+          {
+            "time_s": 38.7099
+          },
+          {
+            "time_s": 39.0252
+          },
+          {
+            "time_s": 39.3607,
+            "content_chars": 1
+          },
+          {
+            "time_s": 39.8471,
+            "content_chars": 5
+          },
+          {
+            "time_s": 39.8472,
+            "content_chars": 1
+          },
+          {
+            "time_s": 39.8473,
+            "content_chars": 4
+          },
+          {
+            "time_s": 40.2246,
+            "content_chars": 6
+          },
+          {
+            "time_s": 40.2247,
+            "content_chars": 3
+          },
+          {
+            "time_s": 40.2247,
+            "content_chars": 8
+          },
+          {
+            "time_s": 40.2247,
+            "content_chars": 7
+          },
+          {
+            "time_s": 40.6284,
+            "content_chars": 1
+          },
+          {
+            "time_s": 40.6285,
+            "content_chars": 10
+          },
+          {
+            "time_s": 40.6285,
+            "content_chars": 3
+          },
+          {
+            "time_s": 40.6285,
+            "content_chars": 8
+          },
+          {
+            "time_s": 41.1178,
+            "content_chars": 1
+          },
+          {
+            "time_s": 41.1178,
+            "content_chars": 4
+          },
+          {
+            "time_s": 41.569,
+            "content_chars": 6
+          },
+          {
+            "time_s": 41.5691,
+            "content_chars": 2
+          },
+          {
+            "time_s": 41.5692,
+            "content_chars": 11
+          },
+          {
+            "time_s": 41.5692,
+            "content_chars": 9
+          },
+          {
+            "time_s": 41.9947,
+            "content_chars": 1
+          },
+          {
+            "time_s": 41.9948,
+            "content_chars": 4
+          },
+          {
+            "time_s": 42.4167,
+            "content_chars": 5
+          },
+          {
+            "time_s": 42.4167,
+            "content_chars": 7
+          },
+          {
+            "time_s": 42.8359,
+            "content_chars": 7
+          },
+          {
+            "time_s": 42.836,
+            "content_chars": 10
+          },
+          {
+            "time_s": 42.836,
+            "content_chars": 3
+          },
+          {
+            "time_s": 42.836,
+            "content_chars": 3
+          },
+          {
+            "time_s": 43.1828,
+            "content_chars": 5
+          },
+          {
+            "time_s": 43.1828,
+            "content_chars": 2
+          },
+          {
+            "time_s": 43.1829,
+            "content_chars": 5
+          },
+          {
+            "time_s": 43.1829,
+            "content_chars": 7
+          },
+          {
+            "time_s": 43.5598,
+            "content_chars": 12
+          },
+          {
+            "time_s": 43.5599,
+            "content_chars": 9
+          },
+          {
+            "time_s": 43.5599,
+            "content_chars": 3
+          },
+          {
+            "time_s": 43.5599,
+            "content_chars": 9
+          },
+          {
+            "time_s": 44.0661,
+            "content_chars": 3
+          },
+          {
+            "time_s": 44.0661,
+            "content_chars": 3
+          },
+          {
+            "time_s": 44.0662,
+            "content_chars": 1
+          },
+          {
+            "time_s": 44.0662,
+            "content_chars": 1
+          },
+          {
+            "time_s": 44.4321,
+            "content_chars": 1
+          },
+          {
+            "time_s": 44.4323,
+            "content_chars": 1
+          },
+          {
+            "time_s": 44.4323,
+            "content_chars": 3
+          },
+          {
+            "time_s": 44.4323,
+            "content_chars": 4
+          },
+          {
+            "time_s": 44.773,
+            "content_chars": 7
+          },
+          {
+            "time_s": 44.7731,
+            "content_chars": 1
+          },
+          {
+            "time_s": 45.3077,
+            "content_chars": 2
+          },
+          {
+            "time_s": 45.308,
+            "content_chars": 3
+          },
+          {
+            "time_s": 45.3081,
+            "content_chars": 7
+          },
+          {
+            "time_s": 45.3082,
+            "content_chars": 3
+          },
+          {
+            "time_s": 45.7232,
+            "content_chars": 10
+          },
+          {
+            "time_s": 46.0604,
+            "content_chars": 3
+          },
+          {
+            "time_s": 46.44,
+            "content_chars": 8
+          },
+          {
+            "time_s": 46.4401,
+            "content_chars": 10
+          },
+          {
+            "time_s": 46.7532,
+            "content_chars": 2
+          },
+          {
+            "time_s": 46.7533,
+            "content_chars": 4
+          },
+          {
+            "time_s": 46.7533,
+            "content_chars": 9
+          },
+          {
+            "time_s": 47.0778,
+            "content_chars": 5
+          },
+          {
+            "time_s": 47.0779,
+            "content_chars": 3
+          },
+          {
+            "time_s": 47.078,
+            "content_chars": 6
+          },
+          {
+            "time_s": 47.4803,
+            "content_chars": 10
+          },
+          {
+            "time_s": 47.4803,
+            "content_chars": 2
+          },
+          {
+            "time_s": 47.4803,
+            "content_chars": 3
+          },
+          {
+            "time_s": 47.4803,
+            "content_chars": 1
+          },
+          {
+            "time_s": 48.0455,
+            "content_chars": 6
+          },
+          {
+            "time_s": 48.0457,
+            "content_chars": 1
+          },
+          {
+            "time_s": 48.0457,
+            "content_chars": 6
+          },
+          {
+            "time_s": 48.0458,
+            "content_chars": 2
+          },
+          {
+            "time_s": 48.5964,
+            "content_chars": 1
+          },
+          {
+            "time_s": 48.5964,
+            "content_chars": 3
+          },
+          {
+            "time_s": 48.5965,
+            "content_chars": 2
+          },
+          {
+            "time_s": 48.5965,
+            "content_chars": 1
+          },
+          {
+            "time_s": 49.074,
+            "content_chars": 7
+          },
+          {
+            "time_s": 49.0741,
+            "content_chars": 2
+          },
+          {
+            "time_s": 49.0741,
+            "content_chars": 2
+          },
+          {
+            "time_s": 49.6274,
+            "content_chars": 2
+          },
+          {
+            "time_s": 49.6275,
+            "content_chars": 3
+          },
+          {
+            "time_s": 49.6275,
+            "content_chars": 6
+          },
+          {
+            "time_s": 49.6276,
+            "content_chars": 6
+          },
+          {
+            "time_s": 50.1454,
+            "content_chars": 3
+          },
+          {
+            "time_s": 50.1454,
+            "content_chars": 7
+          },
+          {
+            "time_s": 50.486,
+            "content_chars": 2
+          },
+          {
+            "time_s": 50.8238,
+            "content_chars": 4
+          },
+          {
+            "time_s": 51.2004,
+            "content_chars": 9
+          },
+          {
+            "time_s": 51.5858,
+            "content_chars": 5
+          },
+          {
+            "time_s": 51.586,
+            "content_chars": 7
+          },
+          {
+            "time_s": 52.1078,
+            "content_chars": 3
+          },
+          {
+            "time_s": 52.1078,
+            "content_chars": 3
+          },
+          {
+            "time_s": 52.6343,
+            "content_chars": 6
+          },
+          {
+            "time_s": 52.6345,
+            "content_chars": 5
+          },
+          {
+            "time_s": 53.1163,
+            "content_chars": 8
+          },
+          {
+            "time_s": 53.3993,
+            "content_chars": 8
+          },
+          {
+            "time_s": 53.6565,
+            "content_chars": 2
+          },
+          {
+            "time_s": 53.6566,
+            "content_chars": 6
+          },
+          {
+            "time_s": 54.0311,
+            "content_chars": 2
+          },
+          {
+            "time_s": 54.0312,
+            "content_chars": 3
+          },
+          {
+            "time_s": 54.4447,
+            "content_chars": 7
+          },
+          {
+            "time_s": 54.4448,
+            "content_chars": 3
+          },
+          {
+            "time_s": 54.4448,
+            "content_chars": 2
+          },
+          {
+            "time_s": 54.6932,
+            "content_chars": 2
+          },
+          {
+            "time_s": 54.6932,
+            "content_chars": 4
+          },
+          {
+            "time_s": 55.0834,
+            "content_chars": 2
+          },
+          {
+            "time_s": 55.3664,
+            "content_chars": 6
+          },
+          {
+            "time_s": 55.3665,
+            "content_chars": 1
+          },
+          {
+            "time_s": 55.8332,
+            "content_chars": 7
+          },
+          {
+            "time_s": 55.8333,
+            "content_chars": 7
+          },
+          {
+            "time_s": 55.8333,
+            "content_chars": 1
+          },
+          {
+            "time_s": 56.2275,
+            "content_chars": 2
+          },
+          {
+            "time_s": 56.2276,
+            "content_chars": 3
+          },
+          {
+            "time_s": 56.2277,
+            "content_chars": 1
+          },
+          {
+            "time_s": 56.5869,
+            "content_chars": 8
+          },
+          {
+            "time_s": 56.587,
+            "content_chars": 3
+          },
+          {
+            "time_s": 56.587,
+            "content_chars": 3
+          },
+          {
+            "time_s": 56.587,
+            "content_chars": 7
+          },
+          {
+            "time_s": 57.1339,
+            "content_chars": 4
+          },
+          {
+            "time_s": 57.134,
+            "content_chars": 2
+          },
+          {
+            "time_s": 57.5585,
+            "content_chars": 4
+          },
+          {
+            "time_s": 57.5586,
+            "content_chars": 4
+          },
+          {
+            "time_s": 57.909,
+            "content_chars": 4
+          },
+          {
+            "time_s": 57.9091,
+            "content_chars": 6
+          },
+          {
+            "time_s": 58.328,
+            "content_chars": 2
+          },
+          {
+            "time_s": 58.3281,
+            "content_chars": 11
+          },
+          {
+            "time_s": 58.3282,
+            "content_chars": 2
+          },
+          {
+            "time_s": 58.6533,
+            "content_chars": 5
+          },
+          {
+            "time_s": 58.6533,
+            "content_chars": 2
+          },
+          {
+            "time_s": 58.6533,
+            "content_chars": 1
+          },
+          {
+            "time_s": 58.6534,
+            "content_chars": 6
+          },
+          {
+            "time_s": 58.9648,
+            "content_chars": 1
+          },
+          {
+            "time_s": 58.9648,
+            "content_chars": 4
+          },
+          {
+            "time_s": 58.9649,
+            "content_chars": 3
+          },
+          {
+            "time_s": 59.2433,
+            "content_chars": 2
+          },
+          {
+            "time_s": 59.2433,
+            "content_chars": 3
+          },
+          {
+            "time_s": 59.2434,
+            "content_chars": 4
+          },
+          {
+            "time_s": 59.2434,
+            "content_chars": 7
+          },
+          {
+            "time_s": 59.568,
+            "content_chars": 3
+          },
+          {
+            "time_s": 59.5681,
+            "content_chars": 3
+          },
+          {
+            "time_s": 59.5681,
+            "content_chars": 5
+          },
+          {
+            "time_s": 60.2349,
+            "content_chars": 3
+          },
+          {
+            "time_s": 60.235,
+            "content_chars": 6
+          },
+          {
+            "time_s": 60.7004,
+            "content_chars": 4
+          },
+          {
+            "time_s": 60.7005,
+            "content_chars": 8
+          },
+          {
+            "time_s": 61.1407,
+            "content_chars": 4
+          },
+          {
+            "time_s": 61.6078,
+            "content_chars": 1
+          },
+          {
+            "time_s": 61.6079,
+            "content_chars": 4
+          },
+          {
+            "time_s": 61.6079,
+            "content_chars": 3
+          },
+          {
+            "time_s": 62.0847,
+            "content_chars": 5
+          },
+          {
+            "time_s": 62.0848,
+            "content_chars": 13
+          },
+          {
+            "time_s": 62.5031,
+            "content_chars": 8
+          },
+          {
+            "time_s": 62.9877,
+            "content_chars": 6
+          },
+          {
+            "time_s": 62.9878,
+            "content_chars": 2
+          },
+          {
+            "time_s": 63.3314,
+            "content_chars": 10
+          },
+          {
+            "time_s": 63.3315,
+            "content_chars": 2
+          },
+          {
+            "time_s": 63.3315,
+            "content_chars": 1
+          },
+          {
+            "time_s": 63.3316,
+            "content_chars": 2
+          },
+          {
+            "time_s": 63.7969,
+            "content_chars": 2
+          },
+          {
+            "time_s": 63.797,
+            "content_chars": 7
+          },
+          {
+            "time_s": 64.4469,
+            "content_chars": 5
+          },
+          {
+            "time_s": 64.4469,
+            "content_chars": 5
+          },
+          {
+            "time_s": 64.9207,
+            "content_chars": 6
+          },
+          {
+            "time_s": 65.2462,
+            "content_chars": 2
+          },
+          {
+            "time_s": 65.6628,
+            "content_chars": 4
+          },
+          {
+            "time_s": 65.6629,
+            "content_chars": 6
+          },
+          {
+            "time_s": 65.9753,
+            "content_chars": 2
+          },
+          {
+            "time_s": 65.9754,
+            "content_chars": 4
+          },
+          {
+            "time_s": 66.4189,
+            "content_chars": 1
+          },
+          {
+            "time_s": 66.419,
+            "content_chars": 2
+          },
+          {
+            "time_s": 66.8403,
+            "content_chars": 3
+          },
+          {
+            "time_s": 66.8404,
+            "content_chars": 5
+          },
+          {
+            "time_s": 66.8404,
+            "content_chars": 2
+          },
+          {
+            "time_s": 67.4813,
+            "content_chars": 3
+          },
+          {
+            "time_s": 67.4815,
+            "content_chars": 2
+          },
+          {
+            "time_s": 68.0476,
+            "content_chars": 2
+          },
+          {
+            "time_s": 68.0477,
+            "content_chars": 4
+          },
+          {
+            "time_s": 68.0477,
+            "content_chars": 1
+          },
+          {
+            "time_s": 68.0477,
+            "content_chars": 7
+          },
+          {
+            "time_s": 68.5682,
+            "content_chars": 1
+          },
+          {
+            "time_s": 68.5683,
+            "content_chars": 3
+          },
+          {
+            "time_s": 68.5683,
+            "content_chars": 2
+          },
+          {
+            "time_s": 68.5683,
+            "content_chars": 6
+          },
+          {
+            "time_s": 68.9413,
+            "content_chars": 1
+          },
+          {
+            "time_s": 68.9414,
+            "content_chars": 5
+          },
+          {
+            "time_s": 68.9414,
+            "content_chars": 2
+          },
+          {
+            "time_s": 69.3623,
+            "content_chars": 5
+          },
+          {
+            "time_s": 69.3624,
+            "content_chars": 1
+          },
+          {
+            "time_s": 69.6873,
+            "content_chars": 5
+          },
+          {
+            "time_s": 69.6876,
+            "content_chars": 5
+          },
+          {
+            "time_s": 69.6877,
+            "content_chars": 5
+          },
+          {
+            "time_s": 70.0651,
+            "content_chars": 11
+          },
+          {
+            "time_s": 70.3739,
+            "content_chars": 3
+          },
+          {
+            "time_s": 70.7307,
+            "content_chars": 4
+          },
+          {
+            "time_s": 70.7308,
+            "content_chars": 1
+          },
+          {
+            "time_s": 71.1648,
+            "content_chars": 2
+          },
+          {
+            "time_s": 71.1649,
+            "content_chars": 4
+          },
+          {
+            "time_s": 71.6228,
+            "content_chars": 2
+          },
+          {
+            "time_s": 72.048,
+            "content_chars": 5
+          },
+          {
+            "time_s": 72.6475,
+            "content_chars": 6
+          },
+          {
+            "time_s": 72.8856,
+            "content_chars": 4
+          },
+          {
+            "time_s": 73.1783,
+            "content_chars": 5
+          },
+          {
+            "time_s": 73.2494,
+            "content_chars": 2
+          },
+          {
+            "time_s": 73.5685,
+            "content_chars": 5
+          },
+          {
+            "time_s": 73.5686,
+            "content_chars": 1
+          },
+          {
+            "time_s": 74.0387,
+            "content_chars": 2
+          },
+          {
+            "time_s": 74.374,
+            "content_chars": 7
+          },
+          {
+            "time_s": 74.3742,
+            "content_chars": 4
+          },
+          {
+            "time_s": 74.7525,
+            "content_chars": 7
+          },
+          {
+            "time_s": 74.7526,
+            "content_chars": 8
+          },
+          {
+            "time_s": 75.1613,
+            "content_chars": 4
+          },
+          {
+            "time_s": 75.4741,
+            "content_chars": 6
+          },
+          {
+            "time_s": 75.4742,
+            "content_chars": 2
+          },
+          {
+            "time_s": 76.1107,
+            "content_chars": 4
+          },
+          {
+            "time_s": 76.4483,
+            "content_chars": 8
+          },
+          {
+            "time_s": 77.043,
+            "content_chars": 7
+          },
+          {
+            "time_s": 77.0432,
+            "content_chars": 2
+          },
+          {
+            "time_s": 77.35,
+            "content_chars": 1
+          },
+          {
+            "time_s": 77.3505,
+            "content_chars": 1
+          },
+          {
+            "time_s": 77.351,
+            "content_chars": 4
+          },
+          {
+            "time_s": 77.612,
+            "content_chars": 2
+          },
+          {
+            "time_s": 77.6121,
+            "content_chars": 2
+          },
+          {
+            "time_s": 77.9336,
+            "content_chars": 6
+          },
+          {
+            "time_s": 78.3634,
+            "content_chars": 3
+          },
+          {
+            "time_s": 78.3635,
+            "content_chars": 9
+          },
+          {
+            "time_s": 78.6272,
+            "content_chars": 8
+          },
+          {
+            "time_s": 78.6273,
+            "content_chars": 4
+          },
+          {
+            "time_s": 78.953,
+            "content_chars": 7
+          },
+          {
+            "time_s": 78.9531,
+            "content_chars": 1
+          },
+          {
+            "time_s": 79.3001,
+            "content_chars": 4
+          },
+          {
+            "time_s": 79.8202,
+            "content_chars": 5
+          },
+          {
+            "time_s": 79.8203,
+            "content_chars": 2
+          },
+          {
+            "time_s": 79.8204,
+            "content_chars": 5
+          },
+          {
+            "time_s": 80.1812,
+            "content_chars": 1
+          },
+          {
+            "time_s": 80.1814,
+            "content_chars": 4
+          },
+          {
+            "time_s": 80.6493,
+            "content_chars": 6
+          },
+          {
+            "time_s": 81.191,
+            "content_chars": 2
+          },
+          {
+            "time_s": 81.191,
+            "content_chars": 9
+          },
+          {
+            "time_s": 81.191,
+            "content_chars": 3
+          },
+          {
+            "time_s": 81.6985,
+            "content_chars": 2
+          },
+          {
+            "time_s": 82.1196,
+            "content_chars": 8
+          },
+          {
+            "time_s": 82.3556,
+            "content_chars": 3
+          },
+          {
+            "time_s": 82.6125,
+            "content_chars": 6
+          },
+          {
+            "time_s": 82.647,
+            "content_chars": 6
+          },
+          {
+            "time_s": 82.9289,
+            "content_chars": 1
+          },
+          {
+            "time_s": 83.2256,
+            "content_chars": 4
+          },
+          {
+            "time_s": 83.2256,
+            "content_chars": 6
+          },
+          {
+            "time_s": 83.5558,
+            "content_chars": 5
+          },
+          {
+            "time_s": 84.1862,
+            "content_chars": 2
+          },
+          {
+            "time_s": 84.1863,
+            "content_chars": 3
+          },
+          {
+            "time_s": 84.1863,
+            "content_chars": 3
+          },
+          {
+            "time_s": 84.5259,
+            "content_chars": 6
+          },
+          {
+            "time_s": 84.8758,
+            "content_chars": 6
+          },
+          {
+            "time_s": 85.2983,
+            "content_chars": 2
+          },
+          {
+            "time_s": 85.2984,
+            "content_chars": 2
+          },
+          {
+            "time_s": 85.6767,
+            "content_chars": 2
+          },
+          {
+            "time_s": 85.6767,
+            "content_chars": 6
+          },
+          {
+            "time_s": 86.3036,
+            "content_chars": 3
+          },
+          {
+            "time_s": 86.3037,
+            "content_chars": 4
+          },
+          {
+            "time_s": 86.9815,
+            "content_chars": 12
+          },
+          {
+            "time_s": 86.9818,
+            "content_chars": 1
+          },
+          {
+            "time_s": 86.9825,
+            "content_chars": 2
+          },
+          {
+            "time_s": 87.5966,
+            "content_chars": 3
+          },
+          {
+            "time_s": 87.5967,
+            "content_chars": 5
+          },
+          {
+            "time_s": 87.5967,
+            "content_chars": 2
+          },
+          {
+            "time_s": 87.5967,
+            "content_chars": 2
+          },
+          {
+            "time_s": 88.1732,
+            "content_chars": 2
+          },
+          {
+            "time_s": 88.1733,
+            "content_chars": 7
+          },
+          {
+            "time_s": 88.1733,
+            "content_chars": 6
+          },
+          {
+            "time_s": 88.73,
+            "content_chars": 5
+          },
+          {
+            "time_s": 88.73,
+            "content_chars": 3
+          },
+          {
+            "time_s": 89.1318,
+            "content_chars": 2
+          },
+          {
+            "time_s": 89.1318,
+            "content_chars": 6
+          },
+          {
+            "time_s": 89.6051,
+            "content_chars": 5
+          },
+          {
+            "time_s": 89.6052,
+            "content_chars": 3
+          },
+          {
+            "time_s": 89.6052,
+            "content_chars": 8
+          },
+          {
+            "time_s": 90.0529,
+            "content_chars": 11
+          },
+          {
+            "time_s": 90.053,
+            "content_chars": 1
+          },
+          {
+            "time_s": 90.5732,
+            "content_chars": 2
+          },
+          {
+            "time_s": 90.5733,
+            "content_chars": 3
+          },
+          {
+            "time_s": 90.5734,
+            "content_chars": 9
+          },
+          {
+            "time_s": 90.5734,
+            "content_chars": 3
+          },
+          {
+            "time_s": 91.1816,
+            "content_chars": 3
+          },
+          {
+            "time_s": 91.1817,
+            "content_chars": 2
+          },
+          {
+            "time_s": 91.7935,
+            "content_chars": 3
+          },
+          {
+            "time_s": 92.0956,
+            "content_chars": 3
+          },
+          {
+            "time_s": 92.0957,
+            "content_chars": 2
+          },
+          {
+            "time_s": 92.3877,
+            "content_chars": 4
+          },
+          {
+            "time_s": 92.744,
+            "content_chars": 3
+          },
+          {
+            "time_s": 92.7441,
+            "content_chars": 3
+          },
+          {
+            "time_s": 92.7441,
+            "content_chars": 2
+          },
+          {
+            "time_s": 93.2364,
+            "content_chars": 4
+          },
+          {
+            "time_s": 93.2369,
+            "content_chars": 7
+          },
+          {
+            "time_s": 93.7753,
+            "content_chars": 6
+          },
+          {
+            "time_s": 94.2004,
+            "content_chars": 4
+          },
+          {
+            "time_s": 94.2005,
+            "content_chars": 10
+          },
+          {
+            "time_s": 94.5104,
+            "content_chars": 8
+          },
+          {
+            "time_s": 94.7683,
+            "content_chars": 2
+          },
+          {
+            "time_s": 95.0635,
+            "content_chars": 1
+          },
+          {
+            "time_s": 95.4112,
+            "content_chars": 6
+          },
+          {
+            "time_s": 95.4113,
+            "content_chars": 4
+          },
+          {
+            "time_s": 95.4113,
+            "content_chars": 10
+          },
+          {
+            "time_s": 95.933,
+            "content_chars": 6
+          },
+          {
+            "time_s": 95.933,
+            "content_chars": 4
+          },
+          {
+            "time_s": 95.9331,
+            "content_chars": 10
+          },
+          {
+            "time_s": 96.3514,
+            "content_chars": 5
+          },
+          {
+            "time_s": 96.3515,
+            "content_chars": 13
+          },
+          {
+            "time_s": 96.3515,
+            "content_chars": 2
+          },
+          {
+            "time_s": 96.8529,
+            "content_chars": 5
+          },
+          {
+            "time_s": 96.8529,
+            "content_chars": 3
+          },
+          {
+            "time_s": 96.853,
+            "content_chars": 8
+          },
+          {
+            "time_s": 97.3045,
+            "content_chars": 1
+          },
+          {
+            "time_s": 97.3046,
+            "content_chars": 4
+          },
+          {
+            "time_s": 97.6589,
+            "content_chars": 4
+          },
+          {
+            "time_s": 97.659,
+            "content_chars": 4
+          },
+          {
+            "time_s": 98.0115,
+            "content_chars": 2
+          },
+          {
+            "time_s": 98.0115,
+            "content_chars": 9
+          },
+          {
+            "time_s": 98.0115,
+            "content_chars": 8
+          },
+          {
+            "time_s": 98.3357,
+            "content_chars": 3
+          },
+          {
+            "time_s": 98.597,
+            "content_chars": 5
+          },
+          {
+            "time_s": 98.5971,
+            "content_chars": 1
+          },
+          {
+            "time_s": 98.5971,
+            "content_chars": 5
+          },
+          {
+            "time_s": 98.8907,
+            "content_chars": 5
+          },
+          {
+            "time_s": 98.8908,
+            "content_chars": 3
+          },
+          {
+            "time_s": 98.8909,
+            "content_chars": 4
+          },
+          {
+            "time_s": 99.1846,
+            "content_chars": 4
+          },
+          {
+            "time_s": 99.1847,
+            "content_chars": 2
+          },
+          {
+            "time_s": 99.1847,
+            "content_chars": 4
+          },
+          {
+            "time_s": 99.5036,
+            "content_chars": 3
+          },
+          {
+            "time_s": 99.5037,
+            "content_chars": 7
+          },
+          {
+            "time_s": 99.5037,
+            "content_chars": 1
+          },
+          {
+            "time_s": 100.076,
+            "finish_reason": "stop"
+          },
+          {
+            "time_s": 100.0762,
+            "usage": true
+          },
+          {
+            "time_s": 100.0764,
+            "done": true
+          }
+        ],
+        "content": "\"Swift\" can refer to several things, depending on context:\n\n## Swift (Programming Language)\nThe most common modern reference is **Apple's open-source programming language**, released in **2014**. Key points:\n- **Purpose:** Developed to replace Objective-C for building apps on Apple platforms (iOS, macOS, watchOS, tvOS, visionOS).\n- **Design goals:** Safety (with features like optionals to avoid null-pointer crashes), speed (comparable to C), and a clean, modern syntax.\n- **Ecosystem:** It powers the Xcode IDE and Apple's frameworks (SwiftUI, UIKit, etc.).\n- **Open source:** It runs on Linux and Windows too, and is used increasingly outside Apple's ecosystem (e.g., server-side with Vapor).\n\n## Swift (Bird)\nA **swift** (*Apodidae* family) is a small, fast-flying, migratory bird recognized by its:\n- Swept-back wings and forked tail.\n- Remarkable aerial agility and speed (some species exceed 100 mph).\n- Habit of catching insects mid-flight.\nThe name \"Swift\" for Apple's language is a tribute to these birds.\n\n## Other Uses\n- **The Swift River** – a river in the Netherlands.\n- **Swift** – a common given name or a brand name in various industries.\n- **Microsoft SWIFT / SWIFT (banking)** – the global interbank messaging network (Society for Worldwide Interbank Financial Telecommunication), used in finance.\n\nIf you had a specific meaning in mind, feel free to ask and I can go deeper!",
+        "done": true,
+        "finish_reasons": [
+          "stop"
+        ],
+        "usage": {
+          "prompt_tokens": 14,
+          "completion_tokens": 518,
+          "total_tokens": 532
+        },
+        "cancelled": false,
+        "request": {
+          "stream_options": {
+            "include_usage": true
+          },
+          "tools": [],
+          "stream": true,
+          "model": "qwen3.8:27b",
+          "messages": [
+            {
+              "content": "What is Swift?",
+              "role": "user"
+            }
+          ]
+        },
+        "status": 200,
+        "headers_s": 13.8305,
+        "first_content_s": 39.3607,
+        "duration_s": 100.0771
+      },
+      "content_matches_terminal": true
+    },
+    {
+      "name": "swift_fast_alias",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:50710/v1",
+        "-m",
+        "qwen-fast",
+        "--model-provider-header",
+        "X-Followup-Case: swift_fast_alias",
+        "What is Swift?"
+      ],
+      "timeout_s": 45,
+      "returncode": -15,
+      "timed_out": true,
+      "duration_s": 45.1,
+      "first_terminal_output_s": 24.3383,
+      "terminal_output": "# Swift\n\n\"Swift\" can refer to several things, but the most common meanings are:\n\n## Swift – Programming Language\n**Swift** is an open-source, general-purpose programming language created by **Apple** and first released in **2014**. It is used to develop software for:\n\n- **iOS, iPadOS, macOS, watchOS, and tvOS** (Apple platforms)\n- **Linux and Windows** (via the open-source community)\n\nKey characteristics:\n- **Modern & safe:** Features like optional types, error handling, and memory safety help prevent common bugs.\n- **Fast:** Designed to rival",
+      "trace": {
+        "name": "swift_fast_alias",
+        "events": [
+          {
+            "time_s": 0.875
+          },
+          {
+            "time_s": 0.8751
+          },
+          {
+            "time_s": 0.8751
+          },
+          {
+            "time_s": 1.3255
+          },
+          {
+            "time_s": 1.3256
+          },
+          {
+            "time_s": 1.3256
+          },
+          {
+            "time_s": 1.6992
+          },
+          {
+            "time_s": 1.6992
+          },
+          {
+            "time_s": 1.6993
+          },
+          {
+            "time_s": 2.0482
+          },
+          {
+            "time_s": 2.0483
+          },
+          {
+            "time_s": 2.0483
+          },
+          {
+            "time_s": 2.3258
+          },
+          {
+            "time_s": 2.3259
+          },
+          {
+            "time_s": 2.326
+          },
+          {
+            "time_s": 2.7413
+          },
+          {
+            "time_s": 2.7414
+          },
+          {
+            "time_s": 2.7414
+          },
+          {
+            "time_s": 2.7414
+          },
+          {
+            "time_s": 3.1046
+          },
+          {
+            "time_s": 3.1047
+          },
+          {
+            "time_s": 3.3795
+          },
+          {
+            "time_s": 3.3796
+          },
+          {
+            "time_s": 3.3796
+          },
+          {
+            "time_s": 3.822
+          },
+          {
+            "time_s": 3.8221
+          },
+          {
+            "time_s": 3.8221
+          },
+          {
+            "time_s": 4.2351
+          },
+          {
+            "time_s": 4.2351
+          },
+          {
+            "time_s": 4.7157
+          },
+          {
+            "time_s": 4.7158
+          },
+          {
+            "time_s": 4.7158
+          },
+          {
+            "time_s": 5.102
+          },
+          {
+            "time_s": 5.1022
+          },
+          {
+            "time_s": 5.44
+          },
+          {
+            "time_s": 5.4401
+          },
+          {
+            "time_s": 5.4401
+          },
+          {
+            "time_s": 5.7676
+          },
+          {
+            "time_s": 5.7677
+          },
+          {
+            "time_s": 5.7677
+          },
+          {
+            "time_s": 6.1086
+          },
+          {
+            "time_s": 6.1086
+          },
+          {
+            "time_s": 6.1087
+          },
+          {
+            "time_s": 6.4318
+          },
+          {
+            "time_s": 6.4319
+          },
+          {
+            "time_s": 6.6934
+          },
+          {
+            "time_s": 6.6935
+          },
+          {
+            "time_s": 6.6935
+          },
+          {
+            "time_s": 7.0179
+          },
+          {
+            "time_s": 7.018
+          },
+          {
+            "time_s": 7.31
+          },
+          {
+            "time_s": 7.3101
+          },
+          {
+            "time_s": 7.3101
+          },
+          {
+            "time_s": 7.7648
+          },
+          {
+            "time_s": 7.7649
+          },
+          {
+            "time_s": 7.7649
+          },
+          {
+            "time_s": 8.1979
+          },
+          {
+            "time_s": 8.198
+          },
+          {
+            "time_s": 8.567
+          },
+          {
+            "time_s": 8.5671
+          },
+          {
+            "time_s": 9.008
+          },
+          {
+            "time_s": 9.0081
+          },
+          {
+            "time_s": 9.0081
+          },
+          {
+            "time_s": 9.4166
+          },
+          {
+            "time_s": 9.4167
+          },
+          {
+            "time_s": 9.4167
+          },
+          {
+            "time_s": 9.7901
+          },
+          {
+            "time_s": 9.7902
+          },
+          {
+            "time_s": 10.08
+          },
+          {
+            "time_s": 10.0801
+          },
+          {
+            "time_s": 10.4571
+          },
+          {
+            "time_s": 10.4572
+          },
+          {
+            "time_s": 10.4572
+          },
+          {
+            "time_s": 10.7504
+          },
+          {
+            "time_s": 10.7505
+          },
+          {
+            "time_s": 10.7505
+          },
+          {
+            "time_s": 11.0256
+          },
+          {
+            "time_s": 11.0257
+          },
+          {
+            "time_s": 11.3764
+          },
+          {
+            "time_s": 11.3765
+          },
+          {
+            "time_s": 11.3765
+          },
+          {
+            "time_s": 11.9102
+          },
+          {
+            "time_s": 11.9104
+          },
+          {
+            "time_s": 12.3844
+          },
+          {
+            "time_s": 12.3846
+          },
+          {
+            "time_s": 12.3846
+          },
+          {
+            "time_s": 12.838
+          },
+          {
+            "time_s": 13.1513
+          },
+          {
+            "time_s": 13.1514
+          },
+          {
+            "time_s": 13.1514
+          },
+          {
+            "time_s": 13.5246
+          },
+          {
+            "time_s": 13.5247
+          },
+          {
+            "time_s": 13.5247
+          },
+          {
+            "time_s": 13.9044
+          },
+          {
+            "time_s": 13.9044
+          },
+          {
+            "time_s": 14.1844
+          },
+          {
+            "time_s": 14.1845
+          },
+          {
+            "time_s": 14.5568
+          },
+          {
+            "time_s": 14.557
+          },
+          {
+            "time_s": 14.557
+          },
+          {
+            "time_s": 14.557
+          },
+          {
+            "time_s": 14.8376
+          },
+          {
+            "time_s": 14.8377
+          },
+          {
+            "time_s": 15.1545
+          },
+          {
+            "time_s": 15.4687
+          },
+          {
+            "time_s": 15.4689
+          },
+          {
+            "time_s": 16.0026
+          },
+          {
+            "time_s": 16.0027
+          },
+          {
+            "time_s": 16.0027
+          },
+          {
+            "time_s": 16.3218
+          },
+          {
+            "time_s": 16.3218
+          },
+          {
+            "time_s": 16.3219
+          },
+          {
+            "time_s": 16.6631
+          },
+          {
+            "time_s": 16.6632
+          },
+          {
+            "time_s": 16.9612
+          },
+          {
+            "time_s": 16.9613
+          },
+          {
+            "time_s": 16.9613
+          },
+          {
+            "time_s": 17.2353
+          },
+          {
+            "time_s": 17.2354
+          },
+          {
+            "time_s": 17.2355
+          },
+          {
+            "time_s": 17.5552
+          },
+          {
+            "time_s": 17.5553
+          },
+          {
+            "time_s": 17.5553
+          },
+          {
+            "time_s": 17.9119
+          },
+          {
+            "time_s": 17.912
+          },
+          {
+            "time_s": 17.912
+          },
+          {
+            "time_s": 18.1866
+          },
+          {
+            "time_s": 18.1866
+          },
+          {
+            "time_s": 18.1867
+          },
+          {
+            "time_s": 18.4421
+          },
+          {
+            "time_s": 18.4422
+          },
+          {
+            "time_s": 18.7643
+          },
+          {
+            "time_s": 18.7644
+          },
+          {
+            "time_s": 18.7644
+          },
+          {
+            "time_s": 19.0307
+          },
+          {
+            "time_s": 19.0308
+          },
+          {
+            "time_s": 19.0309
+          },
+          {
+            "time_s": 19.3032
+          },
+          {
+            "time_s": 19.3033
+          },
+          {
+            "time_s": 19.6025
+          },
+          {
+            "time_s": 19.6026
+          },
+          {
+            "time_s": 19.6026
+          },
+          {
+            "time_s": 19.9641
+          },
+          {
+            "time_s": 19.9642
+          },
+          {
+            "time_s": 19.9643
+          },
+          {
+            "time_s": 20.3395
+          },
+          {
+            "time_s": 20.3399
+          },
+          {
+            "time_s": 20.34
+          },
+          {
+            "time_s": 20.7773
+          },
+          {
+            "time_s": 20.7774
+          },
+          {
+            "time_s": 20.7775
+          },
+          {
+            "time_s": 21.0717
+          },
+          {
+            "time_s": 21.0718
+          },
+          {
+            "time_s": 21.0719
+          },
+          {
+            "time_s": 21.4156
+          },
+          {
+            "time_s": 21.4157
+          },
+          {
+            "time_s": 21.4157
+          },
+          {
+            "time_s": 22.2497
+          },
+          {
+            "time_s": 22.2498
+          },
+          {
+            "time_s": 22.2498
+          },
+          {
+            "time_s": 22.6301
+          },
+          {
+            "time_s": 22.6302
+          },
+          {
+            "time_s": 22.6302
+          },
+          {
+            "time_s": 23.1854
+          },
+          {
+            "time_s": 23.1855
+          },
+          {
+            "time_s": 23.1855
+          },
+          {
+            "time_s": 23.5959
+          },
+          {
+            "time_s": 23.5959
+          },
+          {
+            "time_s": 24.1292,
+            "content_chars": 1
+          },
+          {
+            "time_s": 24.3061,
+            "content_chars": 6
+          },
+          {
+            "time_s": 24.3061,
+            "content_chars": 3
+          },
+          {
+            "time_s": 24.9253,
+            "content_chars": 5
+          },
+          {
+            "time_s": 24.9254,
+            "content_chars": 1
+          },
+          {
+            "time_s": 24.9255,
+            "content_chars": 4
+          },
+          {
+            "time_s": 24.9256,
+            "content_chars": 6
+          },
+          {
+            "time_s": 24.9256,
+            "content_chars": 3
+          },
+          {
+            "time_s": 25.3367,
+            "content_chars": 8
+          },
+          {
+            "time_s": 25.3368,
+            "content_chars": 7
+          },
+          {
+            "time_s": 25.3368,
+            "content_chars": 1
+          },
+          {
+            "time_s": 25.7541,
+            "content_chars": 4
+          },
+          {
+            "time_s": 25.7543,
+            "content_chars": 4
+          },
+          {
+            "time_s": 25.7543,
+            "content_chars": 5
+          },
+          {
+            "time_s": 26.1521,
+            "content_chars": 7
+          },
+          {
+            "time_s": 26.1522,
+            "content_chars": 9
+          },
+          {
+            "time_s": 26.1522,
+            "content_chars": 4
+          },
+          {
+            "time_s": 26.5806,
+            "content_chars": 1
+          },
+          {
+            "time_s": 26.5807,
+            "content_chars": 4
+          },
+          {
+            "time_s": 26.5807,
+            "content_chars": 6
+          },
+          {
+            "time_s": 26.9265,
+            "content_chars": 2
+          },
+          {
+            "time_s": 27.2098,
+            "content_chars": 12
+          },
+          {
+            "time_s": 27.7224,
+            "content_chars": 9
+          },
+          {
+            "time_s": 27.7224,
+            "content_chars": 3
+          },
+          {
+            "time_s": 28.0938,
+            "content_chars": 5
+          },
+          {
+            "time_s": 28.0938,
+            "content_chars": 2
+          },
+          {
+            "time_s": 28.0939,
+            "content_chars": 3
+          },
+          {
+            "time_s": 28.4888,
+            "content_chars": 3
+          },
+          {
+            "time_s": 28.4889,
+            "content_chars": 5
+          },
+          {
+            "time_s": 28.489,
+            "content_chars": 7
+          },
+          {
+            "time_s": 29.1,
+            "content_chars": 1
+          },
+          {
+            "time_s": 29.1,
+            "content_chars": 8
+          },
+          {
+            "time_s": 29.1001,
+            "content_chars": 8
+          },
+          {
+            "time_s": 29.5081,
+            "content_chars": 12
+          },
+          {
+            "time_s": 29.5081,
+            "content_chars": 9
+          },
+          {
+            "time_s": 29.5081,
+            "content_chars": 8
+          },
+          {
+            "time_s": 30.0466,
+            "content_chars": 3
+          },
+          {
+            "time_s": 30.0467,
+            "content_chars": 3
+          },
+          {
+            "time_s": 30.0467,
+            "content_chars": 5
+          },
+          {
+            "time_s": 30.0467,
+            "content_chars": 2
+          },
+          {
+            "time_s": 30.0467,
+            "content_chars": 4
+          },
+          {
+            "time_s": 30.4554,
+            "content_chars": 6
+          },
+          {
+            "time_s": 30.4555,
+            "content_chars": 9
+          },
+          {
+            "time_s": 30.4555,
+            "content_chars": 3
+          },
+          {
+            "time_s": 30.4555,
+            "content_chars": 3
+          },
+          {
+            "time_s": 30.4555,
+            "content_chars": 1
+          },
+          {
+            "time_s": 30.9603,
+            "content_chars": 1
+          },
+          {
+            "time_s": 30.9604,
+            "content_chars": 1
+          },
+          {
+            "time_s": 30.9604,
+            "content_chars": 1
+          },
+          {
+            "time_s": 30.9605,
+            "content_chars": 3
+          },
+          {
+            "time_s": 30.9605,
+            "content_chars": 3
+          },
+          {
+            "time_s": 31.5441,
+            "content_chars": 3
+          },
+          {
+            "time_s": 31.5442,
+            "content_chars": 5
+          },
+          {
+            "time_s": 31.5443,
+            "content_chars": 3
+          },
+          {
+            "time_s": 31.5443,
+            "content_chars": 8
+          },
+          {
+            "time_s": 32.2026,
+            "content_chars": 9
+          },
+          {
+            "time_s": 32.2027,
+            "content_chars": 4
+          },
+          {
+            "time_s": 32.2027,
+            "content_chars": 1
+          },
+          {
+            "time_s": 32.2027,
+            "content_chars": 3
+          },
+          {
+            "time_s": 32.8488,
+            "content_chars": 3
+          },
+          {
+            "time_s": 32.8489,
+            "content_chars": 3
+          },
+          {
+            "time_s": 32.8489,
+            "content_chars": 1
+          },
+          {
+            "time_s": 32.8489,
+            "content_chars": 5
+          },
+          {
+            "time_s": 33.4659,
+            "content_chars": 2
+          },
+          {
+            "time_s": 33.4659,
+            "content_chars": 1
+          },
+          {
+            "time_s": 33.466,
+            "content_chars": 6
+          },
+          {
+            "time_s": 33.466,
+            "content_chars": 1
+          },
+          {
+            "time_s": 33.466,
+            "content_chars": 6
+          },
+          {
+            "time_s": 33.466,
+            "content_chars": 2
+          },
+          {
+            "time_s": 33.9377,
+            "content_chars": 1
+          },
+          {
+            "time_s": 33.9377,
+            "content_chars": 4
+          },
+          {
+            "time_s": 33.9378,
+            "content_chars": 3
+          },
+          {
+            "time_s": 33.9378,
+            "content_chars": 2
+          },
+          {
+            "time_s": 33.9378,
+            "content_chars": 2
+          },
+          {
+            "time_s": 33.9378,
+            "content_chars": 2
+          },
+          {
+            "time_s": 34.3762,
+            "content_chars": 5
+          },
+          {
+            "time_s": 34.3763,
+            "content_chars": 10
+          },
+          {
+            "time_s": 34.9304,
+            "content_chars": 1
+          },
+          {
+            "time_s": 34.9305,
+            "content_chars": 2
+          },
+          {
+            "time_s": 34.9306,
+            "content_chars": 3
+          },
+          {
+            "time_s": 34.9306,
+            "content_chars": 5
+          },
+          {
+            "time_s": 34.9306,
+            "content_chars": 4
+          },
+          {
+            "time_s": 35.3642,
+            "content_chars": 8
+          },
+          {
+            "time_s": 36.0622,
+            "content_chars": 2
+          },
+          {
+            "time_s": 36.0623,
+            "content_chars": 2
+          },
+          {
+            "time_s": 36.0623,
+            "content_chars": 3
+          },
+          {
+            "time_s": 36.6171,
+            "content_chars": 4
+          },
+          {
+            "time_s": 37.2474,
+            "content_chars": 5
+          },
+          {
+            "time_s": 37.2475,
+            "content_chars": 7
+          },
+          {
+            "time_s": 37.2475,
+            "content_chars": 10
+          },
+          {
+            "time_s": 37.2475,
+            "content_chars": 1
+          },
+          {
+            "time_s": 37.2475,
+            "content_chars": 5
+          },
+          {
+            "time_s": 37.8587,
+            "content_chars": 16
+          },
+          {
+            "time_s": 38.392,
+            "content_chars": 1
+          },
+          {
+            "time_s": 38.3921,
+            "content_chars": 2
+          },
+          {
+            "time_s": 38.3921,
+            "content_chars": 3
+          },
+          {
+            "time_s": 38.3921,
+            "content_chars": 6
+          },
+          {
+            "time_s": 39.0864,
+            "content_chars": 2
+          },
+          {
+            "time_s": 39.605,
+            "content_chars": 5
+          },
+          {
+            "time_s": 39.6052,
+            "content_chars": 3
+          },
+          {
+            "time_s": 40.2851,
+            "content_chars": 9
+          },
+          {
+            "time_s": 40.7702,
+            "content_chars": 5
+          },
+          {
+            "time_s": 41.2174,
+            "content_chars": 9
+          },
+          {
+            "time_s": 41.7263,
+            "content_chars": 6
+          },
+          {
+            "time_s": 42.1797,
+            "content_chars": 1
+          },
+          {
+            "time_s": 42.1798,
+            "content_chars": 6
+          },
+          {
+            "time_s": 42.5892,
+            "content_chars": 9
+          },
+          {
+            "time_s": 42.5893,
+            "content_chars": 1
+          },
+          {
+            "time_s": 42.5893,
+            "content_chars": 4
+          },
+          {
+            "time_s": 42.5893,
+            "content_chars": 7
+          },
+          {
+            "time_s": 42.9972,
+            "content_chars": 7
+          },
+          {
+            "time_s": 42.9972,
+            "content_chars": 5
+          },
+          {
+            "time_s": 42.9972,
+            "content_chars": 8
+          },
+          {
+            "time_s": 43.4976,
+            "content_chars": 7
+          },
+          {
+            "time_s": 43.4977,
+            "content_chars": 5
+          },
+          {
+            "time_s": 43.4977,
+            "content_chars": 1
+          },
+          {
+            "time_s": 43.4977,
+            "content_chars": 2
+          },
+          {
+            "time_s": 43.4977,
+            "content_chars": 3
+          },
+          {
+            "time_s": 44.2433,
+            "content_chars": 4
+          },
+          {
+            "time_s": 44.2434,
+            "content_chars": 3
+          },
+          {
+            "time_s": 44.9227,
+            "content_chars": 9
+          },
+          {
+            "time_s": 44.9227,
+            "content_chars": 3
+          },
+          {
+            "time_s": 44.9227,
+            "content_chars": 6
+          }
+        ],
+        "content": "# Swift\n\n\"Swift\" can refer to several things, but the most common meanings are:\n\n## Swift – Programming Language\n**Swift** is an open-source, general-purpose programming language created by **Apple** and first released in **2014**. It is used to develop software for:\n\n- **iOS, iPadOS, macOS, watchOS, and tvOS** (Apple platforms)\n- **Linux and Windows** (via the open-source community)\n\nKey characteristics:\n- **Modern & safe:** Features like optional types, error handling, and memory safety help prevent common bugs.\n- **Fast:** Designed to rival",
+        "done": false,
+        "finish_reasons": [],
+        "usage": null,
+        "cancelled": true,
+        "request": {
+          "stream": true,
+          "messages": [
+            {
+              "role": "user",
+              "content": "What is Swift?"
+            }
+          ],
+          "tools": [],
+          "stream_options": {
+            "include_usage": true
+          },
+          "model": "qwen-fast"
+        },
+        "status": 200,
+        "headers_s": 0.8749,
+        "first_content_s": 24.1292,
+        "duration_s": 45.0682
+      },
+      "content_matches_terminal": true
+    },
+    {
+      "name": "swift_concise",
+      "args": [
+        "respond",
+        "--model-provider",
+        "http://127.0.0.1:50710/v1",
+        "-m",
+        "qwen-fast",
+        "--model-provider-header",
+        "X-Followup-Case: swift_concise",
+        "-i",
+        "Be concise. Answer directly without reasoning.",
+        "Explain Apple's Swift programming language in two sentences. /no_think"
+      ],
+      "timeout_s": 45,
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 26.9354,
+      "first_terminal_output_s": 14.8872,
+      "terminal_output": "Swift is an open-source, general-purpose programming language developed by Apple, designed as a safe and modern successor to Objective-C for building iOS, macOS, and other Apple platform applications. It emphasizes type safety, performance, and concise syntax while integrating seamlessly with Apple's existing frameworks and tools.\n",
+      "trace": {
+        "name": "swift_concise",
+        "events": [
+          {
+            "time_s": 2.8524
+          },
+          {
+            "time_s": 2.8524
+          },
+          {
+            "time_s": 2.8524
+          },
+          {
+            "time_s": 2.8524
+          },
+          {
+            "time_s": 3.431
+          },
+          {
+            "time_s": 3.4311
+          },
+          {
+            "time_s": 3.4312
+          },
+          {
+            "time_s": 3.4312
+          },
+          {
+            "time_s": 3.4312
+          },
+          {
+            "time_s": 3.4312
+          },
+          {
+            "time_s": 4.1358
+          },
+          {
+            "time_s": 4.1359
+          },
+          {
+            "time_s": 4.1359
+          },
+          {
+            "time_s": 4.7555
+          },
+          {
+            "time_s": 5.3572
+          },
+          {
+            "time_s": 5.3573
+          },
+          {
+            "time_s": 5.3573
+          },
+          {
+            "time_s": 5.9923
+          },
+          {
+            "time_s": 5.9924
+          },
+          {
+            "time_s": 5.9924
+          },
+          {
+            "time_s": 6.5735
+          },
+          {
+            "time_s": 7.2848
+          },
+          {
+            "time_s": 7.2849
+          },
+          {
+            "time_s": 7.2849
+          },
+          {
+            "time_s": 7.2849
+          },
+          {
+            "time_s": 7.869
+          },
+          {
+            "time_s": 7.8691
+          },
+          {
+            "time_s": 8.5359
+          },
+          {
+            "time_s": 8.536
+          },
+          {
+            "time_s": 9.213
+          },
+          {
+            "time_s": 9.992
+          },
+          {
+            "time_s": 9.992
+          },
+          {
+            "time_s": 10.4746
+          },
+          {
+            "time_s": 10.4747
+          },
+          {
+            "time_s": 11.1754
+          },
+          {
+            "time_s": 11.1755
+          },
+          {
+            "time_s": 11.5039
+          },
+          {
+            "time_s": 11.504
+          },
+          {
+            "time_s": 11.9669
+          },
+          {
+            "time_s": 11.967
+          },
+          {
+            "time_s": 12.4079
+          },
+          {
+            "time_s": 12.408
+          },
+          {
+            "time_s": 13.0678
+          },
+          {
+            "time_s": 13.0678
+          },
+          {
+            "time_s": 13.5692
+          },
+          {
+            "time_s": 13.5692
+          },
+          {
+            "time_s": 13.5693
+          },
+          {
+            "time_s": 13.5693
+          },
+          {
+            "time_s": 14.1654
+          },
+          {
+            "time_s": 14.1654
+          },
+          {
+            "time_s": 14.8582,
+            "content_chars": 5
+          },
+          {
+            "time_s": 14.8582,
+            "content_chars": 3
+          },
+          {
+            "time_s": 14.8583,
+            "content_chars": 3
+          },
+          {
+            "time_s": 15.5793,
+            "content_chars": 5
+          },
+          {
+            "time_s": 15.5793,
+            "content_chars": 7
+          },
+          {
+            "time_s": 15.5793,
+            "content_chars": 1
+          },
+          {
+            "time_s": 16.2755,
+            "content_chars": 8
+          },
+          {
+            "time_s": 16.2756,
+            "content_chars": 8
+          },
+          {
+            "time_s": 16.2757,
+            "content_chars": 12
+          },
+          {
+            "time_s": 16.2757,
+            "content_chars": 9
+          },
+          {
+            "time_s": 16.2757,
+            "content_chars": 10
+          },
+          {
+            "time_s": 16.8668,
+            "content_chars": 3
+          },
+          {
+            "time_s": 16.867,
+            "content_chars": 6
+          },
+          {
+            "time_s": 16.867,
+            "content_chars": 1
+          },
+          {
+            "time_s": 17.2772,
+            "content_chars": 9
+          },
+          {
+            "time_s": 17.8046,
+            "content_chars": 3
+          },
+          {
+            "time_s": 18.3094,
+            "content_chars": 2
+          },
+          {
+            "time_s": 18.3095,
+            "content_chars": 5
+          },
+          {
+            "time_s": 18.9577,
+            "content_chars": 4
+          },
+          {
+            "time_s": 18.9578,
+            "content_chars": 7
+          },
+          {
+            "time_s": 18.9578,
+            "content_chars": 10
+          },
+          {
+            "time_s": 19.692,
+            "content_chars": 3
+          },
+          {
+            "time_s": 19.6921,
+            "content_chars": 10
+          },
+          {
+            "time_s": 20.3865,
+            "content_chars": 2
+          },
+          {
+            "time_s": 20.3866,
+            "content_chars": 4
+          },
+          {
+            "time_s": 20.3866,
+            "content_chars": 9
+          },
+          {
+            "time_s": 20.3866,
+            "content_chars": 4
+          },
+          {
+            "time_s": 21.1819,
+            "content_chars": 1
+          },
+          {
+            "time_s": 21.182,
+            "content_chars": 6
+          },
+          {
+            "time_s": 21.182,
+            "content_chars": 1
+          },
+          {
+            "time_s": 21.1821,
+            "content_chars": 4
+          },
+          {
+            "time_s": 21.1821,
+            "content_chars": 6
+          },
+          {
+            "time_s": 21.6811,
+            "content_chars": 6
+          },
+          {
+            "time_s": 22.1127,
+            "content_chars": 9
+          },
+          {
+            "time_s": 22.7551,
+            "content_chars": 13
+          },
+          {
+            "time_s": 22.8011,
+            "content_chars": 1
+          },
+          {
+            "time_s": 23.4993,
+            "content_chars": 3
+          },
+          {
+            "time_s": 23.4994,
+            "content_chars": 11
+          },
+          {
+            "time_s": 24.0622,
+            "content_chars": 5
+          },
+          {
+            "time_s": 24.0623,
+            "content_chars": 7
+          },
+          {
+            "time_s": 24.0623,
+            "content_chars": 1
+          },
+          {
+            "time_s": 24.0623,
+            "content_chars": 12
+          },
+          {
+            "time_s": 24.0623,
+            "content_chars": 1
+          },
+          {
+            "time_s": 24.0624,
+            "content_chars": 4
+          },
+          {
+            "time_s": 24.6914,
+            "content_chars": 8
+          },
+          {
+            "time_s": 24.6915,
+            "content_chars": 7
+          },
+          {
+            "time_s": 24.6916,
+            "content_chars": 6
+          },
+          {
+            "time_s": 25.1105,
+            "content_chars": 12
+          },
+          {
+            "time_s": 25.6543,
+            "content_chars": 11
+          },
+          {
+            "time_s": 25.6544,
+            "content_chars": 5
+          },
+          {
+            "time_s": 25.6544,
+            "content_chars": 6
+          },
+          {
+            "time_s": 26.1825,
+            "content_chars": 2
+          },
+          {
+            "time_s": 26.1826,
+            "content_chars": 9
+          },
+          {
+            "time_s": 26.1826,
+            "content_chars": 11
+          },
+          {
+            "time_s": 26.1827,
+            "content_chars": 4
+          },
+          {
+            "time_s": 26.1827,
+            "content_chars": 6
+          },
+          {
+            "time_s": 26.1828,
+            "content_chars": 1
+          },
+          {
+            "time_s": 26.9037,
+            "finish_reason": "stop"
+          },
+          {
+            "time_s": 26.9038,
+            "usage": true
+          },
+          {
+            "time_s": 26.9038,
+            "done": true
+          }
+        ],
+        "content": "Swift is an open-source, general-purpose programming language developed by Apple, designed as a safe and modern successor to Objective-C for building iOS, macOS, and other Apple platform applications. It emphasizes type safety, performance, and concise syntax while integrating seamlessly with Apple's existing frameworks and tools.",
+        "done": true,
+        "finish_reasons": [
+          "stop"
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 110,
+          "total_tokens": 148
+        },
+        "cancelled": false,
+        "request": {
+          "stream_options": {
+            "include_usage": true
+          },
+          "stream": true,
+          "messages": [
+            {
+              "content": "Be concise. Answer directly without reasoning.",
+              "role": "system"
+            },
+            {
+              "content": "Explain Apple's Swift programming language in two sentences. /no_think",
+              "role": "user"
+            }
+          ],
+          "model": "qwen-fast",
+          "tools": []
+        },
+        "status": 200,
+        "headers_s": 2.8523,
+        "first_content_s": 14.8582,
+        "duration_s": 26.9039
+      },
+      "content_matches_terminal": true
+    }
+  ],
+  "go_race": {
+    "command": "go test ./... -race -count=1",
+    "exit_code": 0,
+    "output": "ok  \tgithub.com/isLinXu/fmux/cmd/fmux\t1.476s\n?   \tgithub.com/isLinXu/fmux/internal/adapter\t[no test files]\n?   \tgithub.com/isLinXu/fmux/internal/adapter/local\t[no test files]\n?   \tgithub.com/isLinXu/fmux/internal/adapter/mock\t[no test files]\nok  \tgithub.com/isLinXu/fmux/internal/adapter/openai\t1.473s\nok  \tgithub.com/isLinXu/fmux/internal/api\t3.763s\nok  \tgithub.com/isLinXu/fmux/internal/breaker\t1.780s\nok  \tgithub.com/isLinXu/fmux/internal/budget\t1.822s\nok  \tgithub.com/isLinXu/fmux/internal/build\t1.845s\nok  \tgithub.com/isLinXu/fmux/internal/capprobe\t2.062s\nok  \tgithub.com/isLinXu/fmux/internal/compat\t1.818s\nok  \tgithub.com/isLinXu/fmux/internal/config\t1.789s\nok  \tgithub.com/isLinXu/fmux/internal/gate\t2.080s\nok  \tgithub.com/isLinXu/fmux/internal/ir\t1.808s\nok  \tgithub.com/isLinXu/fmux/internal/launchd\t1.803s\nok  \tgithub.com/isLinXu/fmux/internal/metrics\t1.346s\n?   \tgithub.com/isLinXu/fmux/internal/router\t[no test files]\nok  \tgithub.com/isLinXu/fmux/internal/supervisor\t4.287s\nok  \tgithub.com/isLinXu/fmux/test/conformance\t1.594s\nok  \tgithub.com/isLinXu/fmux/test/e2e\t4.971s\n"
+  },
+  "notes": [
+    "Fault tests used a freshly built isolated fmux, not the running service.",
+    "Live traces used a local observation proxy forwarding to the running gateway, with terminal output captured through a PTY.",
+    "The original alias and prompt completed with stop and DONE in this sample; this does not prove the historical user run was never truncated.",
+    "Metadata assertions analyze existing wire captures without new inference.",
+    "Failed assertions are grouped manifestations of protocol issues, not independent bug counts.",
+    "A synthetic backend error returned generic parse failures from fm; the CLI did not silently exit successfully."
+  ]
+}
