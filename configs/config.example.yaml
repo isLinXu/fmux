@@ -131,6 +131,9 @@ timeouts:
   health: 2s
   non_stream: 10m
   stream_idle: 5m
+  # Total streaming request duration, including queueing, cold starts and
+  # fallbacks. 0 uses the 15m default; a negative value (e.g. -1s) disables it.
+  stream_max: 15m
   # How long SIGTERM waits for in-flight generations before cutting them.
   # Must cover the longest legitimate answer, not the typical one.
   drain: 2m

@@ -230,8 +230,30 @@ type errorEnvelope struct {
 type errorBody struct {
 	Message string `json:"message"`
 	Type    string `json:"type"`
-	Code    string `json:"code,omitempty"`
-	Param   string `json:"param,omitempty"`
+	Code    any    `json:"code,omitempty"`
+	Param   any    `json:"param,omitempty"`
+}
+
+// upstreamErrorEnvelope preserves application errors without guessing an HTTP status.
+func upstreamErrorEnvelope(err error, defaultCode string) (errorEnvelope, bool) {
+	var upstream *openai.StreamError
+	if !errors.As(err, &upstream) {
+		return errorEnvelope{}, false
+	}
+	body := errorBody{Message: upstream.Message, Type: upstream.Type, Code: defaultCode}
+	if body.Message == "" {
+		body.Message = "upstream error"
+	}
+	if body.Type == "" {
+		body.Type = "api_error"
+	}
+	if len(upstream.Code) > 0 {
+		body.Code = upstream.Code
+	}
+	if len(upstream.Param) > 0 {
+		body.Param = upstream.Param
+	}
+	return errorEnvelope{Error: body}, true
 }
 
 func writeError(w http.ResponseWriter, status int, code, msg string) {
@@ -266,7 +288,7 @@ func StatusOf(err error) int {
 	case errors.Is(err, gate.ErrBusy), errors.Is(err, gate.ErrQueueFull):
 		// The backend is healthy and busy; the request should be retried.
 		return http.StatusTooManyRequests
-	case errors.Is(err, errStreamIdle):
+	case errors.Is(err, errStreamIdle), errors.Is(err, errStreamMax):
 		return http.StatusGatewayTimeout
 	}
 	var he *openai.HTTPError

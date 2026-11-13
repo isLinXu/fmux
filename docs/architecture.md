@@ -152,9 +152,45 @@ no `[DONE]`; if nothing had been written it gets a proper `504`. A silent
 backend and a slow backend look identical on the socket, so the timeout is the
 only thing that distinguishes them.
 
+`stream_max` (default 15m) bounds the complete streaming request after request
+normalization, including admission queueing, cold starts and every fallback
+attempt. It does not include reading the client request body. Unlike the idle
+clock it is never reset by a chunk or by switching backends. Set a negative
+duration (for example `-1s`) to disable this bound; zero uses the default.
+Whichever clock expires first cancels the upstream. A total-duration timeout
+returns `504` before SSE starts, or an error event with
+`code: stream_max_duration` after it starts, without `[DONE]`. No further
+fallback is attempted after the total deadline, and this timeout is not
+counted as evidence that the backend is down.
+
 Client disconnect cancels `r.Context()`, which cancels the outbound request and
 closes the backend stream — verified in the logs as
 `Post .../chat/completions: context canceled`.
+
+## TTFT measurement
+
+`fmux_time_to_first_token_milliseconds` starts after request validation and
+compatibility normalization, before alias resolution. It includes admission
+queueing, budget/process preparation, and earlier failed fallback targets.
+The sample belongs to the backend that produces the first text or tool
+function output, so its value may include time spent at a different backend.
+
+A sample is recorded once, after successfully writing an upstream chunk with
+nonempty text or a nonempty tool function name/arguments. Role-only chunks,
+usage, finish, empty deltas and tool metadata do not count. Empty streams and
+failures without output have no TTFT sample; an error after output retains the
+sample that already occurred. Gateway-generated completion tails do not add
+samples. Non-streaming requests do not record TTFT.
+
+This is gateway write latency, not client receipt or terminal display latency.
+It excludes request-body upload, decoding and normalization. It does not
+separately identify queueing, cold loading or hidden model reasoning;
+`fmux_request_duration_milliseconds` retains its per-target adapter-call scope.
+
+The metric name, backend label and millisecond buckets are unchanged. The
+2026-11-09 correction expands the start scope and excludes control frames from
+the endpoint; historical values from the old scope are not directly comparable.
+A larger TTFT after this change is not, by itself, evidence of slower inference.
 
 ## Failure memory
 
@@ -175,12 +211,18 @@ wrong answer is worse than no breaker at all:
 | `400`, `404` | no | the backend answered; the request was wrong |
 | `429` from `gate` | no | busy is not dead |
 | `stream_idle` | no | one stall is not a pattern, and a restart costs a minute |
+| `stream_max_duration` | no | the gateway's total request deadline is not backend failure |
 | client cancelled | no | that says nothing about the backend |
 
 When the cooldown expires exactly one request is let through as a probe. If it
 succeeds the circuit closes; if it fails it reopens immediately rather than
 requiring another three failures. A probe that never reports back expires with
 the next cooldown, so the breaker cannot get stuck open.
+
+Candidate filtering only checks availability; it does not reserve a probe.
+The reservation is taken after capability validation, immediately before a
+target is attempted. A healthy primary therefore cannot consume an unused
+fallback's recovery probe.
 
 If every target in a chain is open, the request is attempted anyway. A gateway
 that answers `503` because its only backend is down is strictly worse than one

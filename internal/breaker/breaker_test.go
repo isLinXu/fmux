@@ -1,6 +1,9 @@
 package breaker
 
 import (
+	"reflect"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -141,5 +144,65 @@ func TestNilBreakerAllowsEverything(t *testing.T) {
 	b.Reset()
 	if b.Snapshot() != nil {
 		t.Fatal("nil snapshot")
+	}
+}
+
+func TestAvailableDoesNotReserveProbe(t *testing.T) {
+	b, c := newTestBreaker(Options{Threshold: 1, Cooldown: time.Minute})
+	if !b.Available("unknown") || len(b.Snapshot()) != 0 {
+		t.Fatal("availability lookup created state")
+	}
+	b.Fail("a", "down")
+	if b.Available("a") {
+		t.Fatal("open circuit is not available")
+	}
+	c.advance(time.Minute)
+	before := b.Snapshot()
+	for i := 0; i < 5; i++ {
+		if !b.Available("a") {
+			t.Fatal("availability check consumed probe")
+		}
+	}
+	if !reflect.DeepEqual(before, b.Snapshot()) {
+		t.Fatal("availability changed circuit state")
+	}
+	if !b.Allow("a") || b.Available("a") {
+		t.Fatal("outstanding probe must block availability")
+	}
+	c.advance(time.Minute)
+	if !b.Available("a") {
+		t.Fatal("lost probe did not expire")
+	}
+	b.Succeed("a")
+	if !b.Available("a") {
+		t.Fatal("closed circuit must be available")
+	}
+	var nilBreaker *Breaker
+	if !nilBreaker.Available("a") {
+		t.Fatal("nil breaker must be available")
+	}
+}
+
+func TestConcurrentProbeReservation(t *testing.T) {
+	b, c := newTestBreaker(Options{Threshold: 1, Cooldown: time.Minute})
+	b.Fail("a", "down")
+	c.advance(time.Minute)
+	var passed atomic.Int64
+	var wg sync.WaitGroup
+	start := make(chan struct{})
+	for i := 0; i < 32; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			if b.Available("a") && b.Allow("a") {
+				passed.Add(1)
+			}
+		}()
+	}
+	close(start)
+	wg.Wait()
+	if got := passed.Load(); got != 1 {
+		t.Fatalf("reserved probes=%d want=1", got)
 	}
 }

@@ -4,14 +4,12 @@
 package openai
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -170,15 +168,13 @@ func (a *Adapter) Chat(ctx context.Context, req *ir.ChatRequest) (*ir.ChatRespon
 // ChatStream starts a streaming completion.
 func (a *Adapter) ChatStream(ctx context.Context, req *ir.ChatRequest) (adapter.Stream, error) {
 	wantUsage := req.WantsUsageInStream() && a.opts.Caps.UsageInStream
-	body, err := marshalWithStream(req, true)
+	cp := *req
+	if !wantUsage {
+		cp.StreamOptions = nil
+	}
+	body, err := marshalWithStream(&cp, true)
 	if err != nil {
 		return nil, err
-	}
-	if !wantUsage {
-		body, err = dropJSONField(body, "stream_options")
-		if err != nil {
-			return nil, err
-		}
 	}
 	httpReq, err := a.newRequest(ctx, http.MethodPost, "/chat/completions", body)
 	if err != nil {
@@ -197,105 +193,18 @@ func (a *Adapter) ChatStream(ctx context.Context, req *ir.ChatRequest) (adapter.
 	return newSSEStream(resp.Body), nil
 }
 
-// sseStream parses an OpenAI-style SSE response body.
-type sseStream struct {
-	body io.ReadCloser
-	br   *bufio.Reader
-	done bool
-}
-
-func newSSEStream(body io.ReadCloser) *sseStream {
-	br := bufio.NewReaderSize(body, 1<<20)
-	return &sseStream{body: body, br: br}
-}
-
-func (s *sseStream) Recv() (*ir.Chunk, error) {
-	if s.done {
-		return nil, io.EOF
-	}
-	var payload []byte
-	for {
-		line, err := s.br.ReadBytes('\n')
-		if len(line) > 0 {
-			trimmed := bytes.TrimRight(line, "\r\n")
-			switch {
-			case len(trimmed) == 0:
-				if payload != nil {
-					return s.decode(payload)
-				}
-				continue
-			case bytes.HasPrefix(trimmed, []byte(":")):
-				continue // comment / keep-alive
-			case bytes.HasPrefix(trimmed, []byte("data:")):
-				v := bytes.TrimPrefix(trimmed, []byte("data:"))
-				v = bytes.TrimSpace(v)
-				if bytes.Equal(v, []byte("[DONE]")) {
-					s.done = true
-					return nil, io.EOF
-				}
-				if payload == nil {
-					payload = append([]byte(nil), v...)
-				} else {
-					payload = append(payload, v...)
-				}
-			case bytes.HasPrefix(trimmed, []byte("event:")):
-				continue
-			}
-		}
-		if err != nil {
-			if err == io.EOF {
-				s.done = true
-				if payload != nil {
-					return s.decode(payload)
-				}
-				return nil, io.EOF
-			}
-			return nil, err
-		}
-		// A complete data line is enough for OpenAI-style servers.
-		if payload != nil {
-			return s.decode(payload)
-		}
-	}
-}
-
-func (s *sseStream) decode(payload []byte) (*ir.Chunk, error) {
-	var c ir.Chunk
-	if err := json.Unmarshal(payload, &c); err != nil {
-		return nil, fmt.Errorf("decode chunk %q: %w", truncate(payload, 200), err)
-	}
-	if c.Object == "" {
-		c.Object = "chat.completion.chunk"
-	}
-	return &c, nil
-}
-
-func (s *sseStream) Close() error { return s.body.Close() }
-
 // marshalWithStream serializes a request with an explicit stream flag.
 func marshalWithStream(req *ir.ChatRequest, stream bool) ([]byte, error) {
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
+	var options *ir.StreamOptions
+	if stream {
+		options = req.StreamOptions
 	}
-	var m map[string]json.RawMessage
-	if err := json.Unmarshal(b, &m); err != nil {
-		return nil, err
-	}
-	m["stream"] = json.RawMessage(strconv.FormatBool(stream))
-	if !stream {
-		delete(m, "stream_options")
-	}
-	return json.Marshal(m)
-}
-
-func dropJSONField(body []byte, field string) ([]byte, error) {
-	var m map[string]json.RawMessage
-	if err := json.Unmarshal(body, &m); err != nil {
-		return nil, err
-	}
-	delete(m, field)
-	return json.Marshal(m)
+	// Explicit fields override the embedded request without mutating it.
+	return json.Marshal(struct {
+		*ir.ChatRequest
+		Stream        bool              `json:"stream"`
+		StreamOptions *ir.StreamOptions `json:"stream_options,omitempty"`
+	}{req, stream, options})
 }
 
 // statusError turns a non-2xx response into an error carrying the body.

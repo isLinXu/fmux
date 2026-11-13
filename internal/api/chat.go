@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync/atomic"
 	"time"
 
 	"github.com/isLinXu/fmux/internal/adapter"
@@ -25,6 +24,16 @@ const maxBodyBytes = 64 << 20
 // stopped producing tokens.
 var errStreamIdle = errors.New("stream idle timeout")
 
+var errStreamMax = errors.New("stream maximum duration exceeded")
+
+func streamTimeoutCause(ctx context.Context) error {
+	cause := context.Cause(ctx)
+	if errors.Is(cause, errStreamIdle) || errors.Is(cause, errStreamMax) {
+		return cause
+	}
+	return nil
+}
+
 // errorCodeOf names the failure in the OpenAI error envelope.
 func errorCodeOf(err error) string {
 	switch {
@@ -32,6 +41,8 @@ func errorCodeOf(err error) string {
 		return "backend_busy"
 	case errors.Is(err, errStreamIdle):
 		return "stream_idle"
+	case errors.Is(err, errStreamMax):
+		return "stream_max_duration"
 	}
 	return "backend_error"
 }
@@ -41,6 +52,9 @@ func errorCodeOf(err error) string {
 func streamErrorCode(err error) string {
 	if errors.Is(err, errStreamIdle) {
 		return "stream_idle"
+	}
+	if errors.Is(err, errStreamMax) {
+		return "stream_max_duration"
 	}
 	return "stream_error"
 }
@@ -64,8 +78,15 @@ func backendDown(err error) bool {
 		// The backend accepted the connection and then went quiet. Suspicious,
 		// but a cold restart costs a minute; one stall is not a pattern.
 		return false
+	case errors.Is(err, errStreamMax):
+		return false
 	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
 		// The caller left, or a legitimately long generation hit its bound.
+		return false
+	}
+	var se *openai.StreamError
+	if errors.As(err, &se) {
+		// An application error inside HTTP 200 does not establish unreachability.
 		return false
 	}
 	var he *openai.HTTPError
@@ -117,9 +138,16 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_request", err.Error())
 		return
 	}
+	requestStart := time.Now()
 	reqID := RequestID(r.Context())
 	if len(quirks) > 0 {
 		s.log.Debug("compat", "req_id", reqID, "client_is_fm", req.ClientIsFm, "quirks", quirks, "model", req.Model)
+	}
+
+	if req.Stream && s.cfg.Timeouts.StreamMax > 0 {
+		ctx, cancel := context.WithTimeoutCause(r.Context(), s.cfg.Timeouts.StreamMax, errStreamMax)
+		defer cancel()
+		r = r.WithContext(ctx)
 	}
 
 	plan, err := s.rt.Resolve(req.Model)
@@ -132,15 +160,17 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 	// take the request. A gateway that refuses everything because one backend
 	// is down is worse than one that retries a dead backend.
 	targets := plan.Targets
+	enforceBreaker := false
 	if len(targets) > 1 {
 		live := make([]router.Target, 0, len(targets))
 		for _, t := range targets {
-			if s.brk.Allow(t.Backend) {
+			if s.brk.Available(t.Backend) {
 				live = append(live, t)
 			}
 		}
 		if len(live) > 0 {
 			targets = live
+			enforceBreaker = true
 		}
 	}
 
@@ -159,11 +189,18 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 			lastErr = err
 			continue
 		}
+		// Filtering must not reserve probes for fallbacks we never attempt.
+		if enforceBreaker && !s.brk.Allow(target.Backend) {
+			continue
+		}
 		for _, d := range degradations {
 			s.log.Warn("degraded", "backend", d.Backend, "reason", d.Reason, "req_id", reqID)
 		}
 
-		wrote, err := s.serveTarget(r.Context(), w, cp, target, plan.Alias, reqID)
+		wrote, err := s.serveTarget(r.Context(), w, cp, target, plan.Alias, reqID, requestStart)
+		if err != nil && errors.Is(context.Cause(r.Context()), errStreamMax) {
+			err = errStreamMax
+		}
 		if err == nil {
 			s.brk.Succeed(target.Backend)
 			return
@@ -183,6 +220,10 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 			s.log.Error("stream aborted", "backend", target.Backend, "err", err, "req_id", reqID)
 			return
 		}
+		if errors.Is(err, errStreamMax) {
+			writeError(w, http.StatusGatewayTimeout, errorCodeOf(err), err.Error())
+			return
+		}
 		// A dead client cannot be helped by a second backend.
 		if r.Context().Err() != nil {
 			return
@@ -199,12 +240,16 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		// the wait is expected to be instead of inviting an immediate retry.
 		w.Header().Set("Retry-After", "5")
 	}
-	writeError(w, status, errorCodeOf(lastErr), lastErr.Error())
+	if envelope, ok := upstreamErrorEnvelope(lastErr, errorCodeOf(lastErr)); ok {
+		writeJSON(w, status, envelope)
+	} else {
+		writeError(w, status, errorCodeOf(lastErr), lastErr.Error())
+	}
 }
 
 // serveTarget admits one request to one backend, prepares it, and serves it.
 // It releases the admission slot before returning, whatever happened.
-func (s *Server) serveTarget(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias, reqID string) (bool, error) {
+func (s *Server) serveTarget(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias, reqID string, requestStart time.Time) (bool, error) {
 	release, err := s.gate.Acquire(ctx, t.Backend)
 	if err != nil {
 		return false, err
@@ -233,7 +278,7 @@ func (s *Server) serveTarget(ctx context.Context, w http.ResponseWriter, req *ir
 	}
 
 	if req.Stream {
-		return s.streamChat(ctx, w, req, t, alias)
+		return s.streamChat(ctx, w, req, t, alias, requestStart)
 	}
 	return false, s.chatOnce(ctx, w, req, t, alias)
 }
@@ -270,7 +315,7 @@ func (s *Server) observe(t router.Target, status int, u *ir.Usage, d time.Durati
 // streamChat proxies a streaming completion, guaranteeing the tail that fm and
 // other OpenAI clients expect: a finish chunk, an optional usage chunk, and
 // the [DONE] sentinel.
-func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias string) (bool, error) {
+func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.ChatRequest, t router.Target, alias string, requestStart time.Time) (bool, error) {
 	start := time.Now()
 
 	// A backend that stops producing tokens is not slow, it is stuck: the
@@ -279,17 +324,13 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 	// cancelling the upstream request — the HTTP client then unblocks the
 	// body read, so no goroutine is left behind watching a dead stream.
 	idle := s.cfg.Timeouts.StreamIdle
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	ctx, cancel := context.WithCancelCause(ctx)
+	defer cancel(nil)
 
-	var (
-		idleTimer *time.Timer
-		idleFired atomic.Bool
-	)
+	var idleTimer *time.Timer
 	if idle > 0 {
 		idleTimer = time.AfterFunc(idle, func() {
-			idleFired.Store(true)
-			cancel()
+			cancel(fmt.Errorf("%w: no chunk from %s for %s", errStreamIdle, t.Backend, idle))
 		})
 		defer idleTimer.Stop()
 	}
@@ -300,12 +341,10 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 		// instead of a half-open 200. A backend that accepts the connection
 		// and then says nothing is the same failure as one that goes quiet
 		// mid-stream; the client should see the same code either way.
-		if idleFired.Load() {
-			err = fmt.Errorf("%w: %s sent no response within %s", errStreamIdle, t.Backend, idle)
-			s.observe(t, http.StatusGatewayTimeout, nil, time.Since(start))
-			return false, err
+		if cause := streamTimeoutCause(ctx); cause != nil {
+			err = cause
 		}
-		s.observe(t, http.StatusBadGateway, nil, time.Since(start))
+		s.observe(t, StatusOf(err), nil, time.Since(start))
 		return false, err
 	}
 	defer st.Close()
@@ -317,9 +356,14 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 	ttftSeen := false
 	var usage *ir.Usage
 	var text []byte
+	metadata := ir.Chunk{Object: "chat.completion.chunk", Model: alias}
+	metadataReady := false
 
 	for {
 		ch, err := st.Recv()
+		if cause := streamTimeoutCause(ctx); cause != nil {
+			err = cause
+		}
 		if idleTimer != nil && err == nil {
 			idleTimer.Reset(idle)
 		}
@@ -327,24 +371,25 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 			break
 		}
 		if err != nil {
-			if idleFired.Load() {
-				// The client is still connected and waiting; it deserves an
-				// explanation rather than a silent truncation.
-				err = fmt.Errorf("%w: no token from %s for %s", errStreamIdle, t.Backend, idle)
-				s.observe(t, http.StatusGatewayTimeout, nil, time.Since(start))
-				if !sw.started {
-					return false, err
-				}
-				sw.errorEvent(streamErrorCode(err), err.Error())
-				return true, err
-			}
+			s.observe(t, StatusOf(err), nil, time.Since(start))
 			if !sw.started {
 				return false, err
 			}
-			sw.errorEvent(streamErrorCode(err), err.Error())
+			sw.errorEvent(err)
 			return true, err
 		}
 
+		if !metadataReady {
+			metadata.ID, metadata.Created = ch.ID, ch.Created
+			if metadata.ID == "" {
+				metadata.ID = ir.NewID("chatcmpl")
+			}
+			if metadata.Created == 0 {
+				metadata.Created = ir.Now()
+			}
+			metadataReady = true
+		}
+		ch.ID, ch.Created, ch.Object = metadata.ID, metadata.Created, metadata.Object
 		if ch.Usage != nil {
 			usage = ch.Usage
 		}
@@ -369,17 +414,18 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 		if err := sw.event(ch); err != nil {
 			return true, err
 		}
-		if !ttftSeen {
-			// The first byte the client actually receives. On a local model
-			// this is where a cold load shows up, and it is invisible in the
-			// total duration once the generation itself is long.
+		if !ttftSeen && chunkHasOutput(ch) {
+			// Include admission, preparation and earlier targets, not control frames.
 			ttftSeen = true
-			s.metrics.ObserveTTFT(t.Backend, time.Since(start))
+			s.metrics.ObserveTTFT(t.Backend, time.Since(requestStart))
 		}
 	}
 
+	if !metadataReady {
+		metadata = *ir.NewChunk(alias)
+	}
 	if firstPending {
-		head := ir.NewChunk(alias)
+		head := metadata
 		head.Choices = []ir.ChunkChoice{{Index: 0, Delta: ir.Delta{Role: "assistant", Content: ""}}}
 		if err := sw.event(head); err != nil {
 			return true, err
@@ -387,7 +433,7 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 	}
 
 	if !finishSeen {
-		tail := ir.NewChunk(alias)
+		tail := metadata
 		stop := "stop"
 		tail.Choices = []ir.ChunkChoice{{Index: 0, Delta: ir.Delta{}, FinishReason: &stop}}
 		if err := sw.event(tail); err != nil {
@@ -400,7 +446,7 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 			usage = estimateUsage(req, string(text))
 			s.log.Debug("usage estimated", "backend", t.Backend)
 		}
-		final := ir.NewChunk(alias)
+		final := metadata
 		final.Choices = []ir.ChunkChoice{}
 		final.Usage = usage
 		if err := sw.event(final); err != nil {
@@ -413,6 +459,20 @@ func (s *Server) streamChat(ctx context.Context, w http.ResponseWriter, req *ir.
 	}
 	s.observe(t, http.StatusOK, usage, time.Since(start))
 	return true, nil
+}
+
+func chunkHasOutput(ch *ir.Chunk) bool {
+	for _, choice := range ch.Choices {
+		if choice.Delta.Content != "" {
+			return true
+		}
+		for _, call := range choice.Delta.ToolCalls {
+			if call.Function.Name != "" || call.Function.Arguments != "" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // sseWriter writes Server-Sent Events with explicit flushing.
@@ -455,9 +515,14 @@ func (s *sseWriter) event(v any) error {
 	return nil
 }
 
-func (s *sseWriter) errorEvent(code, msg string) {
+func (s *sseWriter) errorEvent(err error) {
 	s.start()
-	payload, _ := json.Marshal(errorEnvelope{Error: errorBody{Message: msg, Type: "api_error", Code: code}})
+	code := streamErrorCode(err)
+	envelope, ok := upstreamErrorEnvelope(err, code)
+	if !ok {
+		envelope = errorEnvelope{Error: errorBody{Message: err.Error(), Type: "api_error", Code: code}}
+	}
+	payload, _ := json.Marshal(envelope)
 	_, _ = fmt.Fprintf(s.w, "data: %s\n\n", payload)
 	if s.f != nil {
 		s.f.Flush()

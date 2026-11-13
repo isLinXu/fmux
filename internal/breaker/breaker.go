@@ -73,6 +73,25 @@ func New(o Options) *Breaker {
 	return &Breaker{o: o, entries: map[string]*entry{}, now: time.Now}
 }
 
+// Available checks whether an attempt is possible without reserving a probe.
+// Call Allow immediately before attempting a selected target.
+func (b *Breaker) Available(backend string) bool {
+	if b == nil {
+		return true
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	e := b.entries[backend]
+	return e == nil || b.availableLocked(e)
+}
+
+func (b *Breaker) availableLocked(e *entry) bool {
+	now := b.now()
+	return e.openedAt.IsZero() ||
+		(now.Sub(e.openedAt) >= b.o.Cooldown &&
+			(!e.probing || now.Sub(e.probeAt) >= b.o.Cooldown))
+}
+
 // Allow reports whether a request may be sent to this backend right now.
 //
 // Returning true for a probe reserves that probe: concurrent callers get false
@@ -85,14 +104,11 @@ func (b *Breaker) Allow(backend string) bool {
 	defer b.mu.Unlock()
 
 	e := b.entryLocked(backend)
+	if !b.availableLocked(e) {
+		return false
+	}
 	if e.openedAt.IsZero() {
 		return true // closed
-	}
-	if b.now().Sub(e.openedAt) < b.o.Cooldown {
-		return false // open
-	}
-	if e.probing && b.now().Sub(e.probeAt) < b.o.Cooldown {
-		return false // a probe is already out
 	}
 	e.probing = true
 	e.probeAt = b.now()

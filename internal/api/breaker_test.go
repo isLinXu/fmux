@@ -7,10 +7,12 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/isLinXu/fmux/internal/adapter"
 	"github.com/isLinXu/fmux/internal/adapter/mock"
 	"github.com/isLinXu/fmux/internal/adapter/openai"
+	"github.com/isLinXu/fmux/internal/breaker"
 	"github.com/isLinXu/fmux/internal/config"
 )
 
@@ -185,5 +187,27 @@ func TestClientErrorDoesNotTripCircuit(t *testing.T) {
 	}
 	if got := hits.Load(); got != 6 {
 		t.Fatalf("backend was tried %d times, want 6: a 400 must not open the circuit", got)
+	}
+}
+
+func TestUnusedFallbackDoesNotReserveProbe(t *testing.T) {
+	dead, hits := deadBackend(t)
+	s := newFallbackServer(t, dead.URL)
+	s.cfg.Aliases["auto"] = config.Alias{
+		Backend: "mock", Model: "mock-model", Fallback: []string{"lonely"},
+	}
+	s.brk = breaker.New(breaker.Options{Threshold: 1, Cooldown: 200 * time.Millisecond})
+	s.brk.Fail("dead", "down")
+	time.Sleep(220 * time.Millisecond)
+
+	rec := post(t, s, `{"model":"auto","messages":[{"role":"user","content":"hi"}]}`)
+	if rec.Code != http.StatusOK {
+		t.Fatal(rec.Body.String())
+	}
+	if hits.Load() != 0 {
+		t.Fatal("healthy primary should not attempt fallback")
+	}
+	if !s.brk.Allow("dead") {
+		t.Fatal("unused fallback consumed the recovery probe")
 	}
 }

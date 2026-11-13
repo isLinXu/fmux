@@ -105,6 +105,9 @@ type Timeouts struct {
 	Health     time.Duration `yaml:"health"`
 	NonStream  time.Duration `yaml:"non_stream"`
 	StreamIdle time.Duration `yaml:"stream_idle"`
+	// StreamMax bounds a streaming request, including queueing, cold starts
+	// and fallbacks. 0 uses the default; a negative value disables the bound.
+	StreamMax time.Duration `yaml:"stream_max"`
 
 	// Drain is how long shutdown waits for in-flight requests to finish
 	// before closing their connections.
@@ -144,6 +147,7 @@ func Default() *Config {
 			Health:     2 * time.Second,
 			NonStream:  10 * time.Minute,
 			StreamIdle: 5 * time.Minute,
+			StreamMax:  15 * time.Minute,
 			Drain:      2 * time.Minute,
 		},
 	}
@@ -203,6 +207,9 @@ func (c *Config) Validate() error {
 	}
 	if c.Timeouts.StreamIdle <= 0 {
 		c.Timeouts.StreamIdle = 5 * time.Minute
+	}
+	if c.Timeouts.StreamMax == 0 {
+		c.Timeouts.StreamMax = 15 * time.Minute
 	}
 	if c.Timeouts.Drain <= 0 {
 		c.Timeouts.Drain = 2 * time.Minute
