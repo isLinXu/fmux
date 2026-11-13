@@ -3,6 +3,7 @@ package ir
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
 // StreamOptions controls streaming extras.
@@ -101,17 +102,51 @@ func (r *ChatRequest) WantsUsageInStream() bool {
 	return r.StreamOptions != nil && r.StreamOptions.IncludeUsage
 }
 
-// Clone returns a shallow copy safe for adapter-side mutation.
+// Clone returns an independent copy safe for adapter-side mutation.
 func (r *ChatRequest) Clone() *ChatRequest {
 	cp := *r
-	cp.Messages = append([]Message(nil), r.Messages...)
-	cp.Quirks = append([]string(nil), r.Quirks...)
-	if r.Tools != nil {
-		cp.Tools = append([]Tool(nil), r.Tools...)
+	cp.Messages = slices.Clone(r.Messages)
+	for i := range cp.Messages {
+		m := &cp.Messages[i]
+		m.Content.Parts = slices.Clone(m.Content.Parts)
+		for j := range m.Content.Parts {
+			m.Content.Parts[j].ImageURL = clonePtr(m.Content.Parts[j].ImageURL)
+		}
+		m.ToolCalls = slices.Clone(m.ToolCalls)
+		for j := range m.ToolCalls {
+			m.ToolCalls[j].Index = clonePtr(m.ToolCalls[j].Index)
+		}
 	}
-	if r.StreamOptions != nil {
-		so := *r.StreamOptions
-		cp.StreamOptions = &so
+	cp.Tools = slices.Clone(r.Tools)
+	for i := range cp.Tools {
+		cp.Tools[i].Function.Parameters = slices.Clone(cp.Tools[i].Function.Parameters)
+	}
+	cp.Quirks = slices.Clone(r.Quirks)
+	cp.Stop = slices.Clone(r.Stop)
+	cp.ToolChoice = slices.Clone(r.ToolChoice)
+	cp.StreamOptions = clonePtr(r.StreamOptions)
+	cp.Temperature = clonePtr(r.Temperature)
+	cp.TopP = clonePtr(r.TopP)
+	cp.TopK = clonePtr(r.TopK)
+	cp.MaxTokens = clonePtr(r.MaxTokens)
+	cp.MaxCompletionTok = clonePtr(r.MaxCompletionTok)
+	cp.PresencePenalty = clonePtr(r.PresencePenalty)
+	cp.FrequencyPenalty = clonePtr(r.FrequencyPenalty)
+	cp.Seed = clonePtr(r.Seed)
+	cp.ResponseFormat = clonePtr(r.ResponseFormat)
+	if cp.ResponseFormat != nil {
+		cp.ResponseFormat.JSONSchema = clonePtr(r.ResponseFormat.JSONSchema)
+		if cp.ResponseFormat.JSONSchema != nil {
+			cp.ResponseFormat.JSONSchema.Schema = slices.Clone(r.ResponseFormat.JSONSchema.Schema)
+		}
 	}
 	return &cp
+}
+
+func clonePtr[T any](p *T) *T {
+	if p == nil {
+		return nil
+	}
+	v := *p
+	return &v
 }
