@@ -6,6 +6,7 @@
 package metrics
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"sort"
@@ -109,12 +110,9 @@ func (r *Registry) Observe(backend, model string, status int, promptTok, complTo
 	r.mu.Unlock()
 }
 
-// ObserveTTFT records the time to the first streamed token.
-//
-// Total duration says a request was slow; TTFT says why. A 30-second answer
-// that produced its first token in 200 ms is a healthy model on a long
-// generation, while the same 30 seconds with a 25-second first token is a cold
-// load. Without this split the two are indistinguishable.
+// ObserveTTFT records validated-request to first text/tool output write latency.
+// The producing backend owns the sample, including waits in earlier targets.
+// This does not isolate cold-load time or measure receipt by the client.
 func (r *Registry) ObserveTTFT(backend string, d time.Duration) {
 	if r == nil {
 		return
@@ -184,29 +182,14 @@ func (r *Registry) Render(w io.Writer) error {
 	if r == nil {
 		return nil
 	}
-	r.mu.Lock()
-	keys := make([]key, 0, len(r.reqs))
-	for k := range r.reqs {
-		keys = append(keys, k)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		if keys[i].backend != keys[j].backend {
-			return keys[i].backend < keys[j].backend
-		}
-		if keys[i].model != keys[j].model {
-			return keys[i].model < keys[j].model
-		}
-		return keys[i].status < keys[j].status
-	})
-	snapshot := make([]struct {
+	type sample struct {
 		k key
 		c counter
-	}, 0, len(keys))
-	for _, k := range keys {
-		snapshot = append(snapshot, struct {
-			k key
-			c counter
-		}{k, *r.reqs[k]})
+	}
+	r.mu.Lock()
+	snapshot := make([]sample, 0, len(r.reqs))
+	for k, c := range r.reqs {
+		snapshot = append(snapshot, sample{k, *c})
 	}
 	evicted := r.evict
 	uptime := time.Since(r.start)
@@ -227,6 +210,29 @@ func (r *Registry) Render(w io.Writer) error {
 	ttfts := copyHists(r.ttft)
 	r.mu.Unlock()
 
+	sort.Slice(snapshot, func(i, j int) bool {
+		a, b := snapshot[i].k, snapshot[j].k
+		if a.backend != b.backend {
+			return a.backend < b.backend
+		}
+		if a.model != b.model {
+			return a.model < b.model
+		}
+		return a.status < b.status
+	})
+	// Token families have no status label, so each model needs one aggregate.
+	tokens := make([]sample, 0, len(snapshot))
+	for _, s := range snapshot {
+		if n := len(tokens); n > 0 && tokens[n-1].k.backend == s.k.backend && tokens[n-1].k.model == s.k.model {
+			tokens[n-1].c.promptTok += s.c.promptTok
+			tokens[n-1].c.complTok += s.c.complTok
+		} else {
+			tokens = append(tokens, s)
+		}
+	}
+	buffer := bufio.NewWriter(w)
+	w = buffer
+
 	fmt.Fprintln(w, "# HELP fmux_requests_total Completed chat completion requests.")
 	fmt.Fprintln(w, "# TYPE fmux_requests_total counter")
 	for _, s := range snapshot {
@@ -236,13 +242,13 @@ func (r *Registry) Render(w io.Writer) error {
 
 	fmt.Fprintln(w, "# HELP fmux_prompt_tokens_total Prompt tokens reported by backends.")
 	fmt.Fprintln(w, "# TYPE fmux_prompt_tokens_total counter")
-	for _, s := range snapshot {
+	for _, s := range tokens {
 		fmt.Fprintf(w, "fmux_prompt_tokens_total{backend=%q,model=%q} %d\n", s.k.backend, s.k.model, s.c.promptTok)
 	}
 
 	fmt.Fprintln(w, "# HELP fmux_completion_tokens_total Completion tokens reported by backends.")
 	fmt.Fprintln(w, "# TYPE fmux_completion_tokens_total counter")
-	for _, s := range snapshot {
+	for _, s := range tokens {
 		fmt.Fprintf(w, "fmux_completion_tokens_total{backend=%q,model=%q} %d\n", s.k.backend, s.k.model, s.c.complTok)
 	}
 
@@ -250,7 +256,7 @@ func (r *Registry) Render(w io.Writer) error {
 	fmt.Fprintln(w, "# TYPE fmux_request_duration_milliseconds histogram")
 	renderHist(w, "fmux_request_duration_milliseconds", durations)
 
-	fmt.Fprintln(w, "# HELP fmux_time_to_first_token_milliseconds Time from request start to the first streamed token.")
+	fmt.Fprintln(w, "# HELP fmux_time_to_first_token_milliseconds Time from validated request to the first successful text or tool output write, including queueing, preparation and fallback.")
 	fmt.Fprintln(w, "# TYPE fmux_time_to_first_token_milliseconds histogram")
 	renderHist(w, "fmux_time_to_first_token_milliseconds", ttfts)
 
@@ -286,7 +292,7 @@ func (r *Registry) Render(w io.Writer) error {
 	fmt.Fprintln(w, "# HELP fmux_uptime_seconds Seconds since the gateway started.")
 	fmt.Fprintln(w, "# TYPE fmux_uptime_seconds gauge")
 	fmt.Fprintf(w, "fmux_uptime_seconds %.0f\n", uptime.Seconds())
-	return nil
+	return buffer.Flush()
 }
 
 // sortedKeys returns map keys in a stable order, so the exposition text does
